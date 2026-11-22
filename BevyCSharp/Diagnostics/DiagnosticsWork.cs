@@ -1,10 +1,21 @@
 namespace Bevy;
 
-/// <summary>The diagnostics' part in the app's frame, which <c>EnginePlugin</c> adds to every app.</summary>
+/// <summary>
+/// The diagnostics' part in the app's frame, which <c>EnginePlugin</c> adds to every app.
+/// </summary>
 internal sealed class DiagnosticsWork : IPlugin
 {
     public void Build(App app)
     {
+        Debug.FreshKeys();
+
+        // The keys F1 to F5, in a run that draws and has a window to read them from, before the
+        // hidden scope F1 turns over is kept (2900).
+        app.AreasWork.Add(2800, world =>
+        {
+            if (App.HasRenderer && !world.Resource<Config>().Headless) Debug.TickKeys(world);
+        });
+
         // F3's debug overlay, in a run that draws and has a window to show it, once the scene's
         // field it says is built.
         app.AreasWork.Add(3000, world =>

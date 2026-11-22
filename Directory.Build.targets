@@ -20,6 +20,7 @@
         <_SkyReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Sky'))"/>
         <_VegetationReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Vegetation'))"/>
         <_DiagnosticsReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Diagnostics'))"/>
+        <_DiagnosticsImGuiReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Diagnostics.ImGui'))"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Levels/Levels/Levels.csproj"
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_LevelsReference)' == ''"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Sky/Sky/Sky.csproj"
@@ -28,6 +29,8 @@
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_VegetationReference)' == ''"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Diagnostics/Diagnostics/Diagnostics.csproj"
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_DiagnosticsReference)' == ''"/>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Diagnostics/Diagnostics.ImGui/Diagnostics.ImGui.csproj"
+                          Condition="'@(_BevyCSharpReference)' != '' And '@(_DiagnosticsImGuiReference)' == ''"/>
     </ItemGroup>
 
 </Project>

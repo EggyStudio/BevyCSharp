@@ -275,7 +275,11 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
         if (model.TakesLine)
         {
-            source.Append("                var text = global::Bevy.ConsoleHost.Unwrap(line.Rest);\n");
+            // The rest with one pair of quotes around it taken off, as the module reads it, since
+            // somebody typing do "Spawn/Cube" means the path without them and a tool sending a line
+            // over the socket quotes a value with blanks for it to arrive whole. A fragment that
+            // only holds quotes, as eval world.SetName(e, "x"), arrives as it was written.
+            source.Append("                var text = line.Text;\n");
 
             // A line left empty is the default where the method gives one, rather than nothing.
             if (parameters[0].Default is { } fallback) source.Append("                if (text.Length == 0) text = ").Append(fallback).Append(";\n");

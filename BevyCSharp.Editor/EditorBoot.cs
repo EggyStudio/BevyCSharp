@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using BevyCSharp.Editor.Behaviors;
 using BevyCSharp.Editor.Framework;
 
@@ -15,7 +16,9 @@ namespace BevyCSharp.Editor;
 [Behavior]
 public partial struct EditorBoot
 {
-    /// <summary>The running app, which the scripts' plugin is added to as the editor starts.</summary>
+    /// <summary>
+    /// The running app, which the scripts' plugin is added to as the editor starts.
+    /// </summary>
     public static App? Host { get; set; }
 
     /// <summary>Builds the scene the panels float over, then opens what starts open.</summary>
@@ -26,8 +29,11 @@ public partial struct EditorBoot
         ConsoleLog.Start();
 
         // F1 is the editor's, opening its menu, and every panel is a screen F1 would leave, so the
-        // engine's key for hiding a HUD is turned off rather than hiding nothing.
-        Ui.HiddenKey = null;
+        // key for hiding a HUD is unbound rather than hiding nothing. The console is the tab along
+        // the bottom, raised by the key under Escape, so the console's key is unbound as well and
+        // F5 is the editor's, which plays the scene.
+        Debug.Keys.KeyOf(KeyAction.HideInterface).TrySet(string.Empty);
+        Debug.Keys.KeyOf(KeyAction.Console).TrySet(string.Empty);
 
         var camera = Scene(ctx);
 

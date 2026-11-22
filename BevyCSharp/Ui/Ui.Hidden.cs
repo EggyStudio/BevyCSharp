@@ -5,7 +5,9 @@ namespace Bevy;
 // and stays whatever F1 says, and the engine's debug overlay stays too.
 public static unsafe partial class Ui
 {
-    /// <summary>A node made inside the scope, and what its visibility was before the scope hid it.</summary>
+    /// <summary>
+    /// A node made inside the scope, and what its visibility was before the scope hid it.
+    /// </summary>
     private sealed class ScopedNode(Entity node)
     {
         public readonly Entity Node = node;
@@ -21,21 +23,17 @@ public static unsafe partial class Ui
     [ThreadStatic]
     private static int _scope;
 
-    /// <summary>Whether what is drawn inside the hidden scope is hidden, which <see cref="HiddenKey"/> turns on and off.</summary>
+    /// <summary>
+    /// Whether what is drawn inside the hidden scope is hidden, which the interface's key turns on
+    /// and off, F1 unless a player rebinds <c>keys.hide_interface</c> (<c>Debug.Keys</c>).
+    /// </summary>
     /// <remarks>
     /// Read by <see cref="BeginHidden"/> as a frame's scope opens, and by the engine once a frame,
     /// which hides the scope's nodes and shows them again as they were. Settable, so a program
-    /// hides its interface for a picture or a cut scene without the key.
+    /// hides its interface for a picture or a cut scene without the key, and the key turns it over
+    /// from where the program left it.
     /// </remarks>
     public static bool Hidden { get; set; }
-
-    /// <summary>The key that hides and shows the scope's interface, F1 unless set, or nothing for none.</summary>
-    /// <remarks>
-    /// Pressed in a run that draws, while no field of an ImGui window has the caret, it turns
-    /// <see cref="Hidden"/> over, and the program still sees the press, so a program that asked for
-    /// F1 for itself moves this or turns it off.
-    /// </remarks>
-    public static Key? HiddenKey { get; set; } = Key.F1;
 
     /// <summary>
     /// Opens the hidden scope, answering whether what is drawn inside it is drawn this frame, false
@@ -81,7 +79,9 @@ public static unsafe partial class Ui
         _scope--;
     }
 
-    /// <summary>Records a node made inside the scope, so it is hidden with it, and answers the node.</summary>
+    /// <summary>
+    /// Records a node made inside the scope, so it is hidden with it, and answers the node.
+    /// </summary>
     private static Entity InScope(Entity node)
     {
         if (_scope == 0) return node;
@@ -96,13 +96,11 @@ public static unsafe partial class Ui
     }
 
     /// <summary>
-    /// Takes the key, and hides the scope's nodes or gives them back the visibility they had, once a
-    /// frame from the engine's tick in a run that draws.
+    /// Hides the scope's nodes or gives them back the visibility they had, once a frame from the
+    /// engine's tick in a run that draws.
     /// </summary>
-    internal static void TickHidden(EcsWorld world, Input input)
+    internal static void TickHidden(EcsWorld world)
     {
-        if (HiddenKey is { } key && input.KeyPressed(key) && !ImGuiRuntime.Typing) Hidden = !Hidden;
-
         lock (Scoped)
         {
             Current();
@@ -127,7 +125,9 @@ public static unsafe partial class Ui
         }
     }
 
-    /// <summary>The scope's nodes, emptied where another app runs than the one they were made in.</summary>
+    /// <summary>
+    /// The scope's nodes, emptied where another app runs than the one they were made in.
+    /// </summary>
     private static void Current()
     {
         var app = App.Running;

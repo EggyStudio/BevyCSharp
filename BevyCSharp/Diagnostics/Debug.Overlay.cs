@@ -3,30 +3,39 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Bevy.Interop;
 using Bevy.Reflected;
+using Diagnostics;
 
 namespace Bevy;
 
-// The overlay's two columns of lines, made of the engine's interface nodes the first time it shows
-// and written again a few times a second while it does, what each line says, and the strip of the
-// frames' times under the first lines, an image drawn again every frame while it shows.
+// The keys taken a frame, and the overlay's two columns of lines, made of the engine's interface
+// nodes the first time it shows and written from the model's sections while it does, and the
+// strip of the frames' times under the first lines, an image drawn again every frame while it
+// shows.
 public static unsafe partial class Debug
 {
-    /// <summary>The frames the strip holds, four seconds at sixty a second, so a hitch stays in view for a few seconds after it.</summary>
-    internal const int StripFrames = 240;
-
-    /// <summary>The strip's height in pixels, a bar's pixel for each millisecond and a bit.</summary>
+    /// <summary>
+    /// The strip's height in pixels, a bar's pixel for each millisecond and a bit.
+    /// </summary>
     private const int StripHeight = 48;
 
-    /// <summary>The time the strip's top stands for, in milliseconds, so a frame of 20 fps fills it.</summary>
+    /// <summary>
+    /// The time the strip's top stands for, in milliseconds, so a frame of 20 fps fills it.
+    /// </summary>
     private const float StripTop = 50f;
 
-    /// <summary>The passes the profiler lists, the slowest, with a line saying how many more there are.</summary>
+    /// <summary>
+    /// The passes the profiler lists, the slowest, with a line saying how many more there are.
+    /// </summary>
     private const int ProfilerPasses = 24;
 
-    /// <summary>How far each frame moves the overlay's rate toward its own, as <see cref="Time.SmoothedFps"/> is smoothed.</summary>
-    private const double FpsSmoothing = 0.1;
+    // Every key a keyboard has, and the name the keys' settings hold for each, the key's own.
+    private static readonly Key[] EveryKey = Enum.GetValues<Key>();
+    private static readonly string[] KeyNames = [.. EveryKey.Select(key => key.ToString())];
 
     private static App? _app;
+    private static World? _keysWorld;
+    private static World? _linesWorld;
+    private static bool _sectionsAdded;
     private static Entity _root = Entity.None;
     private static Entity _leftColumn = Entity.None;
     private static Entity _rightColumn = Entity.None;
@@ -39,27 +48,16 @@ public static unsafe partial class Debug
     private static readonly List<Line> BesideLines = [];
     private static readonly List<Line> LeftLines = [];
     private static readonly List<Line> RightLines = [];
-    private static readonly float[] Times = new float[StripFrames];
-    private static readonly byte[] StripPixels = new byte[StripFrames * StripHeight * 4];
-    private static int _timesNext;
-    private static int _timesHeld;
-    private static double _written = double.NegativeInfinity;
-    private static double _realSeconds;
-    private static double _realFps;
+    private static readonly byte[] StripPixels = new byte[OverlayModel.StripFrames * StripHeight * 4];
     private static bool _rootShown;
-    private static bool _chord;
     private static bool _folded;
     private static (bool Text, bool Graph)? _fpsOverlay;
     private static string[]? _system;
 
-    /// <summary>What the overlay says, a list for each place a line goes, an empty line the gap between two parts.</summary>
-    /// <param name="Head">The engine's version and the frame, over the strip.</param>
-    /// <param name="Beside">The frames' times and the GPU's, beside the strip.</param>
-    /// <param name="Left">The camera, the world and the program's sections, under the strip.</param>
-    /// <param name="Right">The system, the GPU, the display and the renderer, with the profiler's passes under them.</param>
-    internal sealed record Said(List<string> Head, List<string> Beside, List<string> Left, List<string> Right);
-
-    /// <summary>A line of the overlay, its backing node, its text and what the text says, nothing until it is first written.</summary>
+    /// <summary>
+    /// A line of the overlay, its backing node, its text and what the text says, nothing until it
+    /// is first written.
+    /// </summary>
     private sealed class Line(Entity backing, Entity text)
     {
         public readonly Entity Backing = backing;
@@ -67,21 +65,22 @@ public static unsafe partial class Debug
         public string? Says;
     }
 
-    /// <summary>Takes the key, and makes, shows, hides and writes the overlay, once a frame from the engine's tick in a run that draws.</summary>
+    /// <summary>
+    /// Keeps the frame's time, and makes, shows, hides and writes the overlay, once a frame from
+    /// the engine's tick in a run that draws.
+    /// </summary>
     internal static void TickOverlay(World world)
     {
         var ecs = world.Resource<EcsWorld>();
-        var input = world.Resource<Input>();
         var time = world.Resource<Time>();
 
-        // The overlay's nodes, its strip and its frames are an app's, and the next app makes its own.
+        // The overlay's nodes and its strip are an app's, and the next app makes its own.
         if (!ReferenceEquals(App.Running, _app))
         {
             _app = App.Running;
-            (_root, _leftColumn, _rightColumn, _written, _rootShown) = (Entity.None, Entity.None, Entity.None, double.NegativeInfinity, false);
+            (_root, _leftColumn, _rightColumn, _rootShown) = (Entity.None, Entity.None, Entity.None, false);
             (_headColumn, _besideColumn, _restColumn, _stripNode, _strip) = (Entity.None, Entity.None, Entity.None, Entity.None, default);
-            (_timesNext, _timesHeld, _folded, _fpsOverlay) = (0, 0, false, null);
-            (_realSeconds, _realFps) = (0.0, 0.0);
+            (_folded, _fpsOverlay) = (false, null);
             HeadLines.Clear();
             BesideLines.Clear();
             LeftLines.Clear();
@@ -90,172 +89,113 @@ public static unsafe partial class Debug
 
         // Every frame's time is kept whether the overlay shows or not, so the strip it opens on is
         // the last four seconds and not an empty one. The first frame, which has no time, is not,
-        // nor is a frame the clock was held still for. The time is the machine's and not the game's,
-        // which stops while the game is paused, is scaled by its speed and is cut at a quarter of a
-        // second, so the overlay goes on and says how long a frame took however the game runs.
+        // nor is a frame the clock was held still for. The time is the machine's and not the
+        // game's, which stops while the game is paused, is scaled by its speed and is cut at a
+        // quarter of a second, so the overlay goes on and says how long a frame took however the
+        // game runs. The sections are asked with the world lent to them, four times a second while
+        // it shows.
+        AddSections();
+        _linesWorld = world;
         var real = time.RawDeltaSeconds;
-        if (real > 0.0)
-        {
-            _realSeconds += real;
-            _realFps = _realFps <= 0.0 ? 1.0 / real : _realFps + (1.0 / real - _realFps) * FpsSmoothing;
-            Times[_timesNext] = (float)(real * 1000.0);
-            _timesNext = (_timesNext + 1) % StripFrames;
-            _timesHeld = Math.Min(_timesHeld + 1, StripFrames);
-        }
+        if (real > 0.0) Overlay.Frame(real);
 
-        if (OverlayKey is { } key)
-        {
-            if (input.KeyDown(key) && input.AnyKeyPressed() && !input.KeyPressed(key)) _chord = true;
-            if (input.KeyReleased(key))
-            {
-                if (!_chord && !ImGuiRuntime.Typing) Turn(input.KeyDown(Key.ShiftLeft) || input.KeyDown(Key.ShiftRight));
-                _chord = false;
-            }
-        }
-
-        if (OverlayShown != _folded) Fold(world, OverlayShown);
-        if (OverlayShown && _root.IsNone) Make(ecs);
+        var shown = Overlay.Shown;
+        if (shown != _folded) Fold(world, shown);
+        if (shown && _root.IsNone) Make(ecs);
         if (_root.IsNone) return;
 
-        if (OverlayShown != _rootShown)
+        if (shown != _rootShown)
         {
-            ecs.Set(_root, new Visibility(OverlayShown ? VisibilityMode.Inherited : VisibilityMode.Hidden));
-            _rootShown = OverlayShown;
+            ecs.Set(_root, new Visibility(shown ? VisibilityMode.Inherited : VisibilityMode.Hidden));
+            _rootShown = shown;
         }
 
-        if (!OverlayShown) return;
+        if (!shown) return;
 
         // The strip moves every frame, as a frame time graph does, and its pixels are a few tens
-        // of kilobytes.
+        // of kilobytes. The lines are written as the model last asked its sections, a line's node
+        // touched only where its text changed.
         DrawStrip();
         Render.WriteImagePixels(_strip, StripPixels);
-
-        if (_realSeconds - _written < 0.25) return;
-
-        _written = _realSeconds;
-        var said = Lines(world);
-        Write(ecs, _headColumn, HeadLines, said.Head);
-        Write(ecs, _besideColumn, BesideLines, said.Beside);
-        Write(ecs, _restColumn, LeftLines, said.Left);
-        Write(ecs, _rightColumn, RightLines, said.Right);
+        Write(ecs, _headColumn, HeadLines, Overlay.Lines(OverlayPlace.Head));
+        Write(ecs, _besideColumn, BesideLines, Overlay.Lines(OverlayPlace.Beside));
+        Write(ecs, _restColumn, LeftLines, Overlay.Lines(OverlayPlace.Left));
+        Write(ecs, _rightColumn, RightLines, Overlay.Lines(OverlayPlace.Right));
     }
 
     /// <summary>
-    /// The key let go alone, which shows or hides the overlay, or with Shift the profiler, showing
-    /// the overlay with it.
+    /// Gives the keys every key that went down and came up this frame by its name, and keeps the
+    /// hidden scope as they leave it, once a frame from the engine's tick in a run that draws.
     /// </summary>
     /// <remarks>
-    /// The key alone hides the profiler with the overlay, so the overlay shown again by it alone
-    /// comes back without it.
+    /// <see cref="Ui.Hidden"/> is given to the keys first, so a program that set it for a picture
+    /// is where F1 turns it over from. A key of one character is the field's while an ImGui field
+    /// has the caret.
     /// </remarks>
-    private static void Turn(bool shift)
+    internal static void TickKeys(World world)
     {
-        if (shift)
-        {
-            ProfilerShown = !ProfilerShown;
-            if (ProfilerShown) OverlayShown = true;
-            return;
-        }
+        var input = world.Resource<Input>();
+        if (!input.AnyKeyPressed() && !AnyReleased(input) && Keys.InterfaceHidden == Ui.Hidden) return;
 
-        OverlayShown = !OverlayShown;
-        if (!OverlayShown) ProfilerShown = false;
+        _keysWorld = world;
+        Keys.InterfaceHidden = Ui.Hidden;
+        var typing = ImGuiRuntime.Typing;
+        for (var i = 0; i < EveryKey.Length; i++)
+            if (input.KeyPressed(EveryKey[i])) Keys.KeyDown(KeyNames[i], typing);
+        for (var i = 0; i < EveryKey.Length; i++)
+            if (input.KeyReleased(EveryKey[i])) Keys.KeyUp(KeyNames[i]);
+        Ui.Hidden = Keys.InterfaceHidden;
+        _keysWorld = null;
+    }
+
+    /// <summary>Whether any key came up this frame.</summary>
+    private static bool AnyReleased(Input input)
+    {
+        foreach (var key in EveryKey)
+            if (input.KeyReleased(key)) return true;
+        return false;
     }
 
     /// <summary>
-    /// Hides Bevy's FPS overlay while the engine's shows, since both stand at the top left and the
-    /// engine's says the frame's rate and draws its times too, and gives it back as it was after.
+    /// Adds the engine's sections to the overlay once for the process, the version and the frame at
+    /// the head after the model's own line of the frame's rate, the GPU's time beside them, the
+    /// camera and the world in the left column, the system, the GPU, the display and the renderer
+    /// in the right one, and the profiler's passes under them as its detail.
     /// </summary>
-    /// <remarks>
-    /// Its text and its graph are hidden apart, so each comes back as the program had it, and an
-    /// app without it, which asked for no <see cref="DevTools.FpsOverlay"/>, has nothing done.
-    /// </remarks>
-    private static void Fold(World world, bool shown)
+    private static void AddSections()
     {
-        _folded = shown;
-        if (!world.Resource<Config>().DevTools.HasFlag(DevTools.FpsOverlay)) return;
-        if (world.Resource<EcsWorld>().Resource<FpsOverlayConfigRef>() is not { } overlay) return;
+        if (_sectionsAdded) return;
+        _sectionsAdded = true;
 
-        if (shown)
-        {
-            _fpsOverlay = (overlay.Enabled, overlay.FrameTimeGraphConfigEnabled);
-            overlay.Enabled = false;
-            overlay.FrameTimeGraphConfigEnabled = false;
-        }
-        else if (_fpsOverlay is { } was)
-        {
-            overlay.Enabled = was.Text;
-            overlay.FrameTimeGraphConfigEnabled = was.Graph;
-            _fpsOverlay = null;
-        }
+        Overlay.AddSection("engine", OverlayPlace.Head, () =>
+        [
+            Say($"BevyCSharp {Version()} ({(App.HasEditor ? "editor" : App.HasRenderer ? "render" : "headless")} bridge, ABI {Native.ExpectedAbiVersion}), frame {LinesWorld.Resource<Time>().FrameCount}"),
+        ]);
+        Overlay.AddSection("gpu.time", OverlayPlace.Beside, () => [GpuTime(Render.Timings())]);
+        Overlay.AddSection("scene", OverlayPlace.Left, () => Scene(LinesWorld));
+        Overlay.AddSection("machine", OverlayPlace.Right, () => Machine(LinesWorld));
+        Overlay.AddSection("passes", OverlayPlace.Right, () => Passes(Render.Timings()), detail: true);
     }
 
-    /// <summary>The frames' times the strip holds, in milliseconds, the oldest first.</summary>
-    internal static float[] FrameTimes()
-    {
-        var times = new float[_timesHeld];
-        var first = (_timesNext - _timesHeld + StripFrames) % StripFrames;
-        for (var i = 0; i < _timesHeld; i++) times[i] = Times[(first + i) % StripFrames];
-        return times;
-    }
+    /// <summary>The world the sections read, the one the frame's tick lent them.</summary>
+    private static World LinesWorld =>
+        _linesWorld ?? throw new InvalidOperationException("The overlay's sections read the world the engine's tick gives them, and none was given.");
 
     /// <summary>
-    /// The last frame's time, the frames' average and their one percent low, the rate the slowest
-    /// hundredth of them came at, which a game that stutters shows where its average does not.
+    /// The camera and the world's counts, the left column's lines. Only valid inside a system.
     /// </summary>
-    /// <remarks>
-    /// The slowest hundredth is at least one frame, so 240 frames give the slowest three, and their
-    /// times are averaged before the rate is taken, as the common tools take it.
-    /// </remarks>
-    internal static (float Now, float Average, float LowFps) Stats(ReadOnlySpan<float> times)
+    internal static List<string> Scene(World world)
     {
-        if (times.IsEmpty) return (0f, 0f, 0f);
-
-        var sorted = times.ToArray();
-        Array.Sort(sorted);
-        var slowest = (sorted.Length + 99) / 100;
-        var low = 0f;
-        for (var i = sorted.Length - slowest; i < sorted.Length; i++) low += sorted[i];
-        low /= slowest;
-
-        var sum = 0f;
-        foreach (var t in times) sum += t;
-
-        return (times[^1], sum / times.Length, low > 0f ? 1000f / low : 0f);
-    }
-
-    /// <summary>
-    /// What the overlay says, a list for each place a line goes. Only valid inside a system.
-    /// </summary>
-    internal static Said Lines(World world)
-    {
-        var ecs = world.Resource<EcsWorld>();
-        var time = world.Resource<Time>();
         var held = Held();
-        var timings = Render.Timings();
+        var left = new List<string>();
 
         NativeSceneCounts scene = default;
         var counted = App.HasRenderer && NativeGlobalIllumination.bcs_render_scene_counts(&scene) == NativeStatus.Ok;
-
-        var (now, average, lowFps) = Stats(FrameTimes());
-        var head = new List<string>
-        {
-            Say($"BevyCSharp {Version()} ({(App.HasEditor ? "editor" : App.HasRenderer ? "render" : "headless")} bridge, ABI {Native.ExpectedAbiVersion})"),
-            Say($"{_realFps:0} fps, {now:0.0} ms a frame, frame {time.FrameCount}"),
-        };
-
-        var beside = new List<string>
-        {
-            Say($"Now {now:0.0} ms, average {average:0.0} ms, 1% low {lowFps:0} fps"),
-            GpuTime(timings),
-        };
-
-        var left = new List<string>();
-
         if (counted && scene.Camera != 0)
         {
             // North is minus Z, this engine's forward, and the heading turns from it toward plus X,
-            // east.
-            // The pitch rounded to a tenth and added to zero, so a level view reads 0.0 and not -0.0.
+            // east. The pitch rounded to a tenth and added to zero, so a level view reads 0.0 and
+            // not -0.0.
             var heading = (MathF.Atan2(scene.ForwardX, -scene.ForwardZ) * 180f / MathF.PI + 360f) % 360f;
             var pitch = MathF.Round(MathF.Asin(Math.Clamp(scene.ForwardY, -1f, 1f)) * 180f / MathF.PI, 1) + 0f;
             left.Add(Say($"XYZ {scene.X:0.000} / {scene.Y:0.000} / {scene.Z:0.000}"));
@@ -271,7 +211,18 @@ public static unsafe partial class Debug
         left.Add("");
         left.Add(Say($"Entities {Count(held, "entities")}"));
         left.Add(Say($"Meshes {Count(held, "asset.Mesh")}, materials {Count(held, "asset.StandardMaterial")}, images {Count(held, "asset.Image")}, sounds {Count(held, "asset.AudioSource")}"));
-        AddSections(left);
+        return left;
+    }
+
+    /// <summary>
+    /// The system, the GPU, the display and the renderer, the right column's lines. Only valid
+    /// inside a system.
+    /// </summary>
+    internal static List<string> Machine(World world)
+    {
+        var held = Held();
+        NativeSceneCounts scene = default;
+        var counted = App.HasRenderer && NativeGlobalIllumination.bcs_render_scene_counts(&scene) == NativeStatus.Ok;
 
         var system = System();
         var right = new List<string>
@@ -305,9 +256,7 @@ public static unsafe partial class Debug
         right.Add(Render.RayTracingActive ? "Lighting ray traced, its global illumination Solari's" : "Lighting rasterized, no global illumination");
         right.Add(SceneField.Said());
         if (Render.MeshletsActive) right.Add("Meshlets on");
-        if (ProfilerShown) AddPasses(right, timings);
-
-        return new Said(head, beside, left, right);
+        return right;
     }
 
     /// <summary>
@@ -328,14 +277,16 @@ public static unsafe partial class Debug
             : Say($"GPU {outer.Sum(pass => pass.GpuMilliseconds!.Value):0.0} ms a frame, {outer.Count} passes added");
     }
 
-    /// <summary>The profiler's lines, the passes the slowest first by the GPU's time, then the CPU's.</summary>
-    private static void AddPasses(List<string> right, IReadOnlyList<PassTiming> timings)
+    /// <summary>
+    /// The profiler's lines, the passes the slowest first by the GPU's time, then the CPU's.
+    /// </summary>
+    private static List<string> Passes(IReadOnlyList<PassTiming> timings)
     {
-        right.Add("");
+        var right = new List<string> { "" };
         if (timings.Count == 0)
         {
             right.Add("Pass timings not measured, Config.GpuTimings measures them");
-            return;
+            return right;
         }
 
         right.Add("Passes, the slowest first");
@@ -352,36 +303,34 @@ public static unsafe partial class Debug
         }
 
         if (slowest.Count > ProfilerPasses) right.Add(Say($"and {slowest.Count - ProfilerPasses} more"));
+        return right;
     }
 
     /// <summary>
-    /// The program's sections, each after a gap, its name and then its lines, or why it said
-    /// nothing where its lines threw.
+    /// Hides Bevy's FPS overlay while the engine's shows, since both stand at the top left and the
+    /// engine's says the frame's rate and draws its times too, and gives it back as it was after.
     /// </summary>
     /// <remarks>
-    /// The list is copied before any section is asked, so a section that adds or removes one, its
-    /// own among them, changes the next writing and not this one.
+    /// Its text and its graph are hidden apart, so each comes back as the program had it, and an
+    /// app without it, which asked for no <see cref="DevTools.FpsOverlay"/>, has nothing done.
     /// </remarks>
-    private static void AddSections(List<string> left)
+    private static void Fold(World world, bool shown)
     {
-        (string Name, Func<IEnumerable<string>> Lines)[] sections;
-        lock (Sections) sections = [.. Sections];
+        _folded = shown;
+        if (!world.Resource<Config>().DevTools.HasFlag(DevTools.FpsOverlay)) return;
+        if (world.Resource<EcsWorld>().Resource<FpsOverlayConfigRef>() is not { } overlay) return;
 
-        foreach (var (name, lines) in sections)
+        if (shown)
         {
-            left.Add("");
-            left.Add(name);
-
-            try
-            {
-                left.AddRange(lines());
-            }
-            catch (Exception error)
-            {
-                // Said where its lines would be rather than logged, since a section asked four
-                // times a second would fill the log, and the overlay is where its author looks.
-                left.Add($"{name}: {error.GetType().Name}, {error.Message}");
-            }
+            _fpsOverlay = (overlay.Enabled, overlay.FrameTimeGraphConfigEnabled);
+            overlay.Enabled = false;
+            overlay.FrameTimeGraphConfigEnabled = false;
+        }
+        else if (_fpsOverlay is { } was)
+        {
+            overlay.Enabled = was.Text;
+            overlay.FrameTimeGraphConfigEnabled = was.Graph;
+            _fpsOverlay = null;
         }
     }
 
@@ -396,20 +345,21 @@ public static unsafe partial class Debug
     /// </remarks>
     private static void DrawStrip()
     {
+        const int Frames = OverlayModel.StripFrames;
         var sixty = StripHeight - (int)MathF.Round(1000f / 60f / StripTop * StripHeight);
         var thirty = StripHeight - (int)MathF.Round(1000f / 30f / StripTop * StripHeight);
-        var first = (_timesNext - _timesHeld + StripFrames) % StripFrames;
-        var empty = StripFrames - _timesHeld;
+        var times = Overlay.FrameTimes;
+        var empty = Frames - times.Count;
 
-        for (var x = 0; x < StripFrames; x++)
+        for (var x = 0; x < Frames; x++)
         {
-            var ms = x < empty ? 0f : Times[(first + x - empty) % StripFrames];
+            var ms = x < empty ? 0f : times[x - empty];
             var bar = ms <= 0f ? 0 : Math.Clamp((int)MathF.Ceiling(ms / StripTop * StripHeight), 1, StripHeight);
             var (r, g, b) = ms <= 1000f / 60f + 0.5f ? ((byte)80, (byte)220, (byte)100) : ms <= 1000f / 30f + 0.5f ? ((byte)240, (byte)200, (byte)60) : ((byte)240, (byte)80, (byte)70);
 
             for (var y = 0; y < StripHeight; y++)
             {
-                var at = (y * StripFrames + x) * 4;
+                var at = (y * Frames + x) * 4;
                 if (y >= StripHeight - bar)
                     (StripPixels[at], StripPixels[at + 1], StripPixels[at + 2], StripPixels[at + 3]) = (r, g, b, 255);
                 else if (y == sixty || y == thirty)
@@ -452,13 +402,13 @@ public static unsafe partial class Debug
         ecs.SetParent(_restColumn, _leftColumn);
 
         DrawStrip();
-        _strip = Render.CreateImage(StripPixels, StripFrames, StripHeight);
+        _strip = Render.CreateImage(StripPixels, OverlayModel.StripFrames, StripHeight);
         // Its least size its own, so a narrow window cuts the strip off rather than squeezes it.
         _stripNode = Ui.SpawnNode(new UiSettings
         {
-            Width = Length.Px(StripFrames),
+            Width = Length.Px(OverlayModel.StripFrames),
             Height = Length.Px(StripHeight),
-            MinWidth = Length.Px(StripFrames),
+            MinWidth = Length.Px(OverlayModel.StripFrames),
             MinHeight = Length.Px(StripHeight),
         });
         Ui.SetImage(_stripNode, _strip);
@@ -473,13 +423,16 @@ public static unsafe partial class Debug
         _rootShown = true;
     }
 
-    /// <summary>Gives a column a line for each it is to say, made or taken away as the count changes, and writes each line that changed.</summary>
-    private static void Write(EcsWorld ecs, Entity column, List<Line> lines, List<string> says)
+    /// <summary>
+    /// Gives a column a line for each it is to say, made or taken away as the count changes, and
+    /// writes each line that changed.
+    /// </summary>
+    private static void Write(EcsWorld ecs, Entity column, List<Line> lines, IReadOnlyList<string> says)
     {
         while (lines.Count < says.Count)
         {
-            // Light gray text on a backing of black at half, so a line reads over a bright scene and
-            // a dark one alike.
+            // Light gray text on a backing of black at half, so a line reads over a bright scene
+            // and a dark one alike.
             var backing = Ui.SpawnNode(new UiSettings { Color = (0f, 0f, 0f, 0.5f), Padding = new Sides(Length.Px(3f), Length.Px(1f), Length.Px(3f), Length.Px(0f)) });
             var text = Ui.SpawnText("", new UiSettings { Color = (0.88f, 0.88f, 0.88f, 1f) }, 15f);
             ecs.SetParent(text, backing);
@@ -501,9 +454,10 @@ public static unsafe partial class Debug
             var line = lines[i];
             if (line.Says == says[i]) continue;
 
-            // An empty line is a gap the height of a line, its backing hidden, which keeps its space,
-            // and its text a space, since a text of nothing has no height. A line made for a gap is
-            // written too, which nothing written yet tells apart from one that said nothing before.
+            // An empty line is a gap the height of a line, its backing hidden, which keeps its
+            // space, and its text a space, since a text of nothing has no height. A line made for a
+            // gap is written too, which nothing written yet tells apart from one that said nothing
+            // before.
             var gap = says[i].Length == 0;
             if (line.Says is null || (line.Says.Length == 0) != gap)
                 ecs.Set(line.Backing, new Visibility(gap ? VisibilityMode.Hidden : VisibilityMode.Inherited));
@@ -536,7 +490,9 @@ public static unsafe partial class Debug
 
     private static long Count(Dictionary<string, long> held, string name) => held.GetValueOrDefault(name);
 
-    /// <summary>The OS, the kernel, the CPU, its cores and the memory installed, read once for the process.</summary>
+    /// <summary>
+    /// The OS, the kernel, the CPU, its cores and the memory installed, read once for the process.
+    /// </summary>
     private static string[] System()
     {
         if (_system is { } known) return known;
@@ -570,11 +526,16 @@ public static unsafe partial class Debug
         return plus >= 0 ? version[..plus] : version;
     }
 
-    /// <summary>The eight points of the compass a heading in degrees is nearest, north being minus Z.</summary>
+    /// <summary>
+    /// The eight points of the compass a heading in degrees is nearest, north being minus Z.
+    /// </summary>
     internal static string Compass(float heading) =>
         new[] { "north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest" }[(int)MathF.Round(heading / 45f) % 8];
 
-    /// <summary>The axis and its sign a heading faces nearest along the ground, as the coordinate that moves most as the camera moves ahead and the way it moves.</summary>
+    /// <summary>
+    /// The axis and its sign a heading faces nearest along the ground, as the coordinate that moves
+    /// most as the camera moves ahead and the way it moves.
+    /// </summary>
     private static string Towards(float x, float z) =>
         MathF.Abs(x) > MathF.Abs(z) ? (x > 0f ? "positive X" : "negative X") : (z > 0f ? "positive Z" : "negative Z");
 

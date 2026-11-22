@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Numerics;
 using Bevy;
+using Diagnostics;
 using ImGuiNET;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
@@ -14,7 +15,9 @@ internal abstract record Row(string Label)
     /// <summary>What it is set to, said at the right of the row.</summary>
     public virtual string Value => string.Empty;
 
-    /// <summary>How far something it started has come, drawn as a bar under it, or nothing.</summary>
+    /// <summary>
+    /// How far something it started has come, drawn as a bar under it, or nothing.
+    /// </summary>
     public virtual float? Progress => null;
 
     /// <summary>
@@ -80,7 +83,9 @@ internal sealed record ActionRow(string Label, Action<BehaviorContext> Do) : Row
     }
 }
 
-/// <summary>A line of text, such as a scene's attribution, which stepping does nothing to.</summary>
+/// <summary>
+/// A line of text, such as a scene's attribution, which stepping does nothing to.
+/// </summary>
 internal sealed record TextRow(string Label) : Row(Label)
 {
     public override void Step(BehaviorContext ctx, int direction)
@@ -96,10 +101,11 @@ internal sealed record Page(string Title, IReadOnlyList<Row> Rows);
 /// </summary>
 /// <remarks>
 /// <para>
-/// F4 or the pad's start button opens and closes it, F4 held with F3 being the mode's chord. The arrows or the pad's cross move through
-/// the rows, Enter, the right arrow or the pad's south button opens a page or steps a value on,
-/// the left arrow steps it back, and Escape, Backspace or the pad's east button goes back a page,
-/// closing the panel from the first. The pointer works too, a click being Enter.
+/// The settings panel's row Feature test (F4) or the pad's start button opens it, and the pad's
+/// start button closes it. The arrows or the pad's cross move through the rows, Enter, the right
+/// arrow or the pad's south button opens a page or steps a value on, the left arrow steps it back,
+/// and Escape, Backspace or the pad's east button goes back a page, closing the panel from the
+/// first. The pointer works too, a click being Enter.
 /// </para>
 /// <para>
 /// Read from the engine's own input rather than through ImGui's keyboard navigation, which moves
@@ -128,23 +134,39 @@ public static class Panel
         _selected = 0;
     }
 
-    /// <summary>Opens or closes it on its keys, steers it, and draws it while it is open.</summary>
+    /// <summary>
+    /// Opens it at its first page, as the settings panel's row asks, closing that panel, which
+    /// shares the arrows and Enter.
+    /// </summary>
+    [Command("feature.panel", "Opens the feature test's admin panel")]
+    internal static string Show()
+    {
+        Bevy.Debug.Panel.Open = false;
+        Turn(true);
+        return "the admin panel is open";
+    }
+
+    /// <summary>Opens it at its first page or closes it.</summary>
+    private static void Turn(bool open)
+    {
+        IsOpen = open;
+        Trail.Clear();
+        _page = open ? Pages.First() : null;
+        _selected = 0;
+    }
+
+    /// <summary>
+    /// Opens or closes it on the pad's start button, steers it, and draws it while it is open.
+    /// </summary>
     public static void Draw(BehaviorContext ctx)
     {
         ArgumentNullException.ThrowIfNull(ctx);
-        var input = ctx.Input;
 
-        if ((input.KeyPressed(Key.F4) && !input.KeyDown(Key.F3)) || Pad(ctx, GamepadButton.Start))
-        {
-            IsOpen = !IsOpen;
-            Trail.Clear();
-            _page = IsOpen ? Pages.First() : null;
-            _selected = 0;
-        }
+        if (Pad(ctx, GamepadButton.Start)) Turn(!IsOpen);
 
         if (!IsOpen || _page is not { } page) return;
 
-        if (!ImGuiConsole.IsOpen) Steer(ctx, page);
+        if (!ConsoleLog.Model.Open) Steer(ctx, page);
         if (_page is not { } shown) return;
 
         ImGui.SetNextWindowPos(new Vector2(16f, 16f), ImGuiCond.Always);
@@ -182,7 +204,7 @@ public static class Panel
 
             ImGui.Separator();
             ImGui.TextDisabled("Arrows or the pad move, Enter steps on,");
-            ImGui.TextDisabled("Esc goes back and F4 closes.");
+            ImGui.TextDisabled("Esc goes back and closes from the first page.");
         }
 
         ImGui.End();

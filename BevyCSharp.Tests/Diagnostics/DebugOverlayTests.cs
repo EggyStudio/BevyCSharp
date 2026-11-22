@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Bevy;
+using Diagnostics;
 using Bevy.Interop;
 using Bevy.Reflected;
 using Xunit;
@@ -9,8 +10,9 @@ namespace Bevy.Tests;
 /// <summary>
 /// Covers the debug overlay, F3 let go alone turning it over and a chord on F3 not, the key moved,
 /// its lines saying the frame, the camera, the world, the system and the renderer of a scene whose
-/// numbers are known, the strip of the last 240 frames' times and what is said beside it, Shift+F3's
-/// profiler, a program's sections, and Bevy's FPS overlay hidden under it and given back.
+/// numbers are known, the strip of the last 240 frames' times and what is said beside it,
+/// Shift+F3's profiler, a program's sections, and Bevy's FPS overlay hidden under it and given
+/// back.
 /// </summary>
 /// <remarks>
 /// The key is set to F3 before each test, since an example that holds F3 turns it off in the
@@ -20,18 +22,23 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class DebugOverlayTests : IDisposable
 {
-    public DebugOverlayTests() => Debug.OverlayKey = Key.F3;
+    // The overlay's key put back to F3, since a test or an example in the process the suite shares
+    // may have moved it.
+    public DebugOverlayTests() => Debug.Keys.KeyOf(KeyAction.Overlay).Reset();
 
     public void Dispose()
     {
-        Debug.OverlayShown = false;
-        Debug.ProfilerShown = false;
-        Debug.OverlayKey = Key.F3;
-        Debug.RemoveOverlaySection("World");
-        Debug.RemoveOverlaySection("Broken");
+        Debug.Overlay.Shown = false;
+        Debug.Overlay.Detailed = false;
+        Debug.Keys.KeyOf(KeyAction.Overlay).Reset();
+        Debug.Overlay.RemoveSection("World");
+        Debug.Overlay.RemoveSection("Broken");
     }
 
-    /// <summary>The scene's counts at the offsets the bridge writes them, which its own test holds to the same numbers.</summary>
+    /// <summary>
+    /// The scene's counts at the offsets the bridge writes them, which its own test holds to the
+    /// same numbers.
+    /// </summary>
     [Fact]
     public void TheSceneCountsLieWhereTheBridgeWritesThem()
     {
@@ -57,35 +64,60 @@ public sealed class DebugOverlayTests : IDisposable
             .Wait(2)
             .Do("letting it go", _ => SyntheticInput.Lift(Key.F3))
             .Wait(2)
-            .Do("reading", _ => seen.Add(Debug.OverlayShown))
+            .Do("reading", _ => seen.Add(Debug.Overlay.Shown))
             .Do("holding F3 again", _ => SyntheticInput.Press(Key.F3))
             .Wait(2)
             .Do("pressing F4 with it", _ => SyntheticInput.Tap(Key.F4))
             .Wait(2)
             .Do("letting F3 go", _ => SyntheticInput.Lift(Key.F3))
             .Wait(2)
-            .Do("reading again", _ => seen.Add(Debug.OverlayShown))
+            .Do("reading again", _ => seen.Add(Debug.Overlay.Shown))
             .Do("moving the key and pressing F3", _ =>
             {
-                Debug.OverlayKey = Key.F6;
+                Debug.Keys.KeyOf(KeyAction.Overlay).TrySet("F6");
                 SyntheticInput.Tap(Key.F3);
             })
             .Wait(3)
-            .Do("reading after", _ => seen.Add(Debug.OverlayShown))
+            .Do("reading after", _ => seen.Add(Debug.Overlay.Shown))
             .Do("pressing the moved key", _ => SyntheticInput.Tap(Key.F6))
             .Wait(3)
-            .Do("reading last", _ => seen.Add(Debug.OverlayShown))
+            .Do("reading last", _ => seen.Add(Debug.Overlay.Shown))
             .Go();
 
         // Shown by F3 alone, kept by the chord, kept by F3 once moved, and hidden by the moved key.
         Assert.Equal(new[] { true, true, true, false }, seen);
     }
 
+    /// <summary>
+    /// A key held as an app ends, which that app never saw let go, makes no chord of F3 in the
+    /// next, since each app takes keys of its own.
+    /// </summary>
+    [SkippableFact]
+    public void AKeyHeldAsTheLastAppEndedMakesNoChordInTheNext()
+    {
+        Needs.Renderer();
+        new PictureRun { Width = 64, Height = 48, Scene = ecs => PictureRun.Camera(ecs) }
+            .Wait(3)
+            .Do("holding W to the end", _ => SyntheticInput.Press(Key.W))
+            .Wait(2)
+            .Go();
+
+        var shown = false;
+        new PictureRun { Width = 64, Height = 48, Scene = ecs => PictureRun.Camera(ecs) }
+            .Wait(3)
+            .Do("pressing F3", _ => SyntheticInput.Tap(Key.F3))
+            .Wait(3)
+            .Do("reading", _ => shown = Debug.Overlay.Shown)
+            .Go();
+
+        Assert.True(shown);
+    }
+
     [SkippableFact]
     public void TheOverlaySaysTheFrameTheCameraTheWorldTheSystemAndTheRenderer()
     {
         Needs.Renderer();
-        Debug.Said? said = null;
+        (List<string> Head, List<string> Beside, List<string> Left, List<string> Right)? said = null;
 
         // A cube of twelve triangles seen from up and behind along -Z, a directional light with
         // shadow maps and a point light without.
@@ -101,14 +133,14 @@ public sealed class DebugOverlayTests : IDisposable
                 Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Shadows = false });
             },
         };
-        run.Wait(10).Do("reading the lines", world => said = Debug.Lines(world)).Go();
-        var (head, beside, left, right) = said!;
+        run.Wait(10).Do("reading the lines", _ => said = Said()).Go();
+        var (head, beside, left, right) = said!.Value;
 
-        Assert.StartsWith("BevyCSharp ", head[0]);
-        Assert.Contains(" fps, ", head[1]);
-        Assert.StartsWith("Now ", beside[0]);
-        Assert.Contains(", 1% low ", beside[0]);
-        Assert.Equal("GPU time not measured, Config.GpuTimings measures it", beside[1]);
+        Assert.Contains(" fps, ", head[0]);
+        Assert.EndsWith(" fps 1% low", head[0]);
+        Assert.StartsWith("BevyCSharp ", head[1]);
+        Assert.Contains(", frame ", head[1]);
+        Assert.Equal("GPU time not measured, Config.GpuTimings measures it", beside[0]);
         Assert.Contains("XYZ 0.000 / 2.000 / 6.000", left);
         Assert.Contains(left, line => line.StartsWith("Facing north (towards negative Z), heading 0.0, pitch -18.4", StringComparison.Ordinal));
         Assert.Contains("Field of view 45 degrees", left);
@@ -148,16 +180,16 @@ public sealed class DebugOverlayTests : IDisposable
         run.Wait(300)
             .Do("reading the strip", _ =>
             {
-                strip = Debug.FrameTimes();
+                strip = [.. Debug.Overlay.FrameTimes];
                 frames = kept.Count;
             })
             .Go();
 
-        Assert.True(frames > Debug.StripFrames, $"{frames} frames ran");
-        Assert.Equal(Debug.StripFrames, strip.Length);
+        Assert.True(frames > OverlayModel.StripFrames, $"{frames} frames ran");
+        Assert.Equal(OverlayModel.StripFrames, strip.Length);
         Assert.True(
-            kept.Take(frames).Skip(frames - Debug.StripFrames).SequenceEqual(strip)
-                || kept.Take(frames - 1).Skip(frames - 1 - Debug.StripFrames).SequenceEqual(strip),
+            kept.Take(frames).Skip(frames - OverlayModel.StripFrames).SequenceEqual(strip)
+                || kept.Take(frames - 1).Skip(frames - 1 - OverlayModel.StripFrames).SequenceEqual(strip),
             "The strip is not the last 240 frames' times in order.");
     }
 
@@ -182,40 +214,22 @@ public sealed class DebugOverlayTests : IDisposable
         run.Wait(10)
             .Do("slowing the game to a quarter", world => world.Resource<Time>().SetSpeed(0.25f))
             .Wait(30)
-            .Do("reading the frame's line", world => slowed = Debug.Lines(world).Head[1])
+            .Do("reading the frame's line", _ => slowed = Said().Head[0])
             .Do("pausing the game", world => world.Resource<Time>().Pause())
             .Wait(60)
             .Do("reading the frame's line and the strip", world =>
             {
-                paused = Debug.Lines(world).Head[1];
-                strip = Debug.FrameTimes();
+                paused = Said().Head[0];
+                strip = [.. Debug.Overlay.FrameTimes];
             })
             .Go();
 
-        Assert.StartsWith("50 fps, 20.0 ms a frame", slowed);
-        Assert.StartsWith("50 fps, 20.0 ms a frame", paused);
+        // The last frame's time, the line's second figure, the frames kept before the clock was
+        // fixed counted in the rate and the average.
+        Assert.Contains(" fps, 20.0 ms, ", slowed);
+        Assert.Contains(" fps, 20.0 ms, ", paused);
         Assert.True(strip.Length >= 60, $"the strip holds {strip.Length} frames");
         Assert.All(strip[^60..], ms => Assert.Equal(20f, ms, 0.01f));
-    }
-
-    /// <summary>
-    /// The last time, the average and the one percent low, the slowest hundredth of the frames
-    /// averaged and taken as a rate, three of 240 and one of fewer than a hundred.
-    /// </summary>
-    [Fact]
-    public void TheStatsAreTheLastTheAverageAndTheSlowestHundredthsRate()
-    {
-        var steady = Enumerable.Repeat(16f, 237).Concat([40f, 50f, 60f]).ToArray();
-        var (now, average, low) = Debug.Stats(steady);
-        Assert.Equal(60f, now);
-        Assert.Equal((237f * 16f + 150f) / 240f, average, 3);
-        Assert.Equal(20f, low, 3);
-
-        var (_, few, slowest) = Debug.Stats([10f, 30f, 20f]);
-        Assert.Equal(20f, few, 3);
-        Assert.Equal(1000f / 30f, slowest, 3);
-
-        Assert.Equal((0f, 0f, 0f), Debug.Stats([]));
     }
 
     [SkippableFact]
@@ -228,35 +242,35 @@ public sealed class DebugOverlayTests : IDisposable
         run.Wait(3)
             .Do("adding two sections", world =>
             {
-                Debug.AddOverlaySection("World", () => ["seed 42", "chunk 3 -1"]);
-                Debug.AddOverlaySection("Broken", () => throw new InvalidOperationException("no world yet"));
-                added = Debug.Lines(world).Left;
+                Debug.Overlay.AddSection("World", OverlayPlace.Left, () => ["seed 42", "chunk 3 -1"]);
+                Debug.Overlay.AddSection("Broken", OverlayPlace.Left, () => throw new InvalidOperationException("no world yet"));
+                added = Said().Left;
             })
             .Do("replacing the first", world =>
             {
-                Debug.AddOverlaySection("World", () => ["seed 7"]);
-                replaced = Debug.Lines(world).Left;
+                Debug.Overlay.AddSection("World", OverlayPlace.Left, () => ["seed 7"]);
+                replaced = Said().Left;
             })
             .Do("removing both", world =>
             {
-                Assert.True(Debug.RemoveOverlaySection("World"));
-                Assert.True(Debug.RemoveOverlaySection("Broken"));
-                Assert.False(Debug.RemoveOverlaySection("World"));
-                removed = Debug.Lines(world).Left;
+                Assert.True(Debug.Overlay.RemoveSection("World"));
+                Assert.True(Debug.Overlay.RemoveSection("Broken"));
+                Assert.False(Debug.Overlay.RemoveSection("World"));
+                removed = Said().Left;
             })
             .Go();
 
-        // Under the engine's lines in the order added, each after a gap and its name.
-        var at = added.IndexOf("World");
-        Assert.True(at > 0 && added[at - 1].Length == 0, string.Join(" | ", added));
-        Assert.Equal(["World", "seed 42", "chunk 3 -1", "", "Broken", "Broken: InvalidOperationException, no world yet"], added.Skip(at));
-        Assert.StartsWith("Meshes ", added[at - 2]);
+        // Under the engine's lines in the order added, the one that threw naming itself and why.
+        var at = added.IndexOf("seed 42");
+        Assert.True(at > 0, string.Join(" | ", added));
+        Assert.Equal(["seed 42", "chunk 3 -1", "Broken failed. no world yet"], added.Skip(at));
+        Assert.StartsWith("Meshes ", added[at - 1]);
 
         // Replaced where it stood, ahead of the one added after it.
-        Assert.Equal(["World", "seed 7", "", "Broken", "Broken: InvalidOperationException, no world yet"], replaced.Skip(replaced.IndexOf("World")));
+        Assert.Equal(["seed 7", "Broken failed. no world yet"], replaced.Skip(replaced.IndexOf("seed 7")));
 
-        Assert.DoesNotContain("World", removed);
-        Assert.DoesNotContain("Broken", removed);
+        Assert.DoesNotContain("seed 7", removed);
+        Assert.DoesNotContain("Broken failed. no world yet", removed);
         Assert.StartsWith("Meshes ", removed[^1]);
     }
 
@@ -265,7 +279,7 @@ public sealed class DebugOverlayTests : IDisposable
     {
         Needs.Renderer();
         var seen = new List<(bool Overlay, bool Profiler)>();
-        Debug.Said? said = null;
+        (List<string> Head, List<string> Beside, List<string> Left, List<string> Right)? said = null;
 
         var run = new PictureRun
         {
@@ -283,15 +297,15 @@ public sealed class DebugOverlayTests : IDisposable
             .Wait(30)
             .Do("reading", world =>
             {
-                seen.Add((Debug.OverlayShown, Debug.ProfilerShown));
-                said = Debug.Lines(world);
+                seen.Add((Debug.Overlay.Shown, Debug.Overlay.Detailed));
+                said = Said();
             })
             .Do("pressing F3 alone", _ => SyntheticInput.Tap(Key.F3))
             .Wait(3)
-            .Do("reading again", _ => seen.Add((Debug.OverlayShown, Debug.ProfilerShown)))
+            .Do("reading again", _ => seen.Add((Debug.Overlay.Shown, Debug.Overlay.Detailed)))
             .Do("pressing F3 alone again", _ => SyntheticInput.Tap(Key.F3))
             .Wait(3)
-            .Do("reading last", _ => seen.Add((Debug.OverlayShown, Debug.ProfilerShown)))
+            .Do("reading last", _ => seen.Add((Debug.Overlay.Shown, Debug.Overlay.Detailed)))
             .Go();
 
         // Both shown by Shift+F3, both hidden by F3, and the overlay alone shown by F3 again.
@@ -299,11 +313,12 @@ public sealed class DebugOverlayTests : IDisposable
 
         // The passes the app asked to have timed, the slowest first, and the GPU's time beside the
         // strip, measured or said not to be where the adapter has no timestamp queries.
-        var passes = said!.Right.IndexOf("Passes, the slowest first");
-        Assert.True(passes > 0 && passes + 1 < said.Right.Count, string.Join(" | ", said.Right));
-        Assert.Contains(" GPU ", said.Right[passes + 1]);
-        Assert.StartsWith("GPU ", said.Beside[1]);
-        Assert.NotEqual("GPU time not measured, Config.GpuTimings measures it", said.Beside[1]);
+        var lines = said!.Value;
+        var passes = lines.Right.IndexOf("Passes, the slowest first");
+        Assert.True(passes > 0 && passes + 1 < lines.Right.Count, string.Join(" | ", lines.Right));
+        Assert.Contains(" GPU ", lines.Right[passes + 1]);
+        Assert.StartsWith("GPU ", lines.Beside[0]);
+        Assert.NotEqual("GPU time not measured, Config.GpuTimings measures it", lines.Beside[0]);
     }
 
     [SkippableFact]
@@ -331,10 +346,10 @@ public sealed class DebugOverlayTests : IDisposable
                 overlay.FrameTimeGraphConfigEnabled = false;
                 seen.Add(Read(world));
             })
-            .Do("showing the overlay", _ => Debug.OverlayShown = true)
+            .Do("showing the overlay", _ => Debug.Overlay.Shown = true)
             .Wait(3)
             .Do("reading", world => seen.Add(Read(world)))
-            .Do("hiding the overlay", _ => Debug.OverlayShown = false)
+            .Do("hiding the overlay", _ => Debug.Overlay.Shown = false)
             .Wait(3)
             .Do("reading again", world => seen.Add(Read(world)))
             .Go();
@@ -355,7 +370,7 @@ public sealed class DebugOverlayTests : IDisposable
         var run = new PictureRun { Width = 640, Height = 360, Scene = ecs => PictureRun.Camera(ecs) };
         run.Wait(10)
             .Capture("before")
-            .Do("showing the overlay", _ => Debug.OverlayShown = true)
+            .Do("showing the overlay", _ => Debug.Overlay.Shown = true)
             .Wait(10)
             .Capture("after")
             .Go();
@@ -367,6 +382,14 @@ public sealed class DebugOverlayTests : IDisposable
             Math.Abs(r - wr) <= 6 && Math.Abs(g - wg) <= 6 && Math.Abs(b - wb) <= 6;
 
         Assert.Equal(0, Bars(run.Picture("before")));
-        Assert.True(Bars(run.Picture("after")) >= Debug.StripFrames, $"{Bars(run.Picture("after"))} pixels of bars");
+        Assert.True(Bars(run.Picture("after")) >= OverlayModel.StripFrames, $"{Bars(run.Picture("after"))} pixels of bars");
+    }
+
+    /// <summary>The overlay's lines asked of its sections at once, a list for each place.</summary>
+    private static (List<string> Head, List<string> Beside, List<string> Left, List<string> Right) Said()
+    {
+        Debug.Overlay.Refresh();
+        return ([.. Debug.Overlay.Lines(OverlayPlace.Head)], [.. Debug.Overlay.Lines(OverlayPlace.Beside)],
+            [.. Debug.Overlay.Lines(OverlayPlace.Left)], [.. Debug.Overlay.Lines(OverlayPlace.Right)]);
     }
 }

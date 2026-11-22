@@ -77,10 +77,10 @@ public static class NativeComponents
 
     /// <summary>Bevy's <c>Atmosphere</c>, the planet whose air a sky is scattered through.</summary>
     /// <remarks>
-    /// Render builds only. The id behind <see cref="Bevy.Atmosphere"/>, which is how the planet
-    /// <c>Render.SetAtmosphere</c> keeps is found or counted.
+    /// Render builds only. The id behind <see cref="Bevy.PlanetAtmosphere"/>, which is how the
+    /// planet <c>Render.SetAtmosphere</c> keeps is found or counted.
     /// </remarks>
-    public static int Atmosphere => ComponentType<Bevy.Atmosphere>.Id;
+    public static int Atmosphere => ComponentType<Bevy.PlanetAtmosphere>.Id;
 
     /// <summary>Bevy's <c>Interaction</c>, how the pointer stands on a UI node.</summary>
     /// <remarks>

@@ -1,6 +1,8 @@
 namespace Bevy;
 
-/// <summary>The renderer's part in the app and its frame, which <c>EnginePlugin</c> adds to every app.</summary>
+/// <summary>
+/// The renderer's part in the app and its frame, which <c>EnginePlugin</c> adds to every app.
+/// </summary>
 internal sealed class RenderWork : IPlugin
 {
     public void Build(App app)
@@ -18,14 +20,6 @@ internal sealed class RenderWork : IPlugin
         app.AreasWork.Add(1100, world =>
         {
             if (App.HasRenderer) Recorder.Tick(world.Resource<Time>());
-        });
-
-        // A picture of this frame where the screenshot key was pressed, the press left for the
-        // program to read as well, in a run that draws.
-        app.AreasWork.Add(1300, world =>
-        {
-            if (App.HasRenderer && Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
-                Capture.Screenshot();
         });
 
         // The material files changed on disk since the frame before, after the data files are.

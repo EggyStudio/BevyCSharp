@@ -75,7 +75,10 @@ public sealed class CliEnvelopeTests
         Assert.False(without.RootElement.TryGetProperty("id", out _));
     }
 
-    /// <summary>What a person types, and what a tool sends, arrive as the same thing.</summary>
+    /// <summary>
+    /// What a person types, and what a tool sends, arrive as the same thing at a command that takes
+    /// its line whole, as <c>echo</c> does.
+    /// </summary>
     [Theory]
     [InlineData("\"Spawn/Cube\"", "Spawn/Cube")]
     [InlineData("\"a b\"", "a b")]
@@ -84,5 +87,5 @@ public sealed class CliEnvelopeTests
     [InlineData("\"a\" and \"b\"", "\"a\" and \"b\"")]
     [InlineData("plain", "plain")]
     public void OneEnclosingPairOfQuotesComesOff(string line, string expected) =>
-        Assert.Equal(expected, ConsoleHost.Unwrap(line));
+        Assert.Equal(expected, ConsoleHost.Run($"echo {line}").Text);
 }

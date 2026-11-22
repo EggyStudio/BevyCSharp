@@ -1631,7 +1631,7 @@ The guide's page is [tools.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 ```csharp
 // Capture
 static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f);  // Starts recording what this run draws, a picture at each interval of its clock, until StopRecording, as an animated GIF or PNG
-static string Screenshot();                                     // Saves a picture of the frame being drawn into ScreenshotFolder, as the key does
+static string Screenshot();                                     // Saves a picture of the frame being drawn into ScreenshotFolder, as the screenshot's key does, F2 unless a player rebinds keys.screenshot (Debug.Keys)
 static Task<string>? StopRecording();                           // Stops a recording, whose file is written once the pictures it asked for have come back
 
 // DiagnosticsStore
@@ -1649,8 +1649,8 @@ static void Later(Func<string> poll);                           // Says this com
 static ConsoleHost.Scope Lend(World world);                     // Lends the world to commands run inside the returned scope
 static Answer Run(string line);                                 // Runs a line as it was typed, through Commands
 static Answer Submit(string line, World? world = null);         // Runs a line the player entered through the process's console (Model), which writes it and its answer, with the world lent where one is given
+static void AnswerLater(World world);                           // Asks each command waiting on an answer for it, and writes any that arrive into the process's console, or that a command had none where it waited too long
 static Answer Answered(string? text);                           // The answer of a command's text, or of nothing, as the generated registrations answer, failed with the code the command gave Fail where it called it
-static string Unwrap(string line);                              // A line with one pair of enclosing quotes taken off, if it has them
 
 // ConsoleHost.Scope
 void Dispose();                                                 // Ends it, putting back whatever was lent before
@@ -1737,16 +1737,6 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 // CompassOctants
 static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
 
-// ConsoleView
-ConsoleLine[] Lines();                                          // The lines worth showing, oldest first
-void Run(string line, World? world = null);                     // Runs a line, and writes both it and its answer into the log
-static void AnswerLater(World world);                           // Asks each command waiting on an answer for it, and writes any that arrive into the log
-string Back(string current);                                    // What was typed before this, or what is already there at the end of the list
-string Forward(string current);                                 // The other way, and back to nothing once the end is reached
-string? Completion(string typed);                               // The command a half-typed name would become, or nothing
-string Hint(string typed);                                      // What it would complete to, or what it takes, said under the input
-static string Written(ConsoleLine line);                        // How a line reads on screen, with its repeat count when it has one
-
 // CrashLog
 static string? Write(string title, string what);                // Writes a crash to this run's crash file, made the first time, and says where on the log
 
@@ -1785,8 +1775,7 @@ Vec3 SampleInterior(Random random);                             // A point insid
 Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
 
 // Debug
-static void AddOverlaySection(string name, Func<IEnumerable<string>> lines);  // Adds a section of a program's own to the overlay's left column, under the engine's lines and any section added before, in place of one of the same name
-static bool RemoveOverlaySection(string name);                  // Takes a section of the overlay away by its name
+static void Draw(BehaviorContext ctx);                          // Draws the console and the settings panel while each is open, with Dear ImGui, the world lent to a line the player enters and an action the panel runs
 
 // GameTimer
 static GameTimer FromSeconds(float seconds, TimerMode mode);    // A timer of seconds that runs once or over and over, as Bevy's Timer::from_seconds
@@ -1801,9 +1790,6 @@ T Res<T>();                                                     // One of the ap
 // IBounded2d
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-
-// ImGuiConsole
-static void Draw(BehaviorContext ctx);                          // Opens or closes it on its key, and draws it while it is open
 
 // Isometry2d
 static Isometry2d FromTransform(Transform transform);           // A placement where the shape is turned by its transform's rotation about Z and moved to its translation's X and Y, as Bevy's examples place theirs

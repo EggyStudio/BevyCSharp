@@ -200,7 +200,7 @@ public static class ConsoleHost
     {
         ArgumentNullException.ThrowIfNull(line);
         Reset();
-        return Commands.Run(line);
+        return Logged(Commands.Run(line));
     }
 
     /// <summary>
@@ -221,14 +221,102 @@ public static class ConsoleHost
     {
         ArgumentNullException.ThrowIfNull(line);
         EngineAssemblies.Load();
+        Answer answer;
         if (world is null)
         {
             Reset();
-            return ConsoleLog.Model.Submit(line);
+            answer = ConsoleLog.Model.Submit(line);
+        }
+        else
+        {
+            using (Lend(world)) answer = ConsoleLog.Model.Submit(line);
         }
 
-        using (Lend(world)) return ConsoleLog.Model.Submit(line);
+        return answer;
     }
+
+    /// <summary>
+    /// Writes the stack of what a command threw to the run's log, the console showing only its
+    /// message, and gives the answer back.
+    /// </summary>
+    /// <param name="answer">What the line answered.</param>
+    private static Answer Logged(Answer answer)
+    {
+        if (answer.Error is { } error) CrashLog.Threw(error);
+        return answer;
+    }
+
+    /// <summary>
+    /// Follows each line the process's console runs and each line or setting the settings panel
+    /// runs or moves, logging the stack of what its command threw and keeping the later answer it
+    /// asked for (<see cref="Later"/>), which <see cref="AnswerLater"/> writes into the console
+    /// once it comes.
+    /// </summary>
+    /// <remarks>
+    /// The console raises it for every line however it was entered, <see cref="Submit"/>, the
+    /// Diagnostics module's drawing or a field of a program's own, and the panel for every answer
+    /// it gets, each on the thread that ran the line and inside whatever lend it ran in, so
+    /// <see cref="World"/> is the world the line ran with, whose clock counts the frames waited.
+    /// </remarks>
+    /// <param name="line">
+    /// The line, whose first word names the command in the line given up.
+    /// </param>
+    /// <param name="answer">What it answered.</param>
+    internal static void Ran(string line, Answer answer)
+    {
+        Logged(answer);
+        if (Pending is not { } poll) return;
+
+        Waiting.Add((CommandLine.Parse(line).Name, poll, GiveUpAt(ClockFrames(World))));
+        Pending = null;
+    }
+
+    /// <summary>
+    /// Asks each command waiting on an answer for it, and writes any that arrive into the
+    /// process's console, or that a command had none where it waited too long.
+    /// </summary>
+    /// <remarks>
+    /// Called once a frame by whatever draws a console, with the world lent, since what a command
+    /// waits on is usually the GPU and the answer is read inside a frame. A second call in the
+    /// same frame asks again and changes nothing.
+    /// </remarks>
+    public static void AnswerLater(World world)
+    {
+        ArgumentNullException.ThrowIfNull(world);
+        var frame = ClockFrames(world);
+
+        for (var index = Waiting.Count - 1; index >= 0; index--)
+        {
+            var (name, poll, giveUp) = Waiting[index];
+
+            string? answer;
+            using (Lend(world)) answer = poll();
+
+            if (answer is not null)
+            {
+                ConsoleLog.Write(ConsoleLevel.Info, answer);
+                Waiting.RemoveAt(index);
+            }
+            else if (frame >= giveUp)
+            {
+                ConsoleLog.Write(ConsoleLevel.Warning, $"{name} had no answer after {LaterFrames} frames");
+                Waiting.RemoveAt(index);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The commands whose answers are not ready yet, what each is called, what to ask, and the
+    /// frame it is given up at, one list for every console, since an answer belongs to the log.
+    /// </summary>
+    private static readonly List<(string Name, Func<string?> Poll, ulong GiveUp)> Waiting = [];
+
+    /// <summary>
+    /// The frames the clock has moved in, which a command's give up is counted in, or the log's
+    /// frame where no world was lent.
+    /// </summary>
+    private static ulong ClockFrames(World? world) =>
+        world is not null && world.TryGetResource<Time>(out var time) ? time.ClockFrames : ConsoleLog.Frame;
 
     /// <summary>
     /// The answer of a command's text, or of nothing, as the generated registrations answer, failed
@@ -245,42 +333,6 @@ public static class ConsoleHost
     public static Answer Answered(string? text) => Failure is { } failure
         ? Answer.Fail(failure.Code, string.IsNullOrEmpty(text) ? failure.Message : text)
         : new Answer(text ?? string.Empty);
-
-    /// <summary>
-    /// A line with one pair of enclosing quotes taken off, if it has them.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// For the command that takes everything after its name. Somebody typing <c>do "Spawn/Cube"</c>
-    /// means the path without the quotes, and something sending a line over a socket has to quote a
-    /// value that contains spaces for it to survive as one. Both need the same thing back.
-    /// </para>
-    /// <para>
-    /// Only a line that is entirely one quoted run is unwrapped, so a fragment that merely contains
-    /// quotes, such as <c>eval world.SetName(e, "x")</c>, is left exactly as it was written.
-    /// </para>
-    /// </remarks>
-    public static string Unwrap(string line)
-    {
-        if (line.Length < 2 || line[0] != '"' || line[^1] != '"') return line;
-
-        var inside = line[1..^1];
-        var escaped = false;
-
-        foreach (var character in inside)
-        {
-            if (escaped)
-            {
-                escaped = false;
-                continue;
-            }
-
-            if (character == '\\') escaped = true;
-            else if (character == '"') return line;
-        }
-
-        return inside.Replace("\\\"", "\"").Replace("\\\\", "\\");
-    }
 
     /// <summary>Forgets what the last command said about itself.</summary>
     internal static void Reset()

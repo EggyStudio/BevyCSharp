@@ -293,6 +293,22 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     in five lines and is mended there, never worked round here. The lighting branch goes on beside
     this.
 
+156. **The Sky module is named Atmosphere, and the marker of Bevy's own atmosphere takes another
+     name.** The module's repository becomes 3DEngine.Atmosphere, its assembly and namespace
+     Atmosphere and its class Atmosphere becomes Air, by the module's own item. A namespace
+     Atmosphere at the root hides a type of that name from a game's plain use, so the marker
+     `Bevy.Atmosphere` in Core/Ecs is renamed `Bevy.PlanetAtmosphere`, its native name "Atmosphere"
+     unchanged, in the examples, the tests and the feature test with it. That part does not wait and
+     goes with the next commit. Once the module's commit is on GitHub the bridge follows in one
+     commit. The submodule moves from modules/Sky to modules/Atmosphere with the new address, the
+     project references and the package's embedded assembly take the name, each `using Sky;` becomes
+     `using Atmosphere;`, and the module's type Atmosphere becomes Air where the bridge names it.
+     The guides, the cheatsheet and the README's module table take the name. The pin moves 69
+     commits with the rename, so the bridge's sky light changes with it. The tests' figures move to
+     the module's, each named in the Reply with its old and new figure, no bound widened, and a
+     sheet shows the feature test's day, sunset and night at the old pin and the new with a
+     difference panel.
+
 ## Verdicts
 
 Verdict 93 is settled at 22:56 on 2026-11-21, the build run 44944582195 on `a65613b3` green with the
@@ -984,5 +1000,76 @@ host that runs a line through that registry and keeps its lines in the module's 
 to 3DEngine's binding of the module.
 
 Next in this session's order, item 155's step 2, the console, the overlay and the keys.
+
+NormTests passed, 19.
+
+155, step 2, the console, the overlay and the keys, in the commit carrying this, the module at
+`4f3cf53`.
+
+What went. `ConsoleView` and `ImGuiConsole` whole, `ConsoleHost.Unwrap`, whose place the module's
+`CommandLine.Text` takes for a command that reads its line whole, the overlay's own sections and
+frame times, the key statics, the chord of F3 with F4, and the calls that waited for a late answer
+in `Submit`, in the console's drawing and in the editor's field.
+
+What holds them. The console's model and its ImGui drawing are the module's, `Debug.Draw` writing
+any late answers into the console and, with the world lent, drawing the module's console and its
+settings panel, each while it is open. The keys are the module's actions in `Debug.Keys`, F1 hides
+the interface, F2 takes a screenshot, F3 shows the overlay, F4 the settings panel and F5 the
+console, each a setting a player rebinds on the panel's keys page and taken on its release, with no
+chord. Each app takes fresh keys as it is built, bound as the last app's were, since a key held as
+one app ended stayed held in the next and made every F3 a chord in the first whole run. The overlay
+is the module's `OverlayModel` in `Debug.Overlay`, which heads it with its own frame line, the rate,
+the frame time, the average and the 1% low, and the engine fills its sections, `engine` with the
+version, the bridge's profile, the ABI and the frame count, `gpu.time` with the frame's GPU time as
+the sum of the outer passes, `scene` with the camera and the world's counts, `machine` with the
+system, the GPU, the display and the renderer, and `passes` with the profiler's passes, slowest
+first, shown with Shift and F3. A line however entered goes through the module's `LineRun`, which
+`ConsoleHost.Ran` hears, keeping a late answer and writing a thrown command's stack to the run's log
+alone, the console showing its message, and what the panel moves or runs is answered in the console
+the same way. The tests new or recast are `SettingsPanelTests`, a throwing command's stack in
+`CrashLogTests`, and in `DebugOverlayTests` the overlay's sections and a key held as one app ended
+making no chord in the next.
+
+The public listing (N 2.4). `ConsoleView` and `ImGuiConsole` leave it with every member.
+`ConsoleHost` loses `Unwrap` and gains `AnswerLater(World)`, which was `ConsoleView`'s. `Debug`
+loses `OverlayKey`, `OverlayShown`, `ProfilerShown`, `AddOverlaySection` and `RemoveOverlaySection`
+and gains `Keys`, the module's `DiagnosticKeys`, `Overlay`, its `OverlayModel`, `Panel`, its
+`PanelModel`, and `Draw(BehaviorContext)`. `Capture.ScreenshotKey` and `Ui.HiddenKey` leave it.
+
+The pictures. The feature test offscreen on the module at `4f3cf53` with its console on F5, `help
+keys.console` answered above the candidates of `keys.` joined to the field and the ghost of the
+first, the settings panel on F4, and its keys page with the five keys as settings, in the neutral
+gray look the module draws, each sent on as it was taken. The log's lines show faintly through the
+backing of the candidates, which is the module's look to weigh.
+
+Held. Blockout and Courtyard save on F5, which also opens the console in them, so a player saving
+there opens the console as well. Which of the two moves is the review's to weigh. In the feature
+test the admin panel is reached from the settings panel's row or the pad's Start, the view's mode is
+on V, and the editor unbinds F1 and F5, which open its menu and play the scene.
+
+The whole suite passed from one tree with item 156's first part, 2,192 passed, 0 failed and 5
+skipped, 2,197 in all where the listing is 2,186, the solution built with warnings as errors, in 14
+parts and the rest, a part at a time through the GPU's gate. N 6.4 read a package packed from this
+tree, `0.0.0-diag4`, which carries the module's ImGui assembly beside `3DEngine.Diagnostics.dll`,
+and the five guides this commit touches build their 69 blocks on it.
+
+Shared: the engine's keys as the module's actions and settings, made fresh for each app, its overlay
+as sections it fills in the module's model, and a single subscriber to `LineRun` for late answers
+and thrown stacks, are offered to 3DEngine's binding of the module.
+
+Next in this session's order, item 156's second part, the Atmosphere module, then item 155's step 3,
+the settings.
+
+NormTests passed, 19.
+
+156, part one, the marker of Bevy's atmosphere, in the commit carrying this.
+
+The marker `Bevy.Atmosphere` is `Bevy.PlanetAtmosphere`, in `PlanetAtmosphere.cs`, its native name
+`Atmosphere` and its id `NativeComponents.Atmosphere` as they were, and the two tests that count or
+find the planet name it so. The components guide lists it as Bevy's `Atmosphere`, and the sky guide
+says the module's `Atmosphere` is the air as data and the engine's `PlanetAtmosphere` marks the
+planet, where it named the one meant in full. In the public listing `readonly struct
+Bevy.Atmosphere` becomes `readonly struct Bevy.PlanetAtmosphere` (N 2.4). The whole suite is step
+2's above, which ran with it.
 
 NormTests passed, 19.

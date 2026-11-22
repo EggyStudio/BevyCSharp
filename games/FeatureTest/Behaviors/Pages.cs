@@ -25,14 +25,14 @@ internal static class Pages
         new PageRow("Scenes", Scenes),
         new PageRow("Spawn", Spawn),
         new PageRow("Time", Time),
-        new ActionRow("Console", _ => ImGuiConsole.IsOpen = true),
+        new ActionRow("Console", _ => ConsoleLog.Model.Open = true),
         new ActionRow("Quit", ctx => ctx.Exit()),
     ]);
 
     private static Page Player() => new("Player",
     [
-        new ChoiceRow<PlayerMode>("Mode (F3 and F4)", () => Behaviors.Player.Mode, Behaviors.Player.Ask),
-        new ChoiceRow<PlayerView>("View (F5)", () => Behaviors.Player.View, value => Behaviors.Player.View = value),
+        new ChoiceRow<PlayerMode>("Mode", () => Behaviors.Player.Mode, Behaviors.Player.Ask),
+        new ChoiceRow<PlayerView>("View (V)", () => Behaviors.Player.View, value => Behaviors.Player.View = value),
         new ActionRow("Back to the zone's start", ctx => Behaviors.Player.Put(ctx, Behaviors.Player.Respawn, "put back")),
     ]);
 
@@ -70,7 +70,10 @@ internal static class Pages
         new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
     ]);
 
-    /// <summary>The weather's page, its kind of weather, whether the forecast sets it and how finely it is drawn.</summary>
+    /// <summary>
+    /// The weather's page, its kind of weather, whether the forecast sets it and how finely it is
+    /// drawn.
+    /// </summary>
     private static Page Skies() => new("Weather",
         Render.MeshletsActive
             ? [new TextRow("Meshlets keep the weather out.")]
@@ -97,11 +100,17 @@ internal static class Pages
 
     private static Page Debug() => new("Debug",
     [
-        new ToggleRow("Overlay (F3)", () => Bevy.Debug.OverlayShown, value => Bevy.Debug.OverlayShown = value),
-        new ToggleRow("Profiler (Shift+F3)", () => Bevy.Debug.ProfilerShown, value =>
+        new ToggleRow("Overlay (F3)", () => Bevy.Debug.Overlay.Shown, value =>
         {
-            Bevy.Debug.ProfilerShown = value;
-            if (value) Bevy.Debug.OverlayShown = true;
+            Bevy.Debug.Overlay.Shown = value;
+            if (!value) Bevy.Debug.Overlay.Detailed = false;
+            Bevy.Debug.Overlay.Refresh();
+        }),
+        new ToggleRow("Profiler (Shift+F3)", () => Bevy.Debug.Overlay.Detailed, value =>
+        {
+            Bevy.Debug.Overlay.Detailed = value;
+            if (value) Bevy.Debug.Overlay.Shown = true;
+            Bevy.Debug.Overlay.Refresh();
         }),
         new ToggleRow("Scene field", () => Field.On, Field.Set),
         new ToggleRow("Colliders", () => S.Colliders, value => Settings.Change(s => s with { Colliders = value })),

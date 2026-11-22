@@ -10,19 +10,26 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// What the program wrote and what somebody types back. The lines are whatever went to the output
-/// stream, because <see cref="ConsoleLog"/> tees it, so a <c>Console.WriteLine</c> anywhere appears
-/// here without anybody arranging it. What a console does apart from being drawn is
-/// <see cref="ConsoleView"/>'s.
+/// stream, because <see cref="ConsoleLog"/> tees it into the process's console, the Diagnostics
+/// module's <see cref="ConsoleModel"/>, so a <c>Console.WriteLine</c> anywhere appears here without
+/// anybody arranging it. The line being entered, its history and its completion are the model's,
+/// and this tab draws them in the editor's look, with a search and a switch per level of its own.
 /// </remarks>
 public static class ConsoleTab
 {
-    private static readonly ConsoleView View = new();
-
-    private static string _typed = string.Empty;
     private static long _seen;
 
-    /// <summary>How many times an earlier command has been put back in the box.</summary>
+    /// <summary>
+    /// How many times the box was given text it did not type, which its id moves with.
+    /// </summary>
     private static int _recalls;
+
+    /// <summary>What is looked for in the lines, or nothing for every line.</summary>
+    private static string _search = string.Empty;
+
+    private static bool _showInfo = true;
+    private static bool _showWarnings = true;
+    private static bool _showErrors = true;
 
     /// <summary>
     /// How tall each line is once wrapped, by the line and how many times it was said, since the
@@ -33,6 +40,48 @@ public static class ConsoleTab
     /// <summary>The width the heights were measured at.</summary>
     private static float _measuredAt;
 
+    /// <summary>How much of a line is drawn.</summary>
+    private const int Longest = 300;
+
+    /// <summary>
+    /// How a line reads on screen, with its repeat count when it has one.
+    /// </summary>
+    /// <remarks>
+    /// Cut if it is very long, since a path or a stack trace written in one line would otherwise be
+    /// measured and wrapped at its whole length every time the width changes.
+    /// </remarks>
+    internal static string Written(ConsoleLine line)
+    {
+        var text = line.Count > 1 ? $"{line.Text}  ({line.Count})" : line.Text;
+
+        return text.Length <= Longest ? text : string.Concat(text.AsSpan(0, Longest), "...");
+    }
+
+    /// <summary>
+    /// The lines worth showing, oldest first, by the levels shown and what is looked for.
+    /// </summary>
+    internal static ConsoleLine[] Lines()
+    {
+        // Trimmed, because a filter that finds nothing on account of a space somebody typed after
+        // the word is a filter that looks broken.
+        var wanted = _search.Trim();
+
+        return
+        [
+            .. ConsoleLog.All().Where(line => Shows(line.Level)
+                && (wanted.Length == 0 || line.Text.Contains(wanted, StringComparison.OrdinalIgnoreCase))),
+        ];
+    }
+
+    /// <summary>Whether a level is one of the ones being shown, the lines entered always.</summary>
+    private static bool Shows(ConsoleLevel level) => level switch
+    {
+        ConsoleLevel.Warning => _showWarnings,
+        ConsoleLevel.Error => _showErrors,
+        ConsoleLevel.Input => true,
+        _ => _showInfo,
+    };
+
     /// <summary>
     /// Draws the lines in view, and leaves the room the others would take above and below them.
     /// </summary>
@@ -42,7 +91,8 @@ public static class ConsoleTab
     /// them every frame is laying out text nobody sees. ImGui's list clipper does this for rows of
     /// one height, and a wrapped line is as tall as its wrapping makes it, so each line's height is
     /// measured once for the region's width and kept, and the lines between the top and the bottom
-    /// of the view are drawn, with blank room for the rest so the scroll bar measures the whole log.
+    /// of the view are drawn, with blank room for the rest so the scroll bar measures the whole
+    /// log.
     /// </para>
     /// <para>
     /// A line advances the cursor by its height and the item spacing below it, and so does the room
@@ -90,18 +140,22 @@ public static class ConsoleTab
         Room(skipped, spacing);
     }
 
-    /// <summary>Leaves room a run of lines would take, which advances by the spacing after it too.</summary>
+    /// <summary>
+    /// Leaves room a run of lines would take, which advances by the spacing after it too.
+    /// </summary>
     private static void Room(float height, float spacing)
     {
         if (height > 0f) ImGui.Dummy(new Vector2(0f, MathF.Max(0f, height - spacing)));
     }
 
-    /// <summary>A line's height once wrapped at a width, measured the first time it is asked.</summary>
+    /// <summary>
+    /// A line's height once wrapped at a width, measured the first time it is asked.
+    /// </summary>
     private static float HeightOf(ConsoleLine line, float width)
     {
         if (!Heights.TryGetValue((line.Index, line.Count), out var height))
         {
-            height = ImGui.CalcTextSize(ConsoleView.Written(line), false, width).Y;
+            height = ImGui.CalcTextSize(Written(line), false, width).Y;
             Heights[(line.Index, line.Count)] = height;
         }
 
@@ -124,7 +178,7 @@ public static class ConsoleTab
         };
 
         ImGui.PushStyleColor(ImGuiCol.Text, color);
-        ImGui.TextUnformatted(ConsoleView.Written(line));
+        ImGui.TextUnformatted(Written(line));
         ImGui.PopStyleColor();
     }
 
@@ -133,7 +187,7 @@ public static class ConsoleTab
     {
         Filters();
 
-        var lines = View.Lines();
+        var lines = Lines();
         var room = ImGui.GetContentRegionAvail();
 
         // What the box to type in takes, asked for rather than guessed, because a number written
@@ -162,31 +216,77 @@ public static class ConsoleTab
 
         EditorSurface.EndRegion();
 
-        ImGui.SetNextItemWidth(-1f);
+        Entry();
+    }
 
-        // Under an id that changes whenever the text is put there rather than typed. ImGui reads
-        // the string it was given when a box becomes active and not while it is, so a box that
-        // keeps its name keeps showing what was in it when it was last opened.
+    /// <summary>
+    /// The box the line is entered in, the model's line, which runs it on Enter with the world
+    /// lent, walks the history or the candidates with the arrows and takes a candidate on Tab.
+    /// </summary>
+    /// <remarks>
+    /// The box sits under an id that changes whenever the model's line is put there rather than
+    /// typed, since ImGui reads the string it was given when a box becomes active and not while it
+    /// is, so a box that keeps its id keeps showing what was in it when it was last opened. The
+    /// arrows and Tab are read here rather than through ImGui's own callbacks, which need an
+    /// unmanaged function to rewrite the buffer being edited.
+    /// </remarks>
+    private static void Entry()
+    {
+        var model = ConsoleLog.Model;
+        var typed = model.Typed;
+
+        ImGui.SetNextItemWidth(-1f);
         ImGui.PushID(_recalls);
 
-        if (ImGui.InputTextWithHint(
-                "##entry",
-                View.Hint(_typed) is { Length: > 0 } hint ? hint : "Type a command",
-                ref _typed,
-                512,
-                ImGuiInputTextFlags.EnterReturnsTrue))
+        var hint = model.Hint is { Length: > 0 } said ? said : "Type a command";
+        if (ImGui.InputTextWithHint("##entry", hint, ref typed, 512, ImGuiInputTextFlags.EnterReturnsTrue))
         {
-            View.Run(_typed, EditorShell.Context?.World);
-            _typed = string.Empty;
+            if (typed != model.Typed) model.Edit(typed);
+
+            var world = EditorShell.Context?.World;
+            if (world is not null)
+            {
+                using (ConsoleHost.Lend(world)) model.Enter();
+            }
+            else
+            {
+                model.Enter();
+            }
+
+            _recalls++;
 
             // Back where it was, so a run of commands is a run of commands rather than a click
             // between each one.
             ImGui.SetKeyboardFocusHere(-1);
         }
+        else if (typed != model.Typed)
+        {
+            model.Edit(typed);
+        }
 
-        Recall();
+        Steer(model);
 
         ImGui.PopID();
+    }
+
+    /// <summary>
+    /// Walks the history or the candidates with the arrows, and takes a candidate on Tab.
+    /// </summary>
+    private static void Steer(ConsoleModel model)
+    {
+        if (!ImGui.IsItemActive()) return;
+
+        var was = model.Typed;
+
+        if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) model.Navigate(-1);
+        else if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) model.Navigate(1);
+        else if (ImGui.IsKeyPressed(ImGuiKey.Tab)) model.Accept();
+        else return;
+
+        if (model.Typed == was) return;
+
+        _recalls++;
+        ImGui.SetKeyboardFocusHere(-1);
     }
 
     /// <summary>
@@ -195,15 +295,15 @@ public static class ConsoleTab
     /// <remarks>
     /// A console keeps every line a program wrote, which is more lines than anybody reads. What
     /// makes it a tool rather than a wall is being able to say "only the errors" or "only the ones
-    /// with that word in them", and both of those are <see cref="ConsoleView"/>'s already.
+    /// with that word in them".
     /// </remarks>
     private static void Filters()
     {
         var levels = new (string Name, Func<bool> Read, Action<bool> Write)[]
         {
-            ("info", () => View.ShowInfo, on => View.ShowInfo = on),
-            ("warnings", () => View.ShowWarnings, on => View.ShowWarnings = on),
-            ("errors", () => View.ShowErrors, on => View.ShowErrors = on),
+            ("info", () => _showInfo, on => _showInfo = on),
+            ("warnings", () => _showWarnings, on => _showWarnings = on),
+            ("errors", () => _showErrors, on => _showErrors = on),
         };
 
         var buttons = 0f;
@@ -213,14 +313,8 @@ public static class ConsoleTab
             buttons += EditorWidgets.PillWidth(name) + ImGui.GetStyle().ItemSpacing.X;
         }
 
-        var search = View.Search;
-
         ImGui.SetNextItemWidth(MathF.Max(80f, ImGui.GetContentRegionAvail().X - buttons));
-
-        if (ImGui.InputTextWithHint("##find", "Search the log", ref search, 128))
-        {
-            View.Search = search;
-        }
+        ImGui.InputTextWithHint("##find", "Search the log", ref _search, 128);
 
         foreach (var (name, read, write) in levels)
         {
@@ -233,30 +327,5 @@ public static class ConsoleTab
         }
 
         ImGui.Spacing();
-    }
-
-    /// <summary>
-    /// Puts an earlier command back in the box, the way a shell does.
-    /// </summary>
-    /// <remarks>
-    /// Read here rather than through ImGui's own history callback, which needs an unmanaged
-    /// function to rewrite the buffer it is editing. Asking for the focus again makes the box take
-    /// up the new text, because ImGui reads the string it was given when a box becomes active and
-    /// not while it is.
-    /// </remarks>
-    private static void Recall()
-    {
-        if (!ImGui.IsItemActive()) return;
-
-        var was = _typed;
-
-        if (ImGui.IsKeyPressed(ImGuiKey.UpArrow)) _typed = View.Back(_typed);
-        else if (ImGui.IsKeyPressed(ImGuiKey.DownArrow)) _typed = View.Forward(_typed);
-        else return;
-
-        if (_typed == was) return;
-
-        _recalls++;
-        ImGui.SetKeyboardFocusHere(-1);
     }
 }

@@ -39,15 +39,18 @@ The feature test draws its admin panel, its overlay and its console that way, in
 `games/FeatureTest/Behaviors/Interface.cs`. It needs a bridge that draws, the package's or one built with
 `build/build-native.sh --render`, and `Config.Gui` asked for.
 
-**A console is one call.** `ImGuiConsole.Draw` between `Begin` and `End` gives a game the editor's
-console, opened and closed by the key under Escape along the top of the window. It shows the log,
-Bevy's lines and the program's, filtered by level and searched, over a line that runs any
-`[Command]` the game or the engine declares, with the arrows walking back through what was typed and
-the tab key completing a name. It draws nothing while it is closed, so a game calls it every frame.
+**A console is one call.** `Debug.Draw` between `Begin` and `End` gives a game the Diagnostics
+module's console, opened and closed by F5 along the top of the window, and its settings panel,
+opened and closed by F4 in the middle. The console shows the log, Bevy's lines and the program's,
+each in its level's color and a line written again in a row once with its count, over a line that
+runs any `[Command]` the game or the engine declares or reads and sets a setting, with the arrows
+walking back through what was typed and Tab taking a name from the candidates its start leaves.
+The panel pages through the settings, the keys' among them. Each draws nothing while it is closed,
+so a game calls it every frame.
 
 ```csharp
 ImGuiRuntime.Begin(ctx);
-ImGuiConsole.Draw(ctx);
+Debug.Draw(ctx);
 ImGuiRuntime.End();
 ```
 

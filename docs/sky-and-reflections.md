@@ -234,9 +234,8 @@ clock.Advance(delta / 60f);                        // an hour a minute, every fr
 The clock, the weather below and the looks by the sun's height are the Sky module's, a library both
 engines share, checked out under `modules/Sky` and named in the namespace `Sky`, which the package
 carries beside the engine, so both engines light from the same astronomy while each draws its own
-sky. Its `Atmosphere`, the air as data, shares its name with this engine's `Atmosphere` component,
-which wins inside the engine's own namespace, so a file with both `using Bevy;` and `using Sky;`
-names the one it means in full, `Bevy.Atmosphere` or `Sky.Atmosphere`.
+sky. Its `Atmosphere` is the air as data, and the engine's `PlanetAtmosphere` marks the planet
+whose air Bevy scatters a sky through.
 
 `SkyClock` works out where the sun, the moon and the stars stand at an hour of a day of the year for
 a latitude, by the usual spherical astronomy, with north along negative Z and east along positive X.

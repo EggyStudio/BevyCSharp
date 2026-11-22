@@ -23,55 +23,53 @@ dotnet run --project games/FeatureTest -- --offscreen --frames 120
 ```
 
 The feature test opens a window by default on a hub with a signpost to each zone of its map, and a
-lit cube turning in the middle. F4 opens its admin panel, a list steered by the arrows or a pad,
-with pages for the graphics, the audio, the weather, the controls, the debug draws, teleports to the
-zones, things to spawn and the time, each setting kept in the player's folder for the next run. A
-day passes over the map, an hour a minute unless the Time page sets another speed, the hour or the
-latitude, the sun and a full moon carried across Bevy's atmosphere as two directional lights whose
-strength and color follow the hour, the scene lit from the sky as it changes and the stars out at
-night, the camera held at Bevy's exposure of EV 9.7 by day, at a moonlit ground's ISO 3200, 1/15 s
-and f/1.4 from 18:45 to 5:30, and at a lamp-lit street's ISO 3200, 1/60 s and f/2.8 in the Bistro's
-streets at night, and `./bcs command day.hour 22` sets the hour from a terminal.
-The engine's weather runs
-over it where meshlets do not, clouds, fog, rain, snow and thunder from the kind of weather its page
-sets, or from a forecast by the day's clock, as finely as the page's quality asks or not at all,
-and `./bcs command sky.weather Storm now` sets it from
-a terminal. F3
+lit cube turning in the middle. F4 opens the engine's settings panel, whose Feature test row opens
+the game's admin panel, a list steered by the arrows or a pad, which the pad's start button opens
+too, with pages for the graphics, the audio, the weather, the controls, the debug draws, teleports
+to the zones, things to spawn and the time, each setting kept in the player's folder for the next
+run. A day passes over the map, an hour a minute unless the Time page sets another speed, the hour
+or the latitude, the sun and a full moon carried across Bevy's atmosphere as two directional lights
+whose strength and color follow the hour, the scene lit from the sky as it changes and the stars out
+at night, the camera held at Bevy's exposure of EV 9.7 by day, at a moonlit ground's ISO 3200, 1/15
+s and f/1.4 from 18:45 to 5:30, and at a lamp-lit street's ISO 3200, 1/60 s and f/2.8 in the
+Bistro's streets at night, and `./bcs command day.hour 22` sets the hour from a terminal. The
+engine's weather runs over it where meshlets do not, clouds, fog, rain, snow and thunder from the
+kind of weather its page sets, or from a forecast by the day's clock, as finely as the page's
+quality asks or not at all, and `./bcs command sky.weather Storm now` sets it from a terminal. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
-holds, and the key under Escape opens the console. The player is a capsule on a
-`CharacterController`, walked with WASD or a pad's stick, jumping with Space, sprinting with Shift
-and crouching with C, its view turned by the mouse while Tab locks the cursor. F3 held with F4 steps
-it through walking, creative mode, where a double tap of jump flies, and spectator mode, a free
-camera through everything, and F5 steps the view from its eyes, from behind and from in front.
-`./bcs command player` says where it is and how it moves, and `./bcs command mode creative` sets the
-mode. East of the hub the course tries it on ramps and stairs, a beam, a tunnel to crawl through,
-ice, a bounce pad, a pit, a moving platform, an elevator, a turning disc, a conveyor and gaps to
-jump, beside a playground of crates, a door on a hinge, a lift, a rope and a pressure plate, and a
-mound of terraces. West of the hub the render gallery holds spheres from a dielectric to a metal and
-from polished to rough, with a row under a clearcoat and a brushed row, on a wall that parts its
-court in two, and through an arch in that wall a Cornell box lit by a point light's shadow map, or
-by Solari's rays from the next start once the graphics page's ray-traced lighting is on, where the
-bridge and the GPU have them. North of the hub the light hall
-has a bay each for point lights in red, green and blue, a spot light through a cookie, a light the
-size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
-captured once, an irradiance volume made in code, clustered decals and emission for the bloom. South
-of the hub a meadow of the engine's grass, crossed cards on the leaves' material, and a ring of
-trees sway in one wind. In the scenes zone north-east of the hub the
-panel's Scenes page fetches a scene pack and loads it, Intel Sponza at the level's `info_scene` point
-with its main door open for the player to walk in, or the Amazon Lumberyard Bistro's exterior alone
-far from the level's rooms, the player carried into its street, lit at night by its own lamps,
-string lights and signs, its heaviest meshes drawn as meshlets where the graphics page's
-meshlets run from the next start, which its page switches off and on saying the frame time of each,
-the light hall's lamps then casting no shadows, since with meshlets each shadow view holds a few
-hundred megabytes of the graphics driver's memory, and `./bcs scenes fetch intel-sponza` fetches one
-from a terminal. The panel's effects page switches
-the tonemapper and turns on ambient occlusion, screen-space reflections, a depth of field focused on
-whatever the view rests on, motion blur, chromatic aberration, auto exposure, sharpening and a dusk
-sky drawn in code, and `./bcs command setting AmbientOcclusion true` changes a setting as the panel
-does. In spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at
-another. `build/drive-feature-test.sh` walks the player through each station through `bcs` and
-captures each zone, as the pack workflow does, without the weather there (`WEATHER_QUALITY=Off`),
-which its software device spent nearly a third of each frame on.
+holds, and F5 opens the console. The player is a capsule on a `CharacterController`, walked with
+WASD or a pad's stick, jumping with Space, sprinting with Shift and crouching with C, its view
+turned by the mouse while Tab locks the cursor. The admin panel's player page steps it through
+walking, creative mode, where a double tap of jump flies, and spectator mode, a free camera through
+everything, and V steps the view from its eyes, from behind and from in front. `./bcs command
+player` says where it is and how it moves, and `./bcs command mode creative` sets the mode. East of
+the hub the course tries it on ramps and stairs, a beam, a tunnel to crawl through, ice, a bounce
+pad, a pit, a moving platform, an elevator, a turning disc, a conveyor and gaps to jump, beside a
+playground of crates, a door on a hinge, a lift, a rope and a pressure plate, and a mound of
+terraces. West of the hub the render gallery holds spheres from a dielectric to a metal and from
+polished to rough, with a row under a clearcoat and a brushed row, on a wall that parts its court in
+two, and through an arch in that wall a Cornell box lit by a point light's shadow map, or by
+Solari's rays from the next start once the graphics page's ray-traced lighting is on, where the
+bridge and the GPU have them. North of the hub the light hall has a bay each for point lights in
+red, green and blue, a spot light through a cookie, a light the size of a panel with soft shadows, a
+light through slats into a fog volume, a reflection probe captured once, an irradiance volume made
+in code, clustered decals and emission for the bloom. South of the hub a meadow of the engine's
+grass, crossed cards on the leaves' material, and a ring of trees sway in one wind. In the scenes
+zone north-east of the hub the panel's Scenes page fetches a scene pack and loads it, Intel Sponza
+at the level's `info_scene` point with its main door open for the player to walk in, or the Amazon
+Lumberyard Bistro's exterior alone far from the level's rooms, the player carried into its street,
+lit at night by its own lamps, string lights and signs, its heaviest meshes drawn as meshlets where
+the graphics page's meshlets run from the next start, which its page switches off and on saying the
+frame time of each, the light hall's lamps then casting no shadows, since with meshlets each shadow
+view holds a few hundred megabytes of the graphics driver's memory, and `./bcs scenes fetch
+intel-sponza` fetches one from a terminal. The panel's effects page switches the tonemapper and
+turns on ambient occlusion, screen-space reflections, a depth of field focused on whatever the view
+rests on, motion blur, chromatic aberration, auto exposure, sharpening and a dusk sky drawn in code,
+and `./bcs command setting AmbientOcclusion true` changes a setting as the panel does. In spectator
+mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at another.
+`build/drive-feature-test.sh` walks the player through each station through `bcs` and captures each
+zone, as the pack workflow does, without the weather there (`WEATHER_QUALITY=Off`), which its
+software device spent nearly a third of each frame on.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

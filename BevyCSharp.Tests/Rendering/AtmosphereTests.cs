@@ -175,7 +175,7 @@ public sealed class AtmosphereTests
             var frame = ctx.Time.FrameCount;
             if (frame is not (3 or 6 or 9)) return;
 
-            var planet = Assert.Single(ctx.Ecs.EntitiesWith<Atmosphere>());
+            var planet = Assert.Single(ctx.Ecs.EntitiesWith<PlanetAtmosphere>());
             centers.Add(ctx.Ecs.GetOrDefault<GlobalTransform>(planet).Translation.Y);
 
             if (frame == 3)

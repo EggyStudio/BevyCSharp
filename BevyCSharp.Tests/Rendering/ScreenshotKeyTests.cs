@@ -1,12 +1,13 @@
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers the screenshot key, a press of F2 through the input writing a picture of the frame into
-/// the screenshots folder, the program still seeing the press, two pictures in one second given two
-/// names, and the key moved to another or turned off.
+/// Covers the screenshot key, F2 let go through the input writing a picture of the frame into the
+/// screenshots folder, the program still seeing the press, two pictures in one second given two
+/// names, and the key moved to another or turned off through its setting, <c>keys.screenshot</c>.
 /// </summary>
 /// <remarks>
 /// A headless run here draws nothing, so the picture is taken in an offscreen one, which draws the
@@ -23,7 +24,7 @@ public sealed class ScreenshotKeyTests : IDisposable
 
     public void Dispose()
     {
-        Capture.ScreenshotKey = Key.F2;
+        Debug.Keys.KeyOf(KeyAction.Screenshot).Reset();
         Capture.ScreenshotFolder = _folderBefore;
         _folder.Dispose();
     }
@@ -69,13 +70,13 @@ public sealed class ScreenshotKeyTests : IDisposable
     {
         Needs.Renderer();
 
-        Capture.ScreenshotKey = Key.F12;
+        Debug.Keys.KeyOf(KeyAction.Screenshot).TrySet("F12");
         Press(Key.F2, presses: 1);
         Assert.Empty(Directory.GetFiles(_folder.Path));
         Press(Key.F12, presses: 1);
         Assert.Single(Directory.GetFiles(_folder.Path, "*.png"));
 
-        Capture.ScreenshotKey = null;
+        Debug.Keys.KeyOf(KeyAction.Screenshot).TrySet(string.Empty);
         Press(Key.F12, presses: 1);
         Assert.Single(Directory.GetFiles(_folder.Path, "*.png"));
     }

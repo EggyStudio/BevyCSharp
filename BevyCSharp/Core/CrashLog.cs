@@ -276,8 +276,8 @@ public static unsafe class CrashLog
     }
 
     /// <summary>
-    /// The version of the package the library came in, as its assembly says it, which names the pack
-    /// run whose artifact holds the bridge's symbols for a crash's frames.
+    /// The version of the package the library came in, as its assembly says it, which names the
+    /// pack run whose artifact holds the bridge's symbols for a crash's frames.
     /// </summary>
     private static string Package() =>
         typeof(App).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "not known";
@@ -318,16 +318,43 @@ public static unsafe class CrashLog
                 return;
             }
 
-            try
-            {
-                if (_repeats > 0) _latest.WriteLine($"         said {_repeats} more times");
-                _repeats = 0;
-                _latest.WriteLine(Line(line));
-            }
-            catch (IOException)
-            {
-                // A disk that filled is no reason to stop the game that is logging.
-            }
+            Append(_latest, Line(line));
+        }
+    }
+
+    /// <summary>
+    /// Writes what a console command threw, its stack whole, to this run's log and not to the
+    /// console.
+    /// </summary>
+    /// <remarks>
+    /// The console shows the command's name and the exception's message, the part a player reads,
+    /// and the stack is for whoever reads the log the player sends, so it goes to the file alone,
+    /// indented under the answer that names it.
+    /// </remarks>
+    /// <param name="error">
+    /// The exception the module's registry caught, as its answer carries it.
+    /// </param>
+    internal static void Threw(Exception error)
+    {
+        lock (Gate)
+        {
+            if (_latest is null) return;
+            foreach (var line in error.ToString().Split('\n')) Append(_latest, $"         {line.TrimEnd('\r')}");
+        }
+    }
+
+    // Under the gate, the repeats of the line before said first, so they stay beside it.
+    private static void Append(StreamWriter latest, string text)
+    {
+        try
+        {
+            if (_repeats > 0) latest.WriteLine($"         said {_repeats} more times");
+            _repeats = 0;
+            latest.WriteLine(text);
+        }
+        catch (IOException)
+        {
+            // A disk that filled is no reason to stop the game that is logging.
         }
     }
 

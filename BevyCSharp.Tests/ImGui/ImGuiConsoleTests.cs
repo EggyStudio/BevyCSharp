@@ -6,23 +6,24 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The console a game draws with one call, opened by the key under Escape over the top of the
-/// window, running what is typed into it, and closed by the same key.
+/// The console a game draws with one call (<see cref="Debug.Draw"/>), the Diagnostics module's
+/// drawing of the process's console, opened by F5 over the top of the window, running what is typed
+/// into it, and closed by the same key.
 /// </summary>
 /// <remarks>
 /// Run offscreen with the interface asked for, the key pressed where a real one starts
 /// (<see cref="SyntheticInput.Tap"/>) and the command typed into the interface's own queue, as the
 /// editor's tests of a field type. In the engine collection, since it runs an app and the
-/// console's ring is the process's.
+/// console is the process's.
 /// </remarks>
 [Collection("engine")]
 public sealed class ImGuiConsoleTests : IDisposable
 {
-    public void Dispose()
-    {
-        ImGuiConsole.IsOpen = false;
-        ImGuiConsole.View.Search = string.Empty;
-    }
+    // The console's key put back to F5, since the editor's start unbinds it in the process the
+    // suite shares with it.
+    public ImGuiConsoleTests() => Debug.Keys.KeyOf(KeyAction.Console).Reset();
+
+    public void Dispose() => ConsoleLog.Model.Open = false;
 
     [SkippableFact]
     public void TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt()
@@ -44,7 +45,7 @@ public sealed class ImGuiConsoleTests : IDisposable
             {
                 var ctx = new BehaviorContext(world);
                 ImGuiRuntime.Begin(ctx);
-                ImGuiConsole.Draw(ctx);
+                Debug.Draw(ctx);
                 ImGuiRuntime.End();
             },
         };
@@ -53,16 +54,16 @@ public sealed class ImGuiConsoleTests : IDisposable
         // own color until it has.
         run.Wait(15)
             .Capture("before")
-            .Do("pressing the key", _ => SyntheticInput.Tap(Key.Backquote, "`"))
-            .Until("opening", _ => ImGuiConsole.IsOpen)
+            .Do("pressing the key", _ => SyntheticInput.Tap(Key.F5))
+            .Until("opening", _ => ConsoleLog.Model.Open)
             .Wait(3)
             .Capture("open")
             .Do("typing", _ => SyntheticInput.Key(ImGuiKey.E, "echo typed into the console"))
             .Wait(2)
             .Do("entering it", _ => SyntheticInput.Key(ImGuiKey.Enter))
             .Wait(3)
-            .Do("pressing the key again", _ => SyntheticInput.Tap(Key.Backquote, "`"))
-            .Until("closing", _ => !ImGuiConsole.IsOpen)
+            .Do("pressing the key again", _ => SyntheticInput.Tap(Key.F5))
+            .Until("closing", _ => !ConsoleLog.Model.Open)
             .Wait(3)
             .Capture("closed")
             .Go();
@@ -85,10 +86,10 @@ public sealed class ImGuiConsoleTests : IDisposable
     public void WithNoInterfaceRunningItDrawsNothing()
     {
         using var harness = new EngineHarness(frames: 2);
-        harness.OnContext(Stage.Update, ImGuiConsole.Draw);
+        harness.OnContext(Stage.Update, Debug.Draw);
         harness.Run();
 
-        Assert.False(ImGuiConsole.IsOpen);
+        Assert.False(ConsoleLog.Model.Open);
     }
 
     /// <summary>How many pixels differ between two pictures in a band of rows.</summary>

@@ -23,6 +23,15 @@
         <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
+    <!--
+      The Diagnostics module's drawing with Dear ImGui, the console and the settings panel the
+      engine draws in a program's ImGui frame, kept to this project as the other modules are kept
+      to theirs.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../../modules/Diagnostics/Diagnostics.ImGui/Diagnostics.ImGui.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+
 
     <!--
       The projects above this one that reach its internals, each under what it reaches, and each

@@ -1,90 +1,146 @@
+using Diagnostics;
+
 namespace Bevy;
 
 /// <summary>
-/// The engine's debug overlay, which F3 shows over every program, the engine, the frame, the camera
-/// and the world in a column on the left and the system, the GPU, the display and the renderer in
-/// one on the right.
+/// The engine's debug overlay, settings panel and keys, the Diagnostics module's models over the
+/// process's registry, which every program has, F1 hiding the program's interface, F2 taking a
+/// screenshot, F3 showing the overlay, F4 opening the settings panel and F5 the console.
 /// </summary>
 /// <remarks>
 /// <para>
+/// The keys are the module's actions (<see cref="Keys"/>), each a setting of the registry a player
+/// rebinds, <c>keys.overlay</c> and the rest, so <c>keys.overlay F6</c> typed into the console
+/// moves the overlay to F6. An action is taken as its key is let go where no other key went down
+/// while it was held, so a program's own chords on the keys stand and turn nothing over, and a key
+/// of one character is the field's while a field has the caret. Shift held with the overlay's key
+/// shows the profiler's pass timings under the overlay, or hides them.
+/// </para>
+/// <para>
 /// The overlay is the engine's own text in its own font, a line on a dark half-clear backing, with
-/// no window, header or border, drawn over the program's interface. It is no ImGui window and
-/// stands outside the hidden scope (<see cref="Ui.BeginHidden"/>), so F1, which hides a program's
-/// interface, leaves it, and a run with the interface off draws it as well.
+/// no window, header or border, drawn over the program's interface from the module's
+/// <see cref="Overlay"/>. It is no ImGui window and stands outside the hidden scope
+/// (<see cref="Ui.BeginHidden"/>), so F1, which hides a program's interface, leaves it, and a run
+/// with the interface off draws it as well. Its lines are the sections' the engine adds, the frame,
+/// the camera, the world, the system, the GPU, the display and the renderer, with the model's own
+/// line of the frame's rate at the head, asked again four times a second while it shows, the strip
+/// of frame times every frame, and a run that never shows it pays the keys' read and a frame's time
+/// kept a frame.
 /// </para>
 /// <para>
-/// F3 shows and hides it as the key is let go, where no other key was pressed while it was held,
-/// so a program's own chords on F3 stand and never open it, and nothing happens while a field of an
-/// ImGui window has the caret. Shift held with it shows the profiler's pass timings under the
-/// overlay, or hides them. Its lines are written again four times a second while it shows, the
-/// strip of frame times every frame, and a run that never shows it pays a key's read and a frame's
-/// time kept a frame.
+/// A program adds sections of its own with <see cref="OverlayModel.AddSection"/> on
+/// <see cref="Overlay"/>, a world generator's seed and its chunk, an enemy count, in any of its
+/// four places after the engine's. Bevy's own FPS overlay (<see cref="DevTools.FpsOverlay"/>),
+/// which the overlay's lines and strip say again at the same corner, is hidden while the overlay
+/// shows and given back after.
 /// </para>
 /// <para>
-/// A program adds sections of its own with <see cref="AddOverlaySection"/>, a world generator's
-/// seed and its chunk, an enemy count, drawn in the left column under the engine's in the order
-/// added. Bevy's own FPS overlay (<see cref="DevTools.FpsOverlay"/>), which the overlay's lines and
-/// strip say again at the same corner, is hidden while the overlay shows and given back after.
+/// The console (<see cref="ConsoleLog.Model"/>) and the panel (<see cref="Panel"/>) are drawn with
+/// Dear ImGui by the module's drawers, in <see cref="Draw"/>, which a program calls in its ImGui
+/// frame.
 /// </para>
 /// </remarks>
 public static partial class Debug
 {
-    /// <summary>Whether the overlay shows, which <see cref="OverlayKey"/> turns over, settable so a program shows it for a picture.</summary>
-    public static bool OverlayShown { get; set; }
+    // Made in this order, in this file, since the keys turn over the overlay and the panel and
+    // the drawers draw them.
 
-    /// <summary>The key that shows and hides the overlay, F3 unless set, or nothing for none.</summary>
-    /// <remarks>
-    /// Taken on its release, where no other key went down while it was held, so F3 held with
-    /// another key is the program's alone.
-    /// </remarks>
-    public static Key? OverlayKey { get; set; } = Key.F3;
+    /// <summary>The overlay's sections and the frames' times, which F3 shows.</summary>
+    public static OverlayModel Overlay { get; } = new();
 
     /// <summary>
-    /// Whether the profiler's pass timings show under the overlay, the slowest first, which Shift
-    /// with <see cref="OverlayKey"/> turns over, the overlay shown with them.
+    /// The settings panel, a page for each first word of the settings' names and a program's own
+    /// pages, which F4 opens.
     /// </summary>
-    /// <remarks>
-    /// The passes are those <see cref="Render.Timings"/> measures, so they need
-    /// <see cref="Config.GpuTimings"/> asked for when the app is made, and the overlay says so where
-    /// it was not.
-    /// </remarks>
-    public static bool ProfilerShown { get; set; }
+    public static PanelModel Panel { get; } = MadePanel();
 
     /// <summary>
-    /// Adds a section of a program's own to the overlay's left column, under the engine's lines and
-    /// any section added before, in place of one of the same name.
+    /// The five keys, each a setting of the registry a player rebinds, and what they turn over, the
+    /// overlay, the panel, the console (<see cref="ConsoleLog.Model"/>), the interface the hidden
+    /// scope holds (<see cref="Ui.Hidden"/>) and a screenshot (<see cref="Capture.Screenshot"/>).
     /// </summary>
-    /// <param name="name">The section's heading, which it is taken away by.</param>
-    /// <param name="lines">What it says, asked four times a second while the overlay shows, from the engine's tick.</param>
     /// <remarks>
-    /// A section whose lines throw says why in a line of its own rather than stopping the overlay.
-    /// The sections last while the process runs, across apps, as the keys do.
+    /// Each app takes keys of its own as it is built, bound as the last app's were, so a key a
+    /// player rebinds stays rebound and a key held as the last app ended, which that app never saw
+    /// let go, makes no later key a chord.
+    /// </remarks>
+    public static DiagnosticKeys Keys { get; private set; } = MadeKeys(null);
+
+    private static readonly ImGuiConsole DrawnConsole = new(ConsoleLog.Model);
+    private static readonly ImGuiPanel DrawnPanel = new(Panel);
+
+    // What the panel moves or runs is written to the console as a typed line's answer is, so the
+    // run's log holds what a player changed, and the host follows it as it follows a typed line.
+    private static PanelModel MadePanel()
+    {
+        var panel = new PanelModel(Registry.Process);
+        panel.Answered += (name, answer) =>
+        {
+            if (answer.Text.Length > 0) ConsoleLog.Write(answer.Done ? ConsoleLevel.Info : ConsoleLevel.Error, answer.Text);
+            ConsoleHost.Ran(name, answer);
+        };
+        return panel;
+    }
+
+    /// <summary>The keys made again for an app being built, as <see cref="Keys"/> says.</summary>
+    internal static void FreshKeys()
+    {
+        var last = Keys;
+        // The last keys go first, since the registry takes no name it holds.
+        last.Dispose();
+        Keys = MadeKeys(last);
+    }
+
+    private static DiagnosticKeys MadeKeys(DiagnosticKeys? last)
+    {
+        var keys = new DiagnosticKeys(Registry.Process) { Overlay = Overlay, Panel = Panel, Console = ConsoleLog.Model };
+        keys.ScreenshotAsked += Screenshot;
+        if (last is not null)
+            foreach (var action in Enum.GetValues<KeyAction>()) keys.KeyOf(action).TrySet(last.KeyOf(action).Value);
+        return keys;
+    }
+
+    /// <summary>
+    /// Draws the console and the settings panel while each is open, with Dear ImGui, the world
+    /// lent to a line the player enters and an action the panel runs.
+    /// </summary>
+    /// <param name="ctx">The frame's context, whose world a command is lent.</param>
+    /// <remarks>
+    /// Called between <see cref="ImGuiRuntime.Begin"/> and <see cref="ImGuiRuntime.End"/>, and
+    /// does nothing where the interface is not running, as in a build without it or a run that did
+    /// not ask for it (<see cref="Config.Gui"/>). A command whose answer waits on the GPU is
+    /// answered into the console in a later frame.
     /// </remarks>
     /// <example>
     /// <code>
-    /// Debug.AddOverlaySection("World", () => [$"seed {seed}", $"chunk {chunk.X} {chunk.Z}"]);
+    /// ImGuiRuntime.Begin(ctx);
+    /// DrawTheGamesOwnWindows();
+    /// Debug.Draw(ctx);
+    /// ImGuiRuntime.End();
     /// </code>
     /// </example>
-    public static void AddOverlaySection(string name, Func<IEnumerable<string>> lines)
+    public static void Draw(BehaviorContext ctx)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentNullException.ThrowIfNull(lines);
+        ArgumentNullException.ThrowIfNull(ctx);
+        if (!ImGuiRuntime.IsRunning) return;
 
-        lock (Sections)
+        ConsoleHost.AnswerLater(ctx.World);
+
+        // The engine's assemblies loaded, so every command they declare is in the registry the
+        // console completes and runs from.
+        _ = ConsoleHost.Commands;
+
+        var window = ImGuiRuntime.Size;
+        using (ConsoleHost.Lend(ctx.World))
         {
-            var at = Sections.FindIndex(section => section.Name == name);
-            if (at >= 0) Sections[at] = (name, lines);
-            else Sections.Add((name, lines));
+            DrawnConsole.Draw(window);
+            DrawnPanel.Draw(window);
         }
     }
 
-    /// <summary>Takes a section of the overlay away by its name.</summary>
-    /// <param name="name">The heading it was added under.</param>
-    /// <returns>Whether there was one of that name.</returns>
-    public static bool RemoveOverlaySection(string name)
+    /// <summary>Takes a screenshot as the screenshot's key asks, in a run that draws.</summary>
+    private static void Screenshot()
     {
-        lock (Sections) return Sections.RemoveAll(section => section.Name == name) > 0;
+        if (App.HasRenderer && _keysWorld is { } world && !world.Resource<Config>().Headless) Capture.Screenshot();
     }
-
-    private static readonly List<(string Name, Func<IEnumerable<string>> Lines)> Sections = [];
 }

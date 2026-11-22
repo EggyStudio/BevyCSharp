@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bevy;
+using Diagnostics;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -32,14 +33,16 @@ public partial struct Held
     public static void Add(BehaviorContext ctx)
     {
         var world = ctx.World;
-        Debug.AddOverlaySection(Section, () => Lines(world));
+        Debug.Overlay.AddSection(Section, OverlayPlace.Left, () => ["", Section, .. Lines(world)]);
     }
 
     /// <summary>Takes it away as the app ends.</summary>
     [OnCleanup]
-    public static void Remove(BehaviorContext ctx) => Debug.RemoveOverlaySection(Section);
+    public static void Remove(BehaviorContext ctx) => Debug.Overlay.RemoveSection(Section);
 
-    /// <summary>The memory command's answer, its names and numbers a few to a line, bytes in megabytes.</summary>
+    /// <summary>
+    /// The memory command's answer, its names and numbers a few to a line, bytes in megabytes.
+    /// </summary>
     internal static string[] Lines(World world)
     {
         string answer;

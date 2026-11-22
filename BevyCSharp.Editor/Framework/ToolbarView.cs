@@ -8,7 +8,7 @@ namespace BevyCSharp.Editor.Framework;
 /// The groups of buttons that float in the scene's corners.
 /// </summary>
 /// <remarks>
-/// What each group holds is <see cref="EditorToolbar"/>'s to say, the way <see cref="ConsoleView"/>
+/// What each group holds is <see cref="EditorToolbar"/>'s to say, the way <see cref="ConsoleTab"/>
 /// draws what <see cref="ConsoleLog"/> holds. This places the groups and draws them.
 /// </remarks>
 public static class ToolbarView
@@ -64,13 +64,19 @@ public static class ToolbarView
         ? new Vector2(EditorShell.Scene.X, EditorShell.SceneTop)
         : new Vector2(EditorSurface.Gutter, EditorShell.SceneTop + EditorSurface.Gutter);
 
-    /// <summary>Which line the top right group is on, which what hangs under it is placed by.</summary>
+    /// <summary>
+    /// Which line the top right group is on, which what hangs under it is placed by.
+    /// </summary>
     internal static int RightRow { get; private set; }
 
-    /// <summary>How wide each group came to last frame, which decides whether they share a line.</summary>
+    /// <summary>
+    /// How wide each group came to last frame, which decides whether they share a line.
+    /// </summary>
     private static readonly Dictionary<ToolbarSlot, float> Widths = [];
 
-    /// <summary>How tall each group came to last frame, which a group placed by its middle needs.</summary>
+    /// <summary>
+    /// How tall each group came to last frame, which a group placed by its middle needs.
+    /// </summary>
     private static readonly Dictionary<ToolbarSlot, float> Heights = [];
 
     /// <summary>
@@ -105,13 +111,12 @@ public static class ToolbarView
         return (1, 2);
     }
 
-    /// <summary>One corner's worth of buttons, in a row.</summary>
-    /// <param name="ctx">This frame.</param>
-    /// <param name="slot">Which corner.</param>
-    /// <param name="corner">Which corner of the scene it hangs from, as a fraction.</param>
-    /// <param name="pivot">Which corner of the group meets it.</param>
-    /// <param name="down">Whether the buttons stack downwards rather than running across.</param>
-    /// <param name="row">Which line of groups down from the top it is on, where they do not all fit on one.</param>
+    /// <summary>One corner's worth of buttons, in a row.</summary> <param name="ctx">This
+    /// frame.</param> <param name="slot">Which corner.</param> <param name="corner">Which corner of
+    /// the scene it hangs from, as a fraction.</param> <param name="pivot">Which corner of the
+    /// group meets it.</param> <param name="down">Whether the buttons stack downwards rather than
+    /// running across.</param> <param name="row">Which line of groups down from the top it is on,
+    /// where they do not all fit on one.</param>
     internal static void Group(
         BehaviorContext ctx,
         ToolbarSlot slot,

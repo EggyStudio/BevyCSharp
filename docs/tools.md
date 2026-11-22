@@ -158,7 +158,9 @@ default can be left off, the last ones first. A single string parameter takes th
 typed after it. Returning a string writes that line back, and anything a person can get wrong is
 answered with a sentence and a code, as `BAD_ARGUMENT` for a word that cannot be read, rather than
 an exception. An enum's member is read by its name alone, so a number that names no member is
-refused rather than handed to code that was never written for it.
+refused rather than handed to code that was never written for it. A command that throws answers
+`FAILED` with its name and the exception's message, and the exception's stack goes to the run's log,
+`logs/latest.log`, and never to the console.
 
 `ConsoleHost.Run(line)` is the whole of the runtime surface, an answer with its text and its code
 where it failed, so a game gets a console by drawing one. The editor's is the tab along the bottom,
@@ -301,6 +303,16 @@ same script host that reloads behavior scripts.
 
 ## Debug keys
 
+Five keys are the Diagnostics module's actions in every program, F1 hiding the interface, F2 taking
+a screenshot, F3 showing the debug overlay, F4 opening the settings panel and F5 the console
+(`Debug.Keys`). Each is a setting of the registry a player rebinds, `keys.hide_interface`,
+`keys.screenshot`, `keys.overlay`, `keys.panel` and `keys.console`, so `keys.overlay F6` typed into
+the console moves the overlay to F6 and `keys.overlay ""` unbinds it, for a game that uses the key
+for something of its own. An action is taken as its key is let go where no other key went down
+while it was held, so a program's own chord on one of them is the program's, and a key of one
+character is the field's while a field has the caret. The press is left for the program to read as
+well.
+
 F1 hides the program's interface as Minecraft hides its HUD, what is drawn inside the hidden scope
 and nothing outside it, so a pause menu or an inventory drawn outside the scope stays whatever F1
 says, and the debug overlay stays too. `Ui.BeginHidden()` opens the scope and answers whether it
@@ -326,8 +338,8 @@ if (Ui.BeginHidden())                                 // an ImGui window each fr
 Ui.EndHidden();
 ```
 
-`Ui.Hidden` says whether the scope is hidden and sets it, and `Ui.HiddenKey` moves the key, or with
-`null` turns it off.
+`Ui.Hidden` says whether the scope is hidden and sets it, and the key turns it over from where a
+program left it.
 
 F3 shows the engine's debug overlay as the newest Minecraft's shows, the engine's own text in two
 columns, a line on a dark half-clear backing, with no window, over the program's interface and
@@ -336,10 +348,8 @@ the frames a second and a frame's time, the camera's place, facing and field of 
 entities, meshes, materials, images and sounds. The right says .NET and the architecture, the OS
 and its kernel, the CPU and its cores, the memory in use of what is installed and the managed heap,
 the GPU, its driver and its memory, the display, the meshes in view and their triangles, the
-lights by kind and those casting shadow maps, and the lighting. It shows and hides as F3 is let go
-where no other key was pressed while it was held, so F3 held with another key, as the feature
-test's F3 and F4, is the program's. `Debug.OverlayShown` shows it from code and `Debug.OverlayKey`
-moves the key, or with `null` turns it off.
+lights by kind and those casting shadow maps, and the lighting. Its lines are the sections of the
+module's overlay model (`Debug.Overlay`), and `Debug.Overlay.Shown` shows it from code.
 
 Under the first two lines a strip draws the last 240 frames' times as the RivaTuner overlay draws
 its graph, a bar a frame with the newest at the right, green to 60 frames a second, yellow to 30
@@ -351,18 +361,17 @@ hidden, so it opens on the last four seconds.
 
 Shift+F3 shows the overlay with the profiler's pass timings under its right column, the slowest
 first by the GPU's time, and hides them again, as Minecraft's opens its profiler's chart, and F3
-alone hides both. `Debug.ProfilerShown` shows them from code.
+alone hides both. `Debug.Overlay.Detailed` shows them from code.
 
-A program adds sections of its own, its world's seed, the chunk it stands in or its enemies,
-drawn in the left column under the engine's lines in the order added, each after a gap and its
-name. The lines are asked four times a second while the overlay shows, and a section whose lines
-throw says why in their place:
+A program adds sections of its own, its world's seed, the chunk it stands in or its enemies, in
+one of the four places, the head, beside it, the left column or the right, under the engine's lines
+in the order added. The lines are asked four times a second while the overlay shows, and a section
+whose lines throw says why in their place:
 
 ```csharp
 var seed = 42;
-var enemies = 0;
-Debug.AddOverlaySection("World", () => [$"seed {seed}", $"enemies {enemies}"]);
-Debug.RemoveOverlaySection("World");                  // as the level ends
+Debug.Overlay.AddSection("World", OverlayPlace.Left, () => ["", "World", $"seed {seed}"]);
+Debug.Overlay.RemoveSection("World");                 // as the level ends
 ```
 
 A section added again under its name replaces the one there, and the sections last while the
@@ -375,11 +384,21 @@ while the engine's overlay shows and given back as the program had it.
 F2 saves a picture of the frame being drawn into a folder named `screenshots` beside the program,
 made on first use, named by the local time as Minecraft names its own, `2026-10-21_03.45.12.png`,
 the second taken in one second `2026-10-21_03.45.12_2.png` and the third `_3`, and the log says
-where it went. The press is left for the program to read as well. `Capture.ScreenshotKey` moves it to
-another key, or with `null` turns it off, for a game that uses F2 for something of its own,
-`Capture.ScreenshotFolder` puts the pictures elsewhere, and `Capture.Screenshot()` takes one from
-code. A run that draws nothing, headless, takes none. The engine holds no other key of its own on
-F2.
+where it went. `Capture.ScreenshotFolder` puts the pictures elsewhere, and `Capture.Screenshot()`
+takes one from code. A run that draws nothing, headless, takes none.
+
+## The settings panel
+
+F4 opens the module's settings panel (`Debug.Panel`) in the middle of the window, a page for each
+first word of the settings' names, the keys' page among them, and a program's own pages and actions
+on its first page, steered by the arrows, Enter and Escape or a pad. `Debug.Draw` draws it with the
+console between `ImGuiRuntime.Begin` and `ImGuiRuntime.End`. What the panel moves or runs answers
+into the console as a typed line does, so the run's log holds what a player changed. The feature
+test adds a row that opens its admin panel:
+
+```csharp
+Debug.Panel.Root.AddAction("Feature test", "feature.panel");
+```
 
 ## Animated captures
 

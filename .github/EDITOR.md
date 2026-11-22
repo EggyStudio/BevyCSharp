@@ -49,8 +49,8 @@ What they draw with is five more, which nothing else in the editor duplicates:
 | `RoundedRows` | rounded highlights behind the rows ImGui draws square |
 
 And the panels themselves are `WorldPanel`, `DetailsPanel` with `ComponentFields`, `FieldNumbers`
-and `FieldPickers`, `ConsoleTab` over `ConsoleView`, `AssetsTab` over `EditorAssets`, `SettingsTab`
-over `EditorSettings`, and `StyleTab` over `EditorTheme`.
+and `FieldPickers`, `ConsoleTab` over `ConsoleLog.Model`, `AssetsTab` over `EditorAssets`,
+`SettingsTab` over `EditorSettings`, and `StyleTab` over `EditorTheme`.
 
 A part reads the shell's numbers and draws; nothing reads back. Adding a panel is a class with a
 draw method and one line in `EditorBoot`, and a tab is a name and that method.
@@ -536,10 +536,12 @@ part written does not wipe its neighbors. A vector is left alone, because it is 
 drawer already draws as one thing.
 
 **The console reads and writes.** The tab along the bottom is where a log is read, and the key under
-Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` decides what it shows,
-which is a search, a switch per level, and what was typed before, reached with the arrows.
-`ConsoleView` is the library's, and `ImGuiConsole` draws it over a game in one call, so a game's
-console and the editor's are the same console.
+Escape raises or puts away that tab. `ConsoleTab` draws the process's console, the Diagnostics
+module's `ConsoleModel`, with a search and a switch per level of its own, and the model keeps what
+was typed before, reached with the arrows, and the candidates Tab takes. A game draws the same
+console with the module's drawing in one call (`Debug.Draw`), so a game's console and the
+editor's are the same console. F1, which opens the editor's menu, and F5, which plays the scene,
+are the editor's, so it unbinds the module's keys for hiding the interface and for the console.
 Everything either of them shows lives outside both. `ConsoleLog` tees the output and error streams
 into the process's console, the Diagnostics module's `ConsoleModel`, which keeps the leveled lines,
 and the module's `Registry.Process` holds what can be typed.

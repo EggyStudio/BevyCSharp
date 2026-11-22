@@ -1,6 +1,8 @@
 namespace Bevy;
 
-/// <summary>The interface's part in the app's frame, which <c>EnginePlugin</c> adds to every app.</summary>
+/// <summary>
+/// The interface's part in the app's frame, which <c>EnginePlugin</c> adds to every app.
+/// </summary>
 internal sealed class UiWork : IPlugin
 {
     public void Build(App app)
@@ -8,7 +10,7 @@ internal sealed class UiWork : IPlugin
         // F1's hidden scope, in a run that draws and has a window to show it.
         app.AreasWork.Add(2900, world =>
         {
-            if (App.HasRenderer && !world.Resource<Config>().Headless) Ui.TickHidden(world.Resource<EcsWorld>(), world.Resource<Input>());
+            if (App.HasRenderer && !world.Resource<Config>().Headless) Ui.TickHidden(world.Resource<EcsWorld>());
         });
     }
 }

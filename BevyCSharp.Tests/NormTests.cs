@@ -16,10 +16,10 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A rule that code written before it does not keep has its list, <c>build/norm/&lt;number&gt;.txt</c>,
-/// a place a line. A test fails for a place that breaks the rule and is not on the list, and for a
-/// line whose place keeps the rule now or is gone, so a list only gets shorter and a place comes off
-/// it in the batch that mends it.
+/// A rule that code written before it does not keep has its list,
+/// <c>build/norm/&lt;number&gt;.txt</c>, a place a line. A test fails for a place that breaks the
+/// rule and is not on the list, and for a line whose place keeps the rule now or is gone, so a list
+/// only gets shorter and a place comes off it in the batch that mends it.
 /// </para>
 /// <para>
 /// The sources are the files git knows, tracked or new and not ignored, so what the build writes
@@ -31,7 +31,9 @@ public sealed partial class NormTests
 {
     private static readonly string Root = FindRoot();
 
-    /// <summary>The last commit before the one that added these tests, which N 7.2 reads from.</summary>
+    /// <summary>
+    /// The last commit before the one that added these tests, which N 7.2 reads from.
+    /// </summary>
     private const string MessagesFrom = "3e694f067b5a74185620b9a09bfe122df6b0072f";
 
     /// <summary>The library's namespaces, as Annex B gives them.</summary>
@@ -205,8 +207,8 @@ public sealed partial class NormTests
             .Select(match => match.Groups[1].Value)
             .ToHashSet(StringComparer.Ordinal);
 
-        // What the packages carry, the library's projects, its generator and its code fixes, and the
-        // bridge's crates, those of a platform's own table among them.
+        // What the packages carry, the library's projects, its generator and its code fixes, and
+        // the bridge's crates, those of a platform's own table among them.
         var referenced = Sources("BevyCSharp/", ".csproj").Concat(["BevyCSharp.Generator/BevyCSharp.Generator.csproj", "BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj"])
             .SelectMany(project => Regex.Matches(Text(project), @"<PackageReference Include=""([^""]+)""").Select(match => match.Groups[1].Value))
             .Concat(Crates("native/bevy_csharp/Cargo.toml"))
@@ -217,7 +219,9 @@ public sealed partial class NormTests
         Hold("2.8", found, "a package the project files and BUILDING.md's list of packages disagree on");
     }
 
-    /// <summary>The crates a manifest's tables of dependencies name, a platform's own among them.</summary>
+    /// <summary>
+    /// The crates a manifest's tables of dependencies name, a platform's own among them.
+    /// </summary>
     private static IEnumerable<string> Crates(string manifest)
     {
         var inDependencies = false;
@@ -359,16 +363,16 @@ public sealed partial class NormTests
         Skip.If(package is null, "N 6.4 has no package to open; BCS_PACKAGE names one, and the pack job sets it");
 
         // Every project's assembly with its documentation in the lib folder, the modules' beside
-        // them, since none of them is a package of its own, and the generator, its code fixes and the
-        // props and targets a game's build takes.
-        var wanted = EngineAssemblies.Names.Concat(["Levels", "Sky", "Vegetation", "3DEngine.Diagnostics"])
+        // them, since none of them is a package of its own, and the generator, its code fixes and
+        // the props and targets a game's build takes.
+        var wanted = EngineAssemblies.Names.Concat(["Levels", "Sky", "Vegetation", "3DEngine.Diagnostics", "3DEngine.Diagnostics.ImGui"])
             .SelectMany(name => new[] { $"lib/net10.0/{name}.dll", $"lib/net10.0/{name}.xml" })
             .Concat(["README.md", "analyzers/dotnet/cs/BevyCSharp.Generator.dll", "analyzers/dotnet/cs/BevyCSharp.CodeFixes.dll", "build/BevyCSharp.props", "build/BevyCSharp.targets"])
             .ToList();
 
         // The natives staged for the pack, a system a folder, each in its runtime's folder. The
-        // folders named as a runtime are read alone, and the files in them a level deep, since a file
-        // beside them, as the release notes a pack writes into build/artifacts, is no library.
+        // folders named as a runtime are read alone, and the files in them a level deep, since a
+        // file beside them, as the release notes a pack writes into build/artifacts, is no library.
         var staged = Path.Combine(Root, "build", "artifacts");
         var runtime = new Regex(@"^(?:linux|linux-musl|win|osx)-(?:x64|arm64)$");
         if (Directory.Exists(staged))
@@ -459,14 +463,18 @@ public sealed partial class NormTests
     /// </summary>
     internal static bool EnginePackage(string path) => char.IsAsciiDigit(Path.GetFileName(path)["BevyCSharp.".Length]);
 
-    /// <summary>Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.</summary>
+    /// <summary>
+    /// Every crate of native/Cargo.lock, the bridge's own apart, as its name and version.
+    /// </summary>
     private static List<string> LockedCrates() =>
         Regex.Matches(Text("native/Cargo.lock"), @"^\[\[package\]\]\nname = ""([^""]+)""\nversion = ""([^""]+)""", RegexOptions.Multiline)
             .Where(match => match.Groups[1].Value != "bevy_csharp")
             .Select(match => $"{match.Groups[1].Value} {match.Groups[2].Value}")
             .ToList();
 
-    /// <summary>Fails for each crate the notices have no row for, by its name and version.</summary>
+    /// <summary>
+    /// Fails for each crate the notices have no row for, by its name and version.
+    /// </summary>
     private static void NamesEvery(string notices, List<string> crates, string what)
     {
         var unnamed = crates
@@ -481,9 +489,9 @@ public sealed partial class NormTests
         var log = Git("log", "--format=%H%x1f%s%x1f%b%x1e", $"{MessagesFrom}..HEAD");
         Skip.If(log is null && Git("rev-parse", "HEAD") is null, "N 7.2 reads the commits with git, which this checkout does not have");
 
-        // A checkout of the last commits alone, as a runner makes by default, holds no commit as old
-        // as the rule's first, and is skipped but in the build workflow's test job, whose checkout
-        // holds the whole history for this rule.
+        // A checkout of the last commits alone, as a runner makes by default, holds no commit as
+        // old as the rule's first, and is skipped but in the build workflow's test job, whose
+        // checkout holds the whole history for this rule.
         Skip.If(log is null && Environment.GetEnvironmentVariable("GITHUB_JOB") != "test",
             $"N 7.2 reads the commits since {MessagesFrom[..8]}, which this checkout does not hold, as the build workflow's test job's does");
         Assert.True(log is not null, $"N 7.2 reads the commits since {MessagesFrom[..8]}, which the test job's checkout of the whole history holds, and this one does not");
@@ -497,9 +505,9 @@ public sealed partial class NormTests
             var sentence = body.Length > 0 && !body.Contains('\n') && body.EndsWith('.') && !Regex.IsMatch(body[..^1], @"[.!?] [A-Z]");
             if (subject == "‎ ‎ ‎" && sentence) continue;
 
-            // A setting of the version, a commit of build/version.txt alone, whatever it says, since
-            // it is made by hand with the version as its message. Any other commit off the form is
-            // on the list.
+            // A setting of the version, a commit of build/version.txt alone, whatever it says,
+            // since it is made by hand with the version as its message. Any other commit off the
+            // form is on the list.
             if (Git("show", "--name-only", "--format=", parts[0])?.Trim() == "build/version.txt") continue;
             found.Add(hash);
         }
@@ -597,7 +605,9 @@ public sealed partial class NormTests
         Assert.True(unlisted.Count == 0 && mended.Count == 0, message);
     }
 
-    /// <summary>A rule's list, a place a line, the place before a tab where a reason follows.</summary>
+    /// <summary>
+    /// A rule's list, a place a line, the place before a tab where a reason follows.
+    /// </summary>
     private static HashSet<string> ReadList(string number)
     {
         var path = Path.Combine(Root, "build", "norm", number + ".txt");
@@ -608,7 +618,9 @@ public sealed partial class NormTests
             .ToHashSet(StringComparer.Ordinal);
     }
 
-    /// <summary>The places in a folder's sources that use any of the words, as "file word".</summary>
+    /// <summary>
+    /// The places in a folder's sources that use any of the words, as "file word".
+    /// </summary>
     private static IEnumerable<string> Uses(string folder, string[] words) =>
         Sources(folder, ".cs")
             .Where(file => !file.EndsWith("/NormTests.cs", StringComparison.Ordinal))
@@ -627,14 +639,18 @@ public sealed partial class NormTests
             .Select(parts => $"BevyCSharp/{parts[1]}")
             .Distinct(StringComparer.Ordinal);
 
-    /// <summary>The files under a folder with any of the endings, as paths from the checkout.</summary>
+    /// <summary>
+    /// The files under a folder with any of the endings, as paths from the checkout.
+    /// </summary>
     private static IEnumerable<string> Sources(string folder, params string[] endings) =>
         Files().Where(file => file.StartsWith(folder, StringComparison.Ordinal)
             && endings.Any(ending => file.EndsWith(ending, StringComparison.Ordinal)));
 
     private static string[]? _files;
 
-    /// <summary>Every file git knows, tracked or new and not ignored, or the folders' own walk without git.</summary>
+    /// <summary>
+    /// Every file git knows, tracked or new and not ignored, or the folders' own walk without git.
+    /// </summary>
     private static string[] Files() => _files ??=
         Git("ls-files", "--cached", "--others", "--exclude-standard") is { } listed
             ? listed.Split('\n', StringSplitOptions.RemoveEmptyEntries).Where(file => File.Exists(Full(file))).ToArray()
@@ -650,7 +666,9 @@ public sealed partial class NormTests
     // nothing on a file with other ends does not pass a rule it never read.
     private static string Text(string relative) => File.ReadAllText(Full(relative)).ReplaceLineEndings("\n");
 
-    /// <summary>What git answers, or nothing where git is not there or this is no checkout.</summary>
+    /// <summary>
+    /// What git answers, or nothing where git is not there or this is no checkout.
+    /// </summary>
     internal static string? Git(params string[] arguments)
     {
         try

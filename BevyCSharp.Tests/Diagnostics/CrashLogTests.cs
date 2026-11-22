@@ -37,7 +37,9 @@ public sealed class CrashLogTests : IDisposable
 
     private string Latest => Read(_folder.File("latest.log"));
 
-    /// <summary>A file of the run's, read whole while the log may still be open for writing.</summary>
+    /// <summary>
+    /// A file of the run's, read whole while the log may still be open for writing.
+    /// </summary>
     /// <remarks>
     /// The log is open for the whole run, and Windows lets a reader open a file another handle
     /// writes only where the reader shares writing as well, which <c>File.ReadAllText</c> does
@@ -92,11 +94,11 @@ public sealed class CrashLogTests : IDisposable
     /// library of that build.
     /// </summary>
     /// <remarks>
-    /// A pack's bridge carries no symbol table, so std's stack names none of its frames there, and the
-    /// namer reads the offsets and the build id alone, never std's stack. Stripping moves no code, so
-    /// the offsets the full library the tests run on writes are the ones its stripped copy writes. A
-    /// Windows library's symbols lie in a PDB, which the namer does not read, so there the frames keep
-    /// their offsets and the test is skipped.
+    /// A pack's bridge carries no symbol table, so std's stack names none of its frames there, and
+    /// the namer reads the offsets and the build id alone, never std's stack. Stripping moves no
+    /// code, so the offsets the full library the tests run on writes are the ones its stripped copy
+    /// writes. A Windows library's symbols lie in a PDB, which the namer does not read, so there
+    /// the frames keep their offsets and the test is skipped.
     /// </remarks>
     [SkippableFact]
     public void APanicsFramesAreNamedFromTheFullLibraryOfItsBuild()
@@ -198,4 +200,18 @@ public sealed class CrashLogTests : IDisposable
         Assert.Contains(ConsoleLog.All(), line => line is { Level: ConsoleLevel.Warning, Text: "a warning from C#" });
         Assert.Contains("WARN  a warning from C#", Latest);
     }
+
+    [Fact]
+    public void WhatACommandThrewIsInTheRunsLogWithItsStackAndInTheConsoleByItsMessage()
+    {
+        var answer = ConsoleHost.Submit("tests.throws");
+
+        Assert.Equal(Answer.Failed, answer.Code);
+        Assert.Contains(ConsoleLog.All(), line => line.Text == "tests.throws failed. thrown on purpose");
+        Assert.DoesNotContain(ConsoleLog.All(), line => line.Text.Contains(nameof(CrashLogTests), StringComparison.Ordinal));
+        Assert.Contains($"at Bevy.Tests.{nameof(CrashLogTests)}.{nameof(Throws)}()", Latest);
+    }
+
+    [Command("tests.throws", "Throws, for a test")]
+    internal static void Throws() => throw new InvalidOperationException("thrown on purpose");
 }

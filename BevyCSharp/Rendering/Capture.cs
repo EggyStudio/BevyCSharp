@@ -17,7 +17,10 @@ public readonly record struct Capture(int Id)
     /// <inheritdoc/>
     public override string ToString() => $"capture {Id}";
 
-    /// <summary>Whether a recording is being made, taking its pictures or waiting for its last ones to come back.</summary>
+    /// <summary>
+    /// Whether a recording is being made, taking its pictures or waiting for its last ones to come
+    /// back.
+    /// </summary>
     public static bool IsRecording => Recorder.IsRecording;
 
     /// <summary>
@@ -28,9 +31,12 @@ public readonly record struct Capture(int Id)
     /// Where the file goes, a GIF where it ends in <c>.gif</c> and an animated PNG where it ends in
     /// <c>.png</c>, relative to the folder the program runs in unless it is a full path.
     /// </param>
-    /// <param name="intervalMs">How often a picture is taken, in milliseconds of the app's clock.</param>
-    /// <param name="scale">How much smaller each picture is kept, above zero and up to one, which keeps it as drawn.</param>
-    /// <returns>A task finished with the file's path once it is written, or failed with why it was not.</returns>
+    /// <param name="intervalMs">How often a picture is taken, in milliseconds of the app's
+    /// clock.</param> <param name="scale">How much smaller each picture is kept, above zero and up
+    /// to one, which keeps it as drawn.</param>
+    /// <returns>
+    /// A task finished with the file's path once it is written, or failed with why it was not.
+    /// </returns>
     /// <remarks>
     /// <para>
     /// Each picture is of the frame being drawn when it falls due, read back off the GPU a frame
@@ -48,8 +54,9 @@ public readonly record struct Capture(int Id)
     /// given rather than until stopped.
     /// </para>
     /// </remarks>
-    /// <exception cref="ArgumentException">The path ends in neither <c>.gif</c> nor <c>.png</c>, or a measure is out of range.</exception>
-    /// <exception cref="InvalidOperationException">A recording is being made, or this build has no renderer to take pictures with.</exception>
+    /// <exception cref="ArgumentException">The path ends in neither <c>.gif</c> nor <c>.png</c>, or
+    /// a measure is out of range.</exception> <exception cref="InvalidOperationException">A
+    /// recording is being made, or this build has no renderer to take pictures with.</exception>
     public static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
@@ -61,24 +68,20 @@ public readonly record struct Capture(int Id)
     }
 
     /// <summary>
-    /// The key that saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>,
-    /// F2 unless set, or nothing for none.
+    /// Where a screenshot goes, a folder named <c>screenshots</c> beside the program unless set,
+    /// made on first use.
     /// </summary>
-    /// <remarks>
-    /// F2 saves a picture named by the time, so a player or a tester takes one without a tool, and
-    /// the log says where it went. It sits between F1, which hides the interface, and F3, which
-    /// shows the debug overlay, so the engine's own keys are together. The press is read and left
-    /// alone, so a program reading the key itself sees it too, and a program using it for something
-    /// else of its own moves this to another key or turns it off. A run that draws nothing,
-    /// headless, takes none.
-    /// </remarks>
-    public static Key? ScreenshotKey { get; set; } = Key.F2;
-
-    /// <summary>Where a screenshot goes, a folder named <c>screenshots</c> beside the program unless set, made on first use.</summary>
     public static string ScreenshotFolder { get; set; } = Path.Combine(AppContext.BaseDirectory, "screenshots");
 
-    /// <summary>Saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>, as the key does. Only valid inside a system.</summary>
-    /// <returns>The file's full path, where the picture is written a frame or two later, once it is back off the GPU.</returns>
+    /// <summary>
+    /// Saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>, as the
+    /// screenshot's key does, F2 unless a player rebinds <c>keys.screenshot</c>
+    /// (<c>Debug.Keys</c>). Only valid inside a system.
+    /// </summary>
+    /// <returns>
+    /// The file's full path, where the picture is written a frame or two later, once it is back off
+    /// the GPU.
+    /// </returns>
     /// <remarks>
     /// Named by the local time, <c>2026-10-21_03.45.12.png</c>, so the pictures sort in the order
     /// they were taken, then <c>2026-10-21_03.45.12_2.png</c> and <c>_3</c> for a second and a
@@ -105,7 +108,10 @@ public readonly record struct Capture(int Id)
 
     private static readonly HashSet<string> Given = new(StringComparer.Ordinal);
 
-    /// <summary>A screenshot's name in a folder for a moment, the moment's own or with the first count not taken.</summary>
+    /// <summary>
+    /// A screenshot's name in a folder for a moment, the moment's own or with the first count not
+    /// taken.
+    /// </summary>
     internal static string ScreenshotName(string folder, DateTime at, Func<string, bool> taken)
     {
         var stem = at.ToString("yyyy-MM-dd_HH.mm.ss", System.Globalization.CultureInfo.InvariantCulture);
@@ -114,7 +120,12 @@ public readonly record struct Capture(int Id)
         return path;
     }
 
-    /// <summary>Stops a recording, whose file is written once the pictures it asked for have come back.</summary>
-    /// <returns>The recording's task, finished with the file's path once it is written, or nothing where none was being made.</returns>
+    /// <summary>
+    /// Stops a recording, whose file is written once the pictures it asked for have come back.
+    /// </summary>
+    /// <returns>
+    /// The recording's task, finished with the file's path once it is written, or nothing where
+    /// none was being made.
+    /// </returns>
     public static Task<string>? StopRecording() => Recorder.Stop();
 }

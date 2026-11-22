@@ -3,6 +3,7 @@
 
 using Bevy;
 using Bevy.Reflected;
+using Diagnostics;
 
 namespace BevyCSharp.Examples.Pointers;
 
@@ -30,7 +31,7 @@ internal static class DebugPicking
             // Bevy's starts in its normal mode, the overlay without the noisy events, and its F3 is
             // the picking's alone, the engine's debug overlay given no key here.
             Picking.DebugMode = PickingDebugMode.Normal;
-            Debug.OverlayKey = null;
+            Debug.Keys.KeyOf(KeyAction.Overlay).TrySet(string.Empty);
 
             var text = Ui.SpawnText("Click Me to get a box\nDrag cubes to rotate\nPress F3 to cycle between picking debug levels",
                 new UiSettings { Absolute = true, Top = Length.Percent(12f), Left = Length.Percent(12f) });

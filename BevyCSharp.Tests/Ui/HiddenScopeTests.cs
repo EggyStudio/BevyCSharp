@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Diagnostics;
 using ImGuiNET;
 using Xunit;
 
@@ -11,19 +12,19 @@ namespace Bevy.Tests;
 /// were, and a node the program hid itself left hidden, all read from the frame's pixels.
 /// </summary>
 /// <remarks>
-/// The key is set to F1 before each test, since the editor's start turns it off in the process the
-/// suite shares with it, and the key, the state and the overlay are put back after.
+/// The key's setting is put back to F1 before each test, since the editor's start unbinds it in the
+/// process the suite shares with it, and the key, the state and the overlay are put back after.
 /// </remarks>
 [Collection("engine")]
 public sealed class HiddenScopeTests : IDisposable
 {
-    public HiddenScopeTests() => Ui.HiddenKey = Key.F1;
+    public HiddenScopeTests() => Debug.Keys.KeyOf(KeyAction.HideInterface).Reset();
 
     public void Dispose()
     {
         Ui.Hidden = false;
-        Ui.HiddenKey = Key.F1;
-        Debug.OverlayShown = false;
+        Debug.Keys.KeyOf(KeyAction.HideInterface).Reset();
+        Debug.Overlay.Shown = false;
     }
 
     [Fact]
@@ -35,8 +36,8 @@ public sealed class HiddenScopeTests : IDisposable
         Needs.Renderer();
 
         // Along the bottom, below where the overlay's lines reach, from the left a node made inside
-        // the scope, a node made inside it that the program hid itself, an ImGui window drawn inside
-        // it and one drawn outside it.
+        // the scope, a node made inside it that the program hid itself, an ImGui window drawn
+        // inside it and one drawn outside it.
         var run = new PictureRun
         {
             Width = 480,
@@ -46,7 +47,7 @@ public sealed class HiddenScopeTests : IDisposable
             {
                 ImGuiRuntime.Start();
                 PictureRun.Camera(ecs);
-                Debug.OverlayShown = true;
+                Debug.Overlay.Shown = true;
 
                 Ui.BeginHidden();
                 Ui.SpawnNode(Square(20f, (1f, 0f, 0f, 1f)));
@@ -95,7 +96,9 @@ public sealed class HiddenScopeTests : IDisposable
         }
     }
 
-    /// <summary>A square of 60 logical pixels a bottom corner's 20 up, at a distance from the left.</summary>
+    /// <summary>
+    /// A square of 60 logical pixels a bottom corner's 20 up, at a distance from the left.
+    /// </summary>
     private static UiSettings Square(float left, (float R, float G, float B, float A) color) => new()
     {
         Absolute = true,
@@ -106,7 +109,10 @@ public sealed class HiddenScopeTests : IDisposable
         Color = color,
     };
 
-    /// <summary>An ImGui window of one color and 60 logical pixels square, at a distance from the left along the bottom.</summary>
+    /// <summary>
+    /// An ImGui window of one color and 60 logical pixels square, at a distance from the left along
+    /// the bottom.
+    /// </summary>
     private static void Window(string name, float left, Vector4 color)
     {
         ImGui.SetNextWindowPos(new Vector2(left, 280f), ImGuiCond.Always);

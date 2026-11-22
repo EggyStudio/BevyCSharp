@@ -438,13 +438,13 @@ public sealed class RenderControlTests
 
             // Asking twice rewrites the planet rather than adding another, which matters because
             // Bevy renders whichever is nearest and two would be a coin toss.
-            Assert.Equal(1, ctx.Ecs.Count<Atmosphere>());
+            Assert.Equal(1, ctx.Ecs.Count<PlanetAtmosphere>());
 
             Render.ClearAtmosphere(second);
             Render.ClearAtmosphere(first);
 
             // The planet outlives the cameras that looked at it, and costs nothing unwatched.
-            Assert.Equal(1, ctx.Ecs.Count<Atmosphere>());
+            Assert.Equal(1, ctx.Ecs.Count<PlanetAtmosphere>());
         });
 
         harness.Run();

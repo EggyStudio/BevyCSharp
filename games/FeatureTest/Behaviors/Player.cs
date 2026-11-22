@@ -8,7 +8,7 @@ using ImGuiNET;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// How the player moves, cycled with F3 held and F4, since F4 alone opens the panel.
+/// How the player moves, set on the panel's player page or with the <c>mode</c> command.
 /// </summary>
 public enum PlayerMode
 {
@@ -26,7 +26,7 @@ public enum PlayerMode
     Spectator,
 }
 
-/// <summary>Where the view is put in walking and creative modes, cycled with F5.</summary>
+/// <summary>Where the view is put in walking and creative modes, cycled with V.</summary>
 public enum PlayerView
 {
     /// <summary>From the character's eyes.</summary>
@@ -54,12 +54,12 @@ public enum PlayerView
 /// </para>
 /// <para>
 /// The mouse turns the view while the cursor is locked (Tab) or the right button is held, and the
-/// right stick turns it at any time, at the controls page's speed. F3 held with F4 steps the mode,
-/// naming it at the top of the screen. In creative mode a double tap of jump takes off, Space then
-/// rising and Shift sinking, and touching ground while sinking lands. In spectator mode the
-/// character is left standing and the free camera (<see cref="FlyCamera"/>) goes through
-/// everything. F5 steps the view, and the panel's player page and the <c>mode</c> command set the
-/// same.
+/// right stick turns it at any time, at the controls page's speed. The mode is set on the panel's
+/// player page or with the <c>mode</c> command, named at the top of the screen. In creative mode a
+/// double tap of jump takes off, Space then rising and Shift sinking, and touching ground while
+/// sinking lands. In spectator mode the character is left standing and the free camera
+/// (<see cref="FlyCamera"/>) goes through everything. V steps the view, and the panel's player page
+/// sets it too.
 /// </para>
 /// <para>
 /// Falling below the map puts it back at the start of the zone it was last in, as falling into the
@@ -144,15 +144,15 @@ public partial struct Player
 
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        // A plain capsule to be seen in the third person, its shape the collider's and nothing on it,
-        // the view behind it saying which way it faces.
+        // A plain capsule to be seen in the third person, its shape the collider's and nothing on
+        // it, the view behind it saying which way it faces.
         _figure = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, _figure, Render.CreateMesh(MeshShape.Capsule, Radius, Tall - (2f * Radius)));
         Render.SetMaterial(ctx.Ecs, _figure, Render.CreateMaterial(0.9f, 0.45f, 0.15f, roughness: 0.6f));
         ctx.Ecs.Add(_figure, Transform.At(0f, Tall / 2f, 0f));
         ctx.Ecs.SetParent(_figure, player);
 
-        Console.WriteLine("[Player] WASD walks, Space jumps, Shift sprints, C crouches, F3 and F4 step the mode, F5 the view");
+        Console.WriteLine("[Player] WASD walks, Space jumps, Shift sprints, C crouches, V steps the view, the panel and mode set the mode");
     }
 
     /// <summary>
@@ -164,10 +164,9 @@ public partial struct Player
         var now = ctx.Time.ElapsedSeconds;
         var input = ctx.Input;
         var pad = input.Gamepads.Count > 0 ? input.Gamepads[0] : null;
-        var free = !Panel.IsOpen && !ImGuiConsole.IsOpen && !ImGuiRuntime.Typing;
+        var free = !Panel.IsOpen && !Bevy.Debug.Panel.Open && !ConsoleLog.Model.Open && !ImGuiRuntime.Typing;
 
-        if (input.KeyDown(Key.F3) && input.KeyPressed(Key.F4)) _asked = (PlayerMode)(((int)Mode + 1) % 3);
-        if (free && (input.KeyPressed(Key.F5) || (pad?.Pressed(GamepadButton.Select) ?? false)))
+        if (free && (input.KeyPressed(Key.V) || (pad?.Pressed(GamepadButton.Select) ?? false)))
             View = (PlayerView)(((int)View + 1) % 3);
 
         if (_asked is { } asked)

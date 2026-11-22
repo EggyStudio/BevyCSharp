@@ -34,7 +34,16 @@ public static class ConsoleLog
     /// The process's console, the lines written and the lines entered with their answers, which a
     /// console draws and the run's log file hears of (<see cref="ConsoleModel.LineWritten"/>).
     /// </summary>
-    public static ConsoleModel Model { get; } = new(Registry.Process, Depth, () => (long)Frame);
+    public static ConsoleModel Model { get; } = Made();
+
+    // Each line the console runs is followed by the host, which logs a thrown stack and keeps a
+    // later answer, so a console drawn by anybody behaves as the engine's does.
+    private static ConsoleModel Made()
+    {
+        var model = new ConsoleModel(Registry.Process, Depth, () => (long)Frame);
+        model.LineRun += ConsoleHost.Ran;
+        return model;
+    }
 
     /// <summary>How many lines have ever been written, so a reader can notice new ones.</summary>
     public static long Written => Model.Written;

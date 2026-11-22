@@ -5,7 +5,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The log a console shows, and what it does with what is typed into it.
+/// The process's console, the Diagnostics module's over the engine's commands, what the program
+/// writes into it and what it does with what is typed into it.
 /// </summary>
 /// <remarks>
 /// None of this needs an engine, because a console is a list of lines, a list of commands and a
@@ -14,8 +15,10 @@ namespace Bevy.Tests;
 /// output into it and write lines of their own while they run.
 /// </remarks>
 [Collection("engine")]
-public sealed class ConsoleTests
+public sealed class ConsoleTests : IDisposable
 {
+    public void Dispose() => ConsoleLog.Model.Edit(string.Empty);
+
     [Fact]
     public void ARepeatedLineIsCountedRatherThanRepeated()
     {
@@ -34,33 +37,6 @@ public sealed class ConsoleTests
         Assert.Equal(3, lines[0].Count);
         Assert.Equal("the same thing", lines[0].Text);
         Assert.Equal(1, lines[1].Count);
-
-        Assert.Equal("the same thing  (3)", ConsoleView.Written(lines[0]));
-        Assert.Equal("something else", ConsoleView.Written(lines[1]));
-    }
-
-    [Fact]
-    public void OnlyTheLevelsAskedForAreShown()
-    {
-        ConsoleLog.Clear();
-
-        ConsoleLog.Write(ConsoleLevel.Info, "ordinary");
-        ConsoleLog.Write(ConsoleLevel.Warning, "careful");
-        ConsoleLog.Write(ConsoleLevel.Error, "broken");
-
-        var view = new ConsoleView { ShowInfo = false };
-
-        Assert.Equal(["careful", "broken"], view.Lines().Select(line => line.Text));
-
-        view.ShowWarnings = false;
-        Assert.Equal(["broken"], view.Lines().Select(line => line.Text));
-
-        // And what is being looked for narrows whatever is left.
-        view.ShowInfo = true;
-        view.ShowWarnings = true;
-        view.Search = " care";
-
-        Assert.Equal(["careful"], view.Lines().Select(line => line.Text));
     }
 
     [Fact]
@@ -68,8 +44,7 @@ public sealed class ConsoleTests
     {
         ConsoleLog.Clear();
 
-        var view = new ConsoleView();
-        view.Run("echo hello");
+        ConsoleHost.Submit("echo hello");
 
         var lines = ConsoleLog.All();
 
@@ -81,73 +56,21 @@ public sealed class ConsoleTests
     }
 
     [Fact]
-    public void TheArrowsWalkBackThroughWhatWasTyped()
+    public void HalfATypedNameCompletesToAnEnginesCommand()
     {
-        ConsoleLog.Clear();
+        // The engine's assemblies loaded, so every command they declare is registered.
+        _ = ConsoleHost.Commands;
+        var model = ConsoleLog.Model;
+        model.Edit("ec");
 
-        var view = new ConsoleView();
-        view.Run("echo one");
-        view.Run("echo two");
-        view.Run("echo two");
-
-        // A command run twice in a row is remembered once, because the arrows are for getting back
-        // to a command, and two presses that do nothing are two presses too many.
-        Assert.Equal("echo two", view.Back(string.Empty));
-        Assert.Equal("echo one", view.Back(string.Empty));
-        Assert.Equal("echo two", view.Forward(string.Empty));
-
-        // Past the end is back to an empty line, which is where it started.
-        Assert.Equal(string.Empty, view.Forward(string.Empty));
-    }
-
-    [Fact]
-    public void HalfATypedNameCompletesToACommand()
-    {
-        var view = new ConsoleView();
-
-        Assert.Equal("echo", view.Completion("ec"));
-        Assert.Contains("Writes what follows", view.Hint("ec"));
-
-        // A name that is already whole completes to nothing, and a line with arguments in it is
-        // past completing.
-        Assert.Null(view.Completion("echo"));
-        Assert.Null(view.Completion("echo something"));
+        // The engine's own commands are the console's, completed from the registry they are
+        // generated into.
+        Assert.Contains("echo", model.Candidates);
+        Assert.True(model.Accept());
+        Assert.StartsWith("echo", model.Typed);
 
         // It then says what the command takes.
-        Assert.Contains("<text>", view.Hint("echo something"));
+        model.Edit("echo something");
+        Assert.Contains("<text>", model.Hint);
     }
-
-    [Fact]
-    public void QuotedWordsStayTogether()
-    {
-        Assert.Equal(["one", "two"], CommandLine.Split("one two"));
-        Assert.Equal(["one two", "three"], CommandLine.Split("\"one two\" three"));
-        Assert.Empty(CommandLine.Split("   "));
-    }
-    [Fact]
-    public void WhatWasTypedComesBackInOrder()
-    {
-        var view = new ConsoleView();
-
-        view.Run("echo one");
-        view.Run("echo two");
-
-        // Newest first, as reaching back up a shell's history gives them.
-        Assert.Equal("echo two", view.Back(string.Empty));
-        Assert.Equal("echo one", view.Back("echo two"));
-
-        // And down again, ending at an empty box rather than at the oldest line.
-        Assert.Equal("echo two", view.Forward("echo one"));
-        Assert.Equal(string.Empty, view.Forward("echo two"));
-    }
-
-    [Fact]
-    public void ReachingBackThroughNothingLeavesWhatIsThere()
-    {
-        var view = new ConsoleView();
-
-        Assert.Equal("half a command", view.Back("half a command"));
-        Assert.Equal("half a command", view.Forward("half a command"));
-    }
-
 }

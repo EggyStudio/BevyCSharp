@@ -53,8 +53,8 @@ filters work, while reading or writing one is refused rather than corrupting the
 The list is curated rather than general, because each entry needs a mirror written by hand as
 well as a name the bridge resolves. It holds `Transform`, `GlobalTransform`, `ChildOf`,
 `Children`, `Visibility`, `InheritedVisibility`, `ViewVisibility`, `WorldInstance`, `Interaction`
-and `Atmosphere`. Any other component Bevy reflects resolves to an id by its full type path, so
-`HasById` and the rest reach it as well.
+and `PlanetAtmosphere`, which is Bevy's `Atmosphere`. Any other component Bevy reflects resolves
+to an id by its full type path, so `HasById` and the rest reach it as well.
 
 ## Every other Bevy component
 

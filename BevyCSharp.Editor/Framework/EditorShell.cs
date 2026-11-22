@@ -23,7 +23,9 @@ namespace BevyCSharp.Editor.Framework;
 /// </remarks>
 public static class EditorShell
 {
-    /// <summary>How far anything lying on the scene sits from the edge of what it lies on.</summary>
+    /// <summary>
+    /// How far anything lying on the scene sits from the edge of what it lies on.
+    /// </summary>
     /// <remarks>
     /// The same gap the panels keep round their cards, so a group of buttons floating in a corner
     /// of the scene is as far from the edge as a card is from the edge of the panel holding it.
@@ -190,7 +192,7 @@ public static class EditorShell
 
         // Before anything is drawn, and whether or not the console is open, so an answer that
         // arrives while it is shut is there when it opens.
-        ConsoleView.AnswerLater(ctx.World);
+        ConsoleHost.AnswerLater(ctx.World);
 
         if (!ImGuiRuntime.IsRunning) return;
 
@@ -324,7 +326,9 @@ public static class EditorShell
     /// <summary>What the scene has to itself, which is the part of it no panel is over.</summary>
     public static (float Right, float Bottom) Free { get; private set; }
 
-    /// <summary>Tells the camera which part of the window it has, and how round its corners are.</summary>
+    /// <summary>
+    /// Tells the camera which part of the window it has, and how round its corners are.
+    /// </summary>
     private static void Apply(BehaviorContext ctx)
     {
         var camera = EditorSelection.Camera;

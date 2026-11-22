@@ -409,7 +409,6 @@ static class Bevy.AssetServer
   static bool TryReadFolder(AssetHandle folder, out AssetHandle[] assets)
   static int LiveHandleCount { get; }
   static string? PathOf(AssetHandle handle)
-readonly struct Bevy.Atmosphere : INativeComponent
 sealed class Bevy.AtmosphereSettings
   AssetHandle DustPhase { get; set; }
   AtmosphereSettings()
@@ -638,7 +637,6 @@ readonly struct Bevy.Capture : IEquatable<Capture>
   override bool Equals(object obj)
   override int GetHashCode()
   override string ToString()
-  static Key? ScreenshotKey { get; set; }
   static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f)
   static Task<string>? StopRecording()
   static bool IsRecording { get; }
@@ -1100,7 +1098,7 @@ static class Bevy.ConsoleHost
   static Registry Commands { get; }
   static Time Time { get; }
   static World? World { get; }
-  static string Unwrap(string line)
+  static void AnswerLater(World world)
   static void Fail(string code, string message)
   static void Hold(ulong frame)
   static void Later(Func<string?> poll)
@@ -1116,21 +1114,6 @@ static class Bevy.ConsoleLog
   static void Start()
   static void Write(ConsoleLevel level, string text)
   static void Write(string text)
-sealed class Bevy.ConsoleView
-  ConsoleLine[] Lines()
-  ConsoleView()
-  bool ShowErrors { get; set; }
-  bool ShowInfo { get; set; }
-  bool ShowWarnings { get; set; }
-  int Scroll { get; set; }
-  static string Written(ConsoleLine line)
-  static void AnswerLater(World world)
-  string Back(string current)
-  string Forward(string current)
-  string Hint(string typed)
-  string Search { get; set; }
-  string? Completion(string typed)
-  void Run(string line, World? world = null)
 sealed class Bevy.ContactShadowSettings : IEquatable<ContactShadowSettings>
   ContactShadowSettings(uint Steps = 16u, float Thickness = 0.1f, float Length = 0.3f)
   bool Equals(ContactShadowSettings? other)
@@ -1323,11 +1306,10 @@ sealed class Bevy.DataVersionAttribute : Attribute
   DataVersionAttribute(int version)
   int Version { get; }
 static class Bevy.Debug
-  static Key? OverlayKey { get; set; }
-  static bool OverlayShown { get; set; }
-  static bool ProfilerShown { get; set; }
-  static bool RemoveOverlaySection(string name)
-  static void AddOverlaySection(string name, Func<IEnumerable<string>> lines)
+  static DiagnosticKeys Keys { get; }
+  static OverlayModel Overlay { get; }
+  static PanelModel Panel { get; }
+  static void Draw(BehaviorContext ctx)
 sealed class Bevy.DefaultPlugins : IPluginGroup
   DefaultPlugins()
   IEnumerable<(IPlugin, int)> GetPlugins()
@@ -2755,12 +2737,6 @@ interface Bevy.IReflectedComponent<TSelf> where TSelf : struct, IReflectedCompon
   static string TypePath { get; }
 interface Bevy.IShaderValues
 interface Bevy.ISparseComponent
-static class Bevy.ImGuiConsole
-  static ConsoleView View { get; }
-  static Key Toggle { get; set; }
-  static bool IsOpen { get; set; }
-  static float Height { get; set; }
-  static void Draw(BehaviorContext ctx)
 static class Bevy.ImGuiRuntime
   static ImFontPtr Face(string face)
   static Vector2 Size { get; }
@@ -5027,6 +5003,7 @@ readonly struct Bevy.PinchGesture : IEquatable<PinchGesture>
   static bool op_Equality(PinchGesture left, PinchGesture right)
   static bool op_Inequality(PinchGesture left, PinchGesture right)
   void Deconstruct(out float Delta)
+readonly struct Bevy.PlanetAtmosphere : INativeComponent
 enum Bevy.PlaybackMode : int
   Despawn = 2
   Loop = 1
@@ -13327,7 +13304,6 @@ static class Bevy.Ui
   static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float, float, float, float) color)
   static Entity? Navigate(NavAction action)
   static IReadOnlyList<FontAtlasPicture> FontAtlasPictures()
-  static Key? HiddenKey { get; set; }
   static TextViewport? TextViewportOf(Entity field)
   static UiInteraction InteractionOf(Entity entity)
   static bool BeginHidden()
