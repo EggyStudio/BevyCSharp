@@ -319,6 +319,12 @@ until the key comes up. With none of them open it is the program's, which an exa
 a game or a template ends on no key unless it sets one. The overlay takes no key, so it holds none,
 and a panel of the game's own reads Escape as the program does.
 
+While the console or the settings panel is open the program reads no input at all, every key,
+button, stick and touch reading as untouched and the pointer standing still, and what a hand holds
+as the panel closes stays unseen until it is let go
+([An open console holds the program's input](input.md#an-open-console-holds-the-programs-input)).
+The overlay holds nothing, and the five keys act as ever.
+
 F1 hides the program's interface as Minecraft hides its HUD, what is drawn inside the hidden scope
 and nothing outside it, so a pause menu or an inventory drawn outside the scope stays whatever F1
 says, and the debug overlay stays too. `Ui.BeginHidden()` opens the scope and answers whether it

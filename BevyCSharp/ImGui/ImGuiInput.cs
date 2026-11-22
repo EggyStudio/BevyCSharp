@@ -80,7 +80,10 @@ internal static class ImGuiInput
         }
     }
 
-    /// <summary>Tells the interface what the pointer and the keyboard did.</summary>
+    /// <summary>
+    /// Tells the interface what the pointer and the keyboard did, as they came, a panel holding the
+    /// program's input or not.
+    /// </summary>
     internal static void Feed(ImGuiIOPtr io, Input input, float scale, ReadOnlySpan<ImeCommit> committed = default)
     {
         _ = scale;
@@ -89,22 +92,24 @@ internal static class ImGuiInput
         // resting on the desk.
         if (SyntheticInput.Pretend is null)
         {
-            io.AddMousePosEvent(input.MouseX, input.MouseY);
+            var (x, y) = input.InterfaceMouse;
+            io.AddMousePosEvent(x, y);
 
-            Button(io, 0, input.MouseDown(MouseButton.Left), ref _left);
-            Button(io, 1, input.MouseDown(MouseButton.Right), ref _right);
-            Button(io, 2, input.MouseDown(MouseButton.Middle), ref _middle);
+            Button(io, 0, input.InterfaceMouseDown(MouseButton.Left), ref _left);
+            Button(io, 1, input.InterfaceMouseDown(MouseButton.Right), ref _right);
+            Button(io, 2, input.InterfaceMouseDown(MouseButton.Middle), ref _middle);
         }
 
-        if (input.WheelX != 0f || input.WheelY != 0f)
+        var (wheelX, wheelY) = input.InterfaceWheel;
+        if (wheelX != 0f || wheelY != 0f)
         {
-            io.AddMouseWheelEvent(input.WheelX, input.WheelY);
+            io.AddMouseWheelEvent(wheelX, wheelY);
         }
 
-        io.AddKeyEvent(ImGuiKey.ModCtrl, input.AnyKeyDown([Key.ControlLeft, Key.ControlRight]));
-        io.AddKeyEvent(ImGuiKey.ModShift, input.AnyKeyDown([Key.ShiftLeft, Key.ShiftRight]));
-        io.AddKeyEvent(ImGuiKey.ModAlt, input.AnyKeyDown([Key.AltLeft, Key.AltRight]));
-        io.AddKeyEvent(ImGuiKey.ModSuper, input.AnyKeyDown([Key.SuperLeft, Key.SuperRight]));
+        io.AddKeyEvent(ImGuiKey.ModCtrl, input.InterfaceKeyDown(Key.ControlLeft) || input.InterfaceKeyDown(Key.ControlRight));
+        io.AddKeyEvent(ImGuiKey.ModShift, input.InterfaceKeyDown(Key.ShiftLeft) || input.InterfaceKeyDown(Key.ShiftRight));
+        io.AddKeyEvent(ImGuiKey.ModAlt, input.InterfaceKeyDown(Key.AltLeft) || input.InterfaceKeyDown(Key.AltRight));
+        io.AddKeyEvent(ImGuiKey.ModSuper, input.InterfaceKeyDown(Key.SuperLeft) || input.InterfaceKeyDown(Key.SuperRight));
 
         for (var index = 0; index < Table.Length; index++)
         {
@@ -121,7 +126,7 @@ internal static class ImGuiInput
 
         // What the keys produced, which is the platform's answer, because a layout, a dead key and
         // a modifier all change it, and none of that can be worked out from the key alone.
-        foreach (var character in input.Text)
+        foreach (var character in input.InterfaceText)
         {
             io.AddInputCharacter(character);
         }

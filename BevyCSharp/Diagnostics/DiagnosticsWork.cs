@@ -14,6 +14,10 @@ internal sealed class DiagnosticsWork : IPlugin
         // call included.
         Input.InterfaceTakesEscape = Debug.TakesEscape;
 
+        // Every key, button and stick is the console's or the settings panel's while one is open,
+        // and the program reads none of them, the overlay, which only shows, holding nothing.
+        Input.InterfaceHoldsInput = () => Debug.Keys.Panels.HoldsInput;
+
         // The player's settings file, read as the app starts in a run that shows a window, and
         // written from then on.
         app.AddSystem(Stage.Startup, new SystemDescriptor(KeptSettings.Open, "Engine.Settings"));

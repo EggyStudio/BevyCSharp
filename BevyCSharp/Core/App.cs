@@ -408,6 +408,10 @@ public sealed unsafe partial class App : IDisposable
             // frame, each in its place, as the areas' plugins added it to this app.
             areas.Run(world);
 
+            // The hold on the program's input read again once the diagnostics' keys have opened or
+            // closed a panel, so the program's systems after read the panels as the keys left them.
+            world.Resource<Input>().SyncHold();
+
             WindowMemory.Tick();
 
             // What Bevy logged as an error since the last frame, heard while the run goes on

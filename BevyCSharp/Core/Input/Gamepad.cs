@@ -33,14 +33,42 @@ public sealed class Gamepad
         _down = native.Down;
         _pressed = native.Pressed;
         _released = native.Released;
-        _axes = new float[6];
-        for (var i = 0; i < 6; i++) _axes[i] = native.Axes[i];
+        _axes = new float[AxisCount];
+        for (var i = 0; i < AxisCount; i++) _axes[i] = native.Axes[i];
         Vendor = native.Vendor;
         Product = native.Product;
 
         var length = (int)Math.Min(native.NameLength, (uint)NativeGamepad.NameCapacity);
         fixed (byte* name = native.Name) Name = Encoding.UTF8.GetString(name, length);
     }
+
+    // The pad as a program reads it while some of it is kept from the program, the same pad with
+    // the buttons hidden neither down nor pressed, the releases hidden not released and the axes
+    // hidden at rest.
+    private Gamepad(Gamepad pad, uint hidden, uint releasesHidden, ReadOnlySpan<bool> axesHidden)
+    {
+        Entity = pad.Entity;
+        Name = pad.Name;
+        Vendor = pad.Vendor;
+        Product = pad.Product;
+        _down = pad._down & ~hidden;
+        _pressed = pad._pressed & ~hidden;
+        _released = pad._released & ~releasesHidden;
+        _axes = new float[AxisCount];
+        for (var i = 0; i < AxisCount; i++) _axes[i] = axesHidden[i] ? 0f : pad._axes[i];
+    }
+
+    /// <summary>The axes a pad reports, the two sticks' two each and the two triggers.</summary>
+    internal const int AxisCount = 6;
+
+    // The buttons as they came, for what keeps them from a program.
+    internal uint DownButtons => _down;
+    internal uint PressedButtons => _pressed;
+    internal uint ReleasedButtons => _released;
+
+    /// <summary>This pad with the buttons and the axes named kept from the program.</summary>
+    internal Gamepad Seen(uint hidden, uint releasesHidden, ReadOnlySpan<bool> axesHidden) =>
+        new(this, hidden, releasesHidden, axesHidden);
 
     /// <summary>The pad's entity, the same while it stays connected.</summary>
     public Entity Entity { get; }

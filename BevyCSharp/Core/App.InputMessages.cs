@@ -19,7 +19,11 @@ public sealed unsafe partial class App
     /// </para>
     /// <para>
     /// A key the interface took from the program, Escape while the console or the settings panel is
-    /// open, is left out, as <see cref="Input"/> leaves it out.
+    /// open, is left out, as <see cref="Input"/> leaves it out. While one of them holds the
+    /// program's input, a press, a move and a value past rest of the keyboard, the pointer, a touch
+    /// and a pad are left out, and a release comes where the program read the press, so a program
+    /// building its state from the messages holds nothing down the hand let go of. A pad's
+    /// connection still comes.
     /// </para>
     /// </remarks>
     private static void PostInputMessages(MessageBus bus, Input input)
@@ -56,7 +60,10 @@ public sealed unsafe partial class App
                     (m.Flags & Repeat) != 0));
                 break;
             case 1:
-                if (m.Code >= 0) bus.Send(new MouseButtonInput((MouseButton)m.Code, state, entity));
+                if (m.Code >= 0 && !input.HoldsMouseMessage((MouseButton)m.Code, state)) bus.Send(new MouseButtonInput((MouseButton)m.Code, state, entity));
+                break;
+            case >= 2 and <= 7 when input.Held:
+            case 8 when input.HoldsTouchMessage(m.Id, PhaseOf(m.Code)):
                 break;
             case 2:
                 bus.Send(new MouseMotion(new Vec2(m.X, m.Y)));
@@ -83,6 +90,10 @@ public sealed unsafe partial class App
                 break;
             case 9:
                 bus.Send(ConnectionOf(ref m));
+                break;
+            case 10 or 15 when m.Code >= 0 && input.HoldsPadValue(entity, (GamepadAxis)m.Code, m.X):
+            case 11 or 14 when m.Code >= 0 && input.HoldsPadValue(entity, (GamepadButton)m.Code, m.X):
+            case 12 when m.Code >= 0 && input.HoldsPadMessage(entity, (GamepadButton)m.Code, state):
                 break;
             case 10:
                 if (m.Code >= 0) bus.Send(new GamepadAxisChangedEvent(entity, (GamepadAxis)m.Code, m.X));

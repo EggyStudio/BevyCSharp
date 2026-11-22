@@ -108,6 +108,23 @@ program's, the overlay taking no key and a panel of the game's own reading Escap
 program does, so a game that pauses on Escape pauses with the overlay shown, and an example that
 ends on Escape ends only once the console is put away.
 
+## An open console holds the program's input
+
+While the Diagnostics module's console or settings panel is open, `Input` reads to the program as
+though nothing were pressed or moved. No key, mouse button, pad button or touch reads down, the
+pointer stands where it stood as the panel opened, the motion, the wheel and the text are empty, and
+each pad in `Gamepads` reads at rest, so a key or a stick that changes a row on the settings panel
+does not move the scene behind it as well. The messages keep to the same rule, no press, move or
+value past rest coming while it lasts and a release coming for each press the program read, so a
+program that builds its own state from the messages holds nothing down that the hand let go of. The
+interface reads the input as it came, the panels' keys act as ever, a pad's connection still comes,
+and the overlay, which only shows, holds nothing.
+
+A key, a button, a touch or a stick a hand holds as the panel closes stays unseen until it is let
+go, a stick until it comes back within a quarter of its travel of rest, so the key that closed the
+console and a stick pushed through the panel's rows are no fresh press of the program's. Bevy's own
+camera controllers, which read the input in the bridge, are not held.
+
 ## Each change as a message
 
 `Input` holds where each frame leaves things, which says what is down and what changed, but not in

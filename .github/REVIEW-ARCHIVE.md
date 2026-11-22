@@ -16779,3 +16779,170 @@ cell of them or where their rims are nearest, 14 beside them were pinched inside
 cells the hold put inside and stay outside after, and 4 by the floor at the double-sided faces' feet
 read half a cell nearer by the seam. The sheet of the frame, the walls' foot and the field from
 above, and the picture of the cells keeping a plane, are in the devlog.
+
+The tests. FieldReadCopiesTests compiles every kernel with its field read as four channels, its own
+kernel reading one cascade among them, and the copies stay at 23. SceneFieldTests reads the field's
+distances as the first of each cell's four halves.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,194 passed, 0 failed and 5 skipped, 2,199 in all where the
+listing is 2,188, the solution built from nothing with warnings as errors, in 15 parts and the rest,
+a part at a time under the GPU lock.
+
+Shared: the field's codes, their resolve to a distance and a plane, the seam and the paint are the
+RadianceCascades module's in this engine from this commit, its field kept in four half floats a cell
+as the sibling keeps it, and a crown's leaf cards held half a cell either side across their band as
+this engine's crossing of a crown takes them. The probes' rays meeting a sheet at its plane and a
+second plane are left for the passes.
+
+NormTests passed, 19.
+
+138, the probes' passes at the module's `d373352`, held where a case reads worse than this engine's
+own code, as the review ordered, and the field's paint that two builds of one scene left apart,
+mended in the commit carrying this Reply.
+
+The passes as bound. The trace marches each ray by the module's `traceProbeRay` from where the probe
+stands to twice its cascade's spacing, the last cascade's to the field's edge, 16 by 16 rays a probe
+at every cascade, four a texel where a cascade keeps 8 by 8, and keeps each ray for the merge. A
+dispatch after each cascade's trace traces its reach maps by `reachTexel` into an image of 32-bit
+floats holding `ReachOpen`, which the merge alone reads, since this engine's faces, screen probes
+and leaves weigh a probe by a reach that passes the surfaces letting light through, and with the
+module's, which stops at them, a floor under a crown read 0.44 of its reference. The merge is
+`mergeTexel` and `settleTexel`, a thread a ray, the four rays of an 8 by 8 texel averaged. The field
+is read through a whole-field `FieldMarch` that copies no table of the cascades. The light kept
+before an interval and the carried rays go, the merge's march on taking their place. The trace keeps
+each probe's share of the bounce for the merge, since the merge read the share the gather left and
+took the whole bounce for a probe judged by its neighbors, and a dark panel's light stayed in its
+room for frames. The screen probes hand a ray past their reach to the world's probes by
+`mergedLight`.
+
+What reads better. The lintel room's probes, the face toward the opening at 0.5 to 7.5 m, read 1.07,
+1.05, 1.10, 1.19, 1.13, 1.16, 1.05 and 1.04 of their fine trace, where head reads 0.72, 0.66, 0.61,
+0.65, 0.82, 0.93, 1.18 and 1.19. The open box's floor reads 0.80 of the dome's share with the world
+probes' merge, where head reads 0.57, still short of the test's 15%. The bounce rooms' mean distance
+from their references without screen probes goes from 0.117 to 0.113. The thin-walled room's faces
+read alike, within 0.0002.
+
+What reads worse, against the fine trace. The front-lit crown's probes take 0.00225, 0.00998 and
+0.00552 where the trace gives 0.00591, 0.01691 and 0.05293 and head 0.00505, 0.01836 and 0.02969,
+and the aspen's leaves read 0.0631 and backlit 0.0883 where the trace gives 0.0469 and 0.0764 and
+head 0.0583 and 0.0833. A crossing takes its entry cell's share for a crown's whole depth, and a
+crown lets most through at its edge. The bounce rooms' views 2, 4 and 7 take 1.017, 1.082 and 1.049
+of their trace's light where head takes 0.967, 1.039 and 1.002, their probes' faces about 5% over,
+as each face of the lintel room reads over too, and view 2 with the screen probes lies 0.031 from
+its reference against 0.020. The smooth room's second bounce reads 12.1% over, from 11.1%. Through
+`mergedLight` the screen probes read the closed rooms at 1.16 and 1.35 of their light past the
+direct and the open box at 0.69, a step that waits for the module's cheaper merge.
+
+What it costs. One dispatch at a time in the feature test at High, cascades 0 to 3, the merge takes
+7.40, 6.94, 6.53 and 0.04 ms on Sponza and 8.36, 6.75, 5.12 and 0.03 on the Bistro by day, where
+head takes 0.05, 0.11, 0.11 and 0.09 on both, and the trace takes 13.9 and 23.6 ms a frame where
+head takes 9.9 and 13.1. On Sponza 80 to 89% of a finer cascade's rays end past their end and march.
+
+Held. The module's session has the set-ups of the crowns, of views 2, 4 and 7 and of the smooth
+room, each probe against its fine trace, and found the merge's cost in the shading at its hits. The
+work stands as `~/.cache/bevycsharp-i138/held/passes-c2.patch`, and the module's pointer stays at
+`109b457` until the passes land.
+
+The paint. Two triangles of one mesh tie on a cell whose middle lies as near both along the same way
+in the code's steps, since the code holds the distance, the way and the mesh's instance and nothing
+of the triangle, and both pass `splatPaint`'s test of the kept code. Each then calls
+`PaintCells.paint` with the color of its own nearest point, which differs where its corners do, and
+the cell kept the store that landed last. `field_splat` keeps the paint as the larger color in its
+bytes by an atomic maximum, the same whichever thread comes first. A cascade is splatted in several
+builds, each painting after its codes, and by the maximum alone the paint an earlier build gave a
+cell from the floor or a trunk stayed over the leaf card of a later build that took the cell, so the
+crowns read as solid, the uniform sky's forest floor at 0.43 of its reference and the canopy's floor
+at 0.0595 against 0.0593 under leaves held solid. A code nearer than the one a cell kept clears the
+cell's paint (`CodeCells`). The gloss and the emission are the mesh's, alike from both triangles.
+Two meshes whose instances share their seven bits tie the same way and could still leave a cell's
+gloss or emission apart.
+
+The test. `TwoBuildsOfOneSceneGiveTheSamePaint` builds a ball of 384 quads whose corners are painted
+apart, in one app and then in another, and reads the field's paint back from each. Without the mend
+226 of the 17,416 cells the ball paints took another color in the second build, and with it none, in
+two runs. The two forest floors' tests fail with the maximum alone and pass with the clear.
+
+The whole suite passed from one tree, 2,195 passed, 0 failed and 5 skipped, 2,200 in all where the
+listing is 2,189, in 13 parts and the rest, a part at a time under the GPU lock. Its run before the
+clear, with the maximum alone, failed the two forest floors' tests and no other.
+
+Shared: the module's `splatPaint` hands two triangles that tie on a cell's code to the engine's
+paint alike, so an engine that stores the paint as it comes leaves the cell to whichever store lands
+last, and this engine keeps the larger by an atomic maximum and clears it where a later build's
+nearer code takes the cell.
+
+Next in this session's order, the merge's hits are lit by the probes' faces about them and a sun
+map, with no march and no lamp, on the module's `6e16181`, timed a cascade at a time against the
+bound merge on Sponza and the Bistro, and the lintel room's row, the open box and a lamp through a
+doorway are read against their traces.
+
+NormTests passed, 19.
+
+Verdict 93, renderer part 7 on `789886e0` past its 45 minutes, mended in the commit carrying this
+Reply by laying the renderer's tests out in fourteen parts in place of twelve.
+
+What the runs show. Part 7 held 82 tests, which took 1,804 s in the run on `eef32314` on a Xeon
+6975P-C, `TreeWayOutTests`' one case 450,
+`AProbeInAClosedRoomHoldsItsReferencesLightAtEachBounceItIsHeldAt` 309, an oak's level shadow at
+30.3 m 258, `FarFromTheWorldsOriginGlowLightsLeaveNoMoreOfTheLandBlackThanNearIt` 209 and the probe
+on a thin wall 138, the rest under 90 each. The run on `789886e0` left no case's time, since a part
+writes its results at its end, and gave part 7 a Xeon 8370C, which over the 40 build runs before
+took 1.47 times as long as the 6975P-C on the same part, 1.12 to 1.60, so part 7's 30 minutes come
+to 44 there against a limit of 45. The parts that ran on one processor in both runs took alike, part
+9 1,866 and 1,868 s on the 6975P-C and part 10 1,591 and 1,621. The twelve parts held some 30
+minutes each on the 6975P-C, 22,074 s in all, and two parts of `5fe97b68` on the 8370C took 2,582
+and 2,656 s.
+
+The splat on lavapipe. In the runner's image, Mesa 25.2.8 held to four cores, each commit's tree
+with the red run's own bridge, `eef32314` and `789886e0` side by side on four cores each took
+`TreeWayOutTests` in 11 m 43 s and 10 m 59 s, the oak's five level shadows in 341, 327, 387, 384 and
+587 s and in 394, 321, 388, 433 and 568, the closed room's probe in 13 m 25 s and 13 m 12 s and the
+glow lights far from the origin in 7 m 24 s and 7 m 43 s. The field of nine tupelos built again from
+nothing, the commits taken in turn on the same four cores twice, took 8.1, 9.4, 7.5 and 7.3 s before
+and 7.7, 7.6, 7.5 and 7.5 s after, the largest `field_splat` dispatch of a build 274, 358, 270 and
+256 ms before and 258, 270, 255 and 253 after. One round taken while the host's load stood near 10
+read 34 s after, and the interleaved rounds put that to the host. The paint's atomic maximum and its
+clear cost the splat nothing these runs tell apart, and the part ran past its limit on a slower
+processor.
+
+The mend. The layout is dealt again from the run on `eef32314`, each case's seconds scaled to the
+6975P-C by its part's processor, the EPYC 9V45 at 0.75, the EPYC 9V74 at 0.98, the EPYC 7763 at 1.33
+and the 8370C at 1.47, each the median over the parts' runs since they were last laid out. Dealt
+from the longest into fourteen parts, each to the part holding least, the trees' leaves apart from
+global illumination as before, each part holds 25.9 minutes on the 6975P-C, 38 on the 8370C at its
+median and 41 at its slowest. Thirteen parts would hold 27.9, and 44.6 at the slowest. The workflow
+runs fourteen jobs on a push beside the test job's three and seven pairs in a pack, and its comments
+and `BUILDING.md` give the new figures. The limits stay as they were.
+
+The whole suite passed from one tree, 2,195 passed, 0 failed and 5 skipped, 2,200 in all where the
+listing is 2,189, the solution built from nothing with warnings as errors, in 13 parts and the rest,
+a part at a time through the GPU's gate.
+
+Settled when a run on this commit passes part 7, its minutes read from that run.
+
+Next in this session's order, item 138's merge as the review weighs the table of the cheap hit and
+the held light, the held light's leak through a wall thinner than a cell among it.
+
+NormTests passed, 19.
+
+155, step 1, the registry, in the commit carrying this, the Modeling module's commands held for item
+154.
+
+What went. `CommandAttribute`, `CommandParameter`, `ConsoleCommand`, `ConsoleCommands`, `LogLine`
+and `LogLevel` in `BevyCSharp/Core` are deleted, with ConsoleLog's ring of lines and the engine's
+`help`, whose place the module's `help`, `list` and `reset` take.
+
+What holds them. The Diagnostics module is a submodule at `modules/Diagnostics` at `10a18e1`, which
+Core references and the package carries in its lib folder. The generator reads the module's
+`[Command]` and emits `Registry.Process.Add` with the module's command and argument types, so every
+command of the engine, the editor and a game is the module's registry's. The console host runs a
+line through that registry by `ConsoleHost.Run` and `Submit` and writes a late answer by `Answered`,
+a command's failing code carried in the module's answer and the CLI's envelope keeping its shape.
+ConsoleLog's lines are the module's console's, stamped with the frame, and the crash log hears each
+line through the console's `LineWritten`. The three things the console lacked for this, a line's
+repeat count, a callback a line and a line's index and stamp, went to the module's session and are
+mended in `10a18e1`.

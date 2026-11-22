@@ -130,29 +130,38 @@ public static unsafe partial class Debug
     /// <remarks>
     /// <see cref="Ui.Hidden"/> is given to the keys first, so a program that set it for a picture
     /// is where F1 turns it over from. A key of one character is the field's while an ImGui field
-    /// has the caret.
+    /// has the caret. The keys are read as they came, a panel holding the program's input or not,
+    /// since they open and close the panels.
     /// </remarks>
     internal static void TickKeys(World world)
     {
         var input = world.Resource<Input>();
-        if (!input.AnyKeyPressed() && !AnyReleased(input) && Keys.InterfaceHidden == Ui.Hidden) return;
+        if (!AnyPressed(input) && !AnyReleased(input) && Keys.InterfaceHidden == Ui.Hidden) return;
 
         _keysWorld = world;
         Keys.InterfaceHidden = Ui.Hidden;
         var typing = ImGuiRuntime.Typing;
         for (var i = 0; i < EveryKey.Length; i++)
-            if (input.KeyPressed(EveryKey[i])) Keys.KeyDown(KeyNames[i], typing);
+            if (input.UnheldKeyPressed(EveryKey[i])) Keys.KeyDown(KeyNames[i], typing);
         for (var i = 0; i < EveryKey.Length; i++)
-            if (input.KeyReleased(EveryKey[i])) Keys.KeyUp(KeyNames[i]);
+            if (input.UnheldKeyReleased(EveryKey[i])) Keys.KeyUp(KeyNames[i]);
         Ui.Hidden = Keys.InterfaceHidden;
         _keysWorld = null;
+    }
+
+    /// <summary>Whether any key went down this frame.</summary>
+    private static bool AnyPressed(Input input)
+    {
+        foreach (var key in EveryKey)
+            if (input.UnheldKeyPressed(key)) return true;
+        return false;
     }
 
     /// <summary>Whether any key came up this frame.</summary>
     private static bool AnyReleased(Input input)
     {
         foreach (var key in EveryKey)
-            if (input.KeyReleased(key)) return true;
+            if (input.UnheldKeyReleased(key)) return true;
         return false;
     }
 
