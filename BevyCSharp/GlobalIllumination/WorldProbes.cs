@@ -139,7 +139,7 @@ internal static unsafe partial class WorldProbes
     // traced, and where each cascade lay the frame before.
     private static App? _app;
     private static Made? _made;
-    private static ShaderProgram _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _holdProgram, _sunProgram, _lampsProgram, _cellsProgram;
+    private static ShaderProgram _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram;
 
     // The trace built without the crossing of surfaces that let light through, which a frame where
     // nothing drawn lets light through traces with, so its light is the light the probes took
@@ -190,10 +190,10 @@ internal static unsafe partial class WorldProbes
         public readonly int[] Texels = texels;
         public AssetHandle[] Rays = [], Merged = [], Distances = [];
         public AssetHandle Cubes, CubesAt, Reach, ReachMaps, Ways, Held, Partial, Shares, Lights, Glows, SkyMap, Air = AssetHandle.None;
-        public ShaderInstance[] Trace = [], Reaches = [], Merge = [], Ambient = [];
+        public ShaderInstance[] Trace = [], Reaches = [], Merge = [], Ambient = [], Marks = [];
         // The light held for the field's cells, each side's own and its probes' (gi_hold.slang),
         // for as many cascades of the field as it was made for, and the dispatch that holds it.
-        public AssetHandle HeldOwn, HeldProbes = AssetHandle.None;
+        public AssetHandle HeldOwn, HeldProbes, HeldReached = AssetHandle.None;
         public AssetHandle SunMap, LampMaps, LampsReaching, HeldList, HeldListed = AssetHandle.None;
         public int HeldCascades;
         public ShaderInstance Hold, Sun, Lamps, Cells;
@@ -334,7 +334,7 @@ internal static unsafe partial class WorldProbes
         {
             _app = App.Running;
             (_made, _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, default, 0, []);
-            (_holdProgram, _sunProgram, _lampsProgram, _cellsProgram) = (default, default, default, default);
+            (_holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram) = (default, default, default, default, default);
             (HeldBounces, _heldFrom) = (null, 0);
             _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
@@ -356,6 +356,7 @@ internal static unsafe partial class WorldProbes
             _traceSolid = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_trace.slang", defines: new Dictionary<string, ShaderDefine> { ["NO_LIGHT_THROUGH"] = true });
             _reachProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_reach.slang");
             _mergeProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_merge.slang");
+            _marksProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_merge.slang", defines: new Dictionary<string, ShaderDefine> { ["MARCH_ONLY"] = true });
             _holdProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_hold.slang");
             _sunProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_sun.slang");
             _lampsProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_lamps.slang");
@@ -368,7 +369,7 @@ internal static unsafe partial class WorldProbes
         if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready || _reachProgram.State != ShaderProgramState.Ready
             || _mergeProgram.State != ShaderProgramState.Ready || _ambientProgram.State != ShaderProgramState.Ready
             || _holdProgram.State != ShaderProgramState.Ready || _sunProgram.State != ShaderProgramState.Ready || _lampsProgram.State != ShaderProgramState.Ready
-            || _cellsProgram.State != ShaderProgramState.Ready)
+            || _cellsProgram.State != ShaderProgramState.Ready || _marksProgram.State != ShaderProgramState.Ready)
             return;
 
         var texels = TexelsFor(quality, CascadesFor(quality, plan), plan.HasFar);
@@ -416,6 +417,7 @@ internal static unsafe partial class WorldProbes
         var cascades = (uint)texels.Length;
         (made.Rays, made.Merged, made.Distances) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
         (made.Trace, made.Reaches, made.Merge, made.Ambient) = (new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades]);
+        made.Marks = new ShaderInstance[cascades];
         for (var c = 0; c < cascades; c++)
         {
             var n = (uint)texels[c];
@@ -424,6 +426,7 @@ internal static unsafe partial class WorldProbes
             made.Distances[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
             (made.Trace[c], made.Reaches[c], made.Merge[c], made.Ambient[c]) = (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_reachProgram),
                 Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
+            made.Marks[c] = Shaders.CreateInstance(_marksProgram);
         }
         made.Hold = Shaders.CreateInstance(_holdProgram);
         (made.Sun, made.Lamps) = (Shaders.CreateInstance(_sunProgram), Shaders.CreateInstance(_lampsProgram));
@@ -482,7 +485,7 @@ internal static unsafe partial class WorldProbes
         }
         if (_made is not { } made) return;
         foreach (var handle in made.Rays.Concat(made.Merged).Concat(made.Distances)
-                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.ReachMaps, made.Ways, made.Held, made.Partial, made.Shares, made.Lights, made.Glows, made.SkyMap, made.Air, made.HeldOwn, made.HeldProbes, made.SunMap, made.LampMaps, made.LampsReaching, made.HeldList, made.HeldListed]))
+                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.ReachMaps, made.Ways, made.Held, made.Partial, made.Shares, made.Lights, made.Glows, made.SkyMap, made.Air, made.HeldOwn, made.HeldProbes, made.HeldReached, made.SunMap, made.LampMaps, made.LampsReaching, made.HeldList, made.HeldListed]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -591,10 +594,11 @@ internal static unsafe partial class WorldProbes
         const uint size = SceneFieldPlan.Resolution;
         if (made.HeldCascades != plan.Cascades)
         {
-            foreach (var handle in (ReadOnlySpan<AssetHandle>)[made.HeldOwn, made.HeldProbes, made.SunMap])
+            foreach (var handle in (ReadOnlySpan<AssetHandle>)[made.HeldOwn, made.HeldProbes, made.HeldReached, made.SunMap])
                 if (handle != AssetHandle.None) AssetServer.Release(handle);
             made.HeldOwn = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, size * (uint)plan.Cascades * 2);
             made.HeldProbes = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, size * (uint)plan.Cascades * 2);
+            made.HeldReached = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, size * (uint)plan.Cascades);
             made.SunMap = Shaders.CreateImage(SunTexels, SunTexels, ShaderImageFormat.R32Float, (uint)plan.Cascades);
             if (made.HeldList != AssetHandle.None) AssetServer.Release(made.HeldList);
             made.HeldList = Shaders.CreateBuffer((int)(size * size * size * (uint)plan.Cascades * 4));
@@ -620,11 +624,29 @@ internal static unsafe partial class WorldProbes
             .SetTexture("held_own", made.HeldOwn).SetTexture("held_probes", made.HeldProbes)
             .SetNumbers("sun", 4, [SunTexels, 0u, 0u, 0u]).SetNumbers("lamp", 4, [LampTexels, 0u, 0u, 0u])
             .SetNumbers("cascade", 4, [0u, p, 0u, 0u]).Set("interval", new Vector4(0, 0, ProbeSpacing, cascades));
-        // The cells the hold shades listed first, by the module's own test, each of the hold's
-        // threads then taking a listed cell, so every thread of its workgroups shades.
+        // The cells this frame's marches meet, stamped by the merge built to march alone, every
+        // cascade's rays marched as its merge marches them and nothing merged.
+        for (var c = last; c >= 0; c--)
+        {
+            var n = (uint)made.Texels[c];
+            ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 0u : (uint)made.Texels[c + 1]];
+            ReadOnlySpan<uint> follow = [0, BitConverter.SingleToUInt32Bits(made.Intervals[last].End), 0, whole ? 1u : 0u];
+            made.Marks[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
+                .SetTexture("albedo", albedo).SetBuffer("lights", made.Lights).SetTexture("sky_map", made.SkyMap).SetTexture("held_reached", made.HeldReached)
+                .SetBuffer("rays", made.Rays[c]).SetTexture("above", c == last ? made.Cubes : made.Merged[c + 1]).SetTexture("reach_maps", made.ReachMaps)
+                .SetBuffer("held", made.Held).SetBuffer("shares", made.Shares)
+                .SetNumbers("cascade", 4, cascade)
+                .Set("interval", new Vector4(made.Intervals[c].End, c == last ? 0 : made.Intervals[c + 1].End, ProbeSpacing, cascades))
+                .SetNumbers("follow", 4, follow);
+            if (!still) Shaders.Dispatch(made.Marks[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
+        }
+        // The cells the hold shades listed first, those the module's own test holds that this
+        // frame's marches met, each of the hold's threads then taking a listed cell, so every
+        // thread of its workgroups shades.
         Shaders.WriteBuffer<uint>(made.HeldListed, NoneListed);
         made.Cells.SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
-            .SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed);
+            .SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed)
+            .SetTexture("held_reached", made.HeldReached).SetNumbers("frame", 4, [(uint)_frame, 0u, 0u, 0u]);
         made.Hold.SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed);
         if (!still)
         {

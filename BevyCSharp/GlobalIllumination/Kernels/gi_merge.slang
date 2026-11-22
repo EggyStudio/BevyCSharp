@@ -13,6 +13,10 @@
 // and the side it met it in (gi_hold.slang, the module's HeldHitLight), held this frame before the
 // merges, in place of shading the surface there as the trace does, since the shading was most of
 // what a merge cost.
+//
+// Built with MARCH_ONLY, it marches each ray as the merge does before the hold and merges nothing,
+// each cell a march reads the light of stamped with the frame, so the hold shades the cells this
+// frame's marches meet alone (gi_hold_cells.slang).
 import bcs_field;
 import bcs_gi;
 // The probes' passes, written once in the RadianceCascades module for both engines, whose merge
@@ -30,6 +34,10 @@ Texture2D<float4> sky_map;
 // gi_hold.slang held it this frame.
 Texture3D<float4> held_own;
 Texture3D<float4> held_probes;
+#if defined(MARCH_ONLY)
+// The frame each cell of the field was last met in by a march.
+[format("r32ui")] WTexture3D<uint> held_reached;
+#endif
 
 // This cascade's rays as gi_trace.slang kept them.
 StructuredBuffer<uint4> rays;
@@ -124,10 +132,21 @@ struct HeldCells : IHeldLight
 {
     int size;
     int cascades;
+    // The frame's number, which a cell a march meets is stamped with (MARCH_ONLY).
+    uint frame;
 
     int4 heldCell(int c, int3 cell, uint side) { return int4(cell.xy, (int(side) * cascades + c) * size + cell.z, 0); }
+#if defined(MARCH_ONLY)
+    float3 heldAt(int c, int3 cell, uint side)
+    {
+        held_reached.Store(uint3(cell.xy, uint(c * size + cell.z)), frame);
+        return float3(0.0);
+    }
+    float3 heldProbeLightAt(int c, int3 cell, uint side) { return float3(0.0); }
+#else
     float3 heldAt(int c, int3 cell, uint side) { return held_own.Load(heldCell(c, cell, side)).rgb; }
     float3 heldProbeLightAt(int c, int3 cell, uint side) { return held_probes.Load(heldCell(c, cell, side)).rgb; }
+#endif
     float probeShare(float3 place, int c, int3 cell) { return lights[0].counts.z * dot(hitShare, float3(1.0 / 3.0)); }
     void hold(int c, int3 cell, uint side, float3 own, float3 probes) {}
 }
@@ -228,7 +247,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             ProbeCascade far = probeCascade(c + 1, cascade.w, interval.y);
             HeldPlaces abovePlaces = { far, c + 1 };
             ProbeScene scene = { fieldMarch(field, field_sampler, info) };
-            HeldCells cells = { scene.size(), int(info[0].counts.x) };
+            HeldCells cells = { scene.size(), int(info[0].counts.x), uint(lights[0].counts.y) };
             HeldHitLight<ProbeScene, HeldCells> heldScene = { scene, cells };
             AboveProbes probesAbove;
             NoSteps none;
@@ -236,7 +255,9 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         }
     }
 
-    // A texel's rays taken together by its first, their merged light's mean.
+    // A texel's rays taken together by its first, their merged light's mean, where the merge is
+    // not built to march alone, which stores nothing past the cells its marches stamped.
+#if !defined(MARCH_ONLY)
     rayMerged[lane] = mergedHere;
     GroupMemoryBarrierWithGroupSync();
     if (!live || quarter != 0u)
@@ -245,4 +266,5 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     for (uint q = 0u; q < each; q++)
         sum += rayMerged[lane + q];
     merged.Store(uint3(at.xy * texels + texel, at.z), holds ? float4(sum / float(each), 1.0) : float4(0.0));
+#endif
 }
