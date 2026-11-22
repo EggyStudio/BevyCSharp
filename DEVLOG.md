@@ -6,6 +6,14 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-22
+
+![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)
+The feature test offscreen on the Diagnostics module at 918de6e, its console on F5 with help
+keys.console answered, the candidates of keys. opening below the field on an opaque ground and the
+log wrapped at the window's width, and its settings panel on F4 on its first page, one panel open at
+a time, both in the module's neutral gray look.
+
 ## 2026-11-21
 
 ![](.github/assets/readings/2026-11-21-item-138-codes-and-sheets.webp)

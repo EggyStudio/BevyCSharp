@@ -102,10 +102,12 @@ internal sealed record Page(string Title, IReadOnlyList<Row> Rows);
 /// <remarks>
 /// <para>
 /// The settings panel's row Feature test (F4) or the pad's start button opens it, and the pad's
-/// start button closes it. The arrows or the pad's cross move through the rows, Enter, the right
-/// arrow or the pad's south button opens a page or steps a value on, the left arrow steps it back,
-/// and Escape, Backspace or the pad's east button goes back a page, closing the panel from the
-/// first. The pointer works too, a click being Enter.
+/// start button closes it. It is one of the Diagnostics module's open panels
+/// (<c>Debug.Keys.Panels</c>), so opening it closes the settings panel, the console and the
+/// overlay, and opening one of them closes it. The arrows or the pad's cross move through the rows,
+/// Enter, the right arrow or the pad's south button opens a page or steps a value on, the left
+/// arrow steps it back, and Escape, Backspace or the pad's east button goes back a page, closing
+/// the panel from the first. The pointer works too, a click being Enter.
 /// </para>
 /// <para>
 /// Read from the engine's own input rather than through ImGui's keyboard navigation, which moves
@@ -119,6 +121,9 @@ public static class Panel
     private static readonly Stack<(Page Page, int Selected)> Trail = new();
     private static Page? _page;
     private static int _selected;
+
+    /// <summary>The name it joins the module's open panels by.</summary>
+    internal const string Name = "admin";
 
     /// <summary>Whether it is open.</summary>
     public static bool IsOpen { get; set; }
@@ -135,14 +140,18 @@ public static class Panel
     }
 
     /// <summary>
-    /// Opens it at its first page, as the settings panel's row asks, closing that panel, which
-    /// shares the arrows and Enter.
+    /// Joins the module's open panels for the app being run, whose keys are made as it is built.
+    /// </summary>
+    internal static void Join() => Bevy.Debug.Keys.Panels.Join(Name, () => IsOpen, Turn);
+
+    /// <summary>
+    /// Opens it at its first page, as the settings panel's row asks, the module closing that panel,
+    /// which shares the arrows and Enter.
     /// </summary>
     [Command("feature.panel", "Opens the feature test's admin panel")]
     internal static string Show()
     {
-        Bevy.Debug.Panel.Open = false;
-        Turn(true);
+        Bevy.Debug.Keys.Panels.Show(Name);
         return "the admin panel is open";
     }
 
@@ -162,7 +171,7 @@ public static class Panel
     {
         ArgumentNullException.ThrowIfNull(ctx);
 
-        if (Pad(ctx, GamepadButton.Start)) Turn(!IsOpen);
+        if (Pad(ctx, GamepadButton.Start)) Bevy.Debug.Keys.Panels.Toggle(Name);
 
         if (!IsOpen || _page is not { } page) return;
 

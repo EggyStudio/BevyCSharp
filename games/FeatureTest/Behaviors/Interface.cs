@@ -35,6 +35,7 @@ public partial struct Interface
     public static void Open(BehaviorContext ctx)
     {
         ImGuiRuntime.Start();
+        Panel.Join();
         if (!_rowAdded)
         {
             Debug.Panel.Root.AddAction("Feature test", "feature.panel");

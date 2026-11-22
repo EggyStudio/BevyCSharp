@@ -637,7 +637,7 @@ the program's keys stay its own until the window is clicked. A shortcut asks
 from [one recipe](../games/Blockout/assets/levels/blockout.model), three rooms, a corridor, stairs
 between two floors, two doors, a window and a lamp, cut from one block. It is walked through the
 character controller on `Modeling.Collider`'s shape, made again each time the level changes, Tab
-opens this window on the level while it is walked in, and F5 saves the recipe.
+opens this window on the level while it is walked in, and F6 saves the recipe.
 `blockout.autopilot` walks it up the stairs or round every room for a scripted run, and
 `blockout.status` says where the walker stands and what lights the level.
 

@@ -309,6 +309,21 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
      sheet shows the feature test's day, sunset and night at the old pin and the new with a
      difference panel.
 
+157. **Both merges of the module measured in the target scene.** The module gains a second merge, by
+    line of sight and agreement, beside the one the bridge runs. Once its commit is on GitHub the
+    bridge takes the pin, keeps its merge as the default, and reads its target scene under each
+    merge against its traced reference, the same parts and views as its last table, with the whole
+    GI's time under each. No change of the default goes with it. The two tables go in the Reply and
+    a sheet shows the scene under each merge with the reference and difference panels. The merge
+    nearer the reference at a like cost in both engines stays as the module's only one.
+
+158. **Escape goes to what is open first.** Where an example, a template or the feature test ends
+    the program on Escape, an open console, settings panel, overlay page or text field takes the key
+    first and the program does not see it. With nothing open an example may still end on Escape, and
+    a game or a template ends on no key unless it sets one. A test holds for the feature test that
+    Escape with the panel open goes back a page and the window stays, the guides and the cheatsheet
+    say it, and it goes with the held commit's follow-up or as a small commit of its own.
+
 ## Verdicts
 
 Verdict 93 is settled at 22:56 on 2026-11-21, the build run 44944582195 on `a65613b3` green with the
@@ -1071,5 +1086,36 @@ says the module's `Atmosphere` is the air as data and the engine's `PlanetAtmosp
 planet, where it named the one meant in full. In the public listing `readonly struct
 Bevy.Atmosphere` becomes `readonly struct Bevy.PlanetAtmosphere` (N 2.4). The whole suite is step
 2's above, which ran with it.
+
+NormTests passed, 19.
+
+155, step 2's picture and the save key, in the commit carrying this, the Diagnostics module at
+`918de6e`.
+
+The picture. A sheet on a white ground under `.github/assets/readings`,
+`2026-11-22-item-155-console-and-panel.webp`, of the feature test offscreen with the module's
+console on F5, `help keys.console` answered and the candidates of `keys.` opening below the field,
+and its settings panel on F4, with its line in the readings' captions. At `918de6e` the console
+wraps its lines at the window's width and has no horizontal scrollbar, its candidates open below the
+field on an opaque ground with a row kept over the field for the answer line, the panel draws no
+marks round a value that only reads, and the settings file writes once more as it is disposed and
+nothing after.
+
+One panel at a time. The module keeps one of the overlay, the settings panel and the console open at
+a time through `Debug.Keys.Panels`, and the feature test's admin panel joins it as `admin` as the
+app starts, so the settings panel's Feature test row and the pad's Start open the admin panel
+through it and the line that closed the settings panel for it goes. Turning the overlay on from the
+admin panel's Debug page closes the admin panel, as the rule has it.
+
+The save key. Blockout and Courtyard save on F6, so F5 is the console alone in them, in their
+scripts, the comments at the head of their programs, the keys their banners name, the plays
+continuous integration runs, and the guides for making a game and for modeling.
+
+The checks. The solution built with warnings as errors on the module at `918de6e`, and N 6.4 read a
+package packed from this tree, `0.0.0-diag6`. The test classes the module's console, panel and keys
+reach, with the CLI's envelope, the screenshot key, the hidden scope, the scripts and the project's
+settings, passed 114 with NormTests among them. Blockout and Courtyard were built and played to
+their end, Blockout saving its level on F6, Courtyard saving on F6 and loading on F9. The public
+listing does not move.
 
 NormTests passed, 19.

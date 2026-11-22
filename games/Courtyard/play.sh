@@ -90,7 +90,7 @@ quiet frames.wait 5
 [ "$(coins)" = 1 ] || fail "the first coin was not picked up"
 shot "$shots/2-one-coin.png"
 
-quiet input.key F5
+quiet input.key F6
 quiet frames.wait 5
 
 go_to -5 -4 carrying 2

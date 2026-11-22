@@ -98,7 +98,7 @@ public partial struct Game
         ctx.Ecs.Add(walker, new Walker { Speed = 4f });
 
         Ui.SpawnText(
-            "WASD to walk, the right button held or the arrows to look, Space to jump\nTab for the modeling window on the level, F5 to save it",
+            "WASD to walk, the right button held or the arrows to look, Space to jump\nTab for the modeling window on the level, F6 to save it",
             new UiSettings { Absolute = true, Left = Length.Px(12f), Top = Length.Px(10f), Color = (1f, 1f, 1f, 0.9f) },
             15f);
     }
@@ -129,7 +129,7 @@ public partial struct Game
 
         var typing = ImGuiRuntime.Typing;
         if (!typing && ctx.Input.KeyPressed(Key.Tab)) Level.Editing = !Level.Editing;
-        if (!typing && ctx.Input.KeyPressed(Key.F5)) Console.WriteLine($"[blockout] saved the level to {Level.Mesh.Save(Level.File)}");
+        if (!typing && ctx.Input.KeyPressed(Key.F6)) Console.WriteLine($"[blockout] saved the level to {Level.Mesh.Save(Level.File)}");
 
         if (!ImGuiRuntime.IsRunning) return;
 

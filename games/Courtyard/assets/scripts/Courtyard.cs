@@ -256,7 +256,7 @@ public partial struct Screens
         if (ctx.Input.KeyPressed(Key.Escape))
             ctx.SetState(App.TryState<Pause>(out var paused) && paused == Pause.On ? Pause.Off : Pause.On);
 
-        if (ctx.Input.KeyPressed(Key.F5)) Console.WriteLine($"[courtyard] saved {SaveGame.Save(ctx.Ecs)} entities");
+        if (ctx.Input.KeyPressed(Key.F6)) Console.WriteLine($"[courtyard] saved {SaveGame.Save(ctx.Ecs)} entities");
         if (ctx.Input.KeyPressed(Key.F9)) Console.WriteLine($"[courtyard] loaded {SaveGame.Load(ctx.Ecs).Entities.Count} entities");
     }
 
@@ -265,7 +265,7 @@ public partial struct Screens
     public static void Paused(BehaviorContext ctx)
     {
         if (ctx.TryRes<PhysicsWorld>(out var physics)) physics.Paused = true;
-        Banner(ctx, "Paused\nEscape to go on, F5 to save, F9 to load", Pause.On);
+        Banner(ctx, "Paused\nEscape to go on, F6 to save, F9 to load", Pause.On);
     }
 
     /// <summary>Lets the simulation go on as play does.</summary>

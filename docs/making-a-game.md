@@ -3,7 +3,7 @@
 [`games/Courtyard`](../games/Courtyard) is a small game made the way one outside this repository is
 made, as a project of its own on the package, with a level built in the editor, behaviors written
 as scripts, and an export that runs from its own folder. The runner is walked around a courtyard
-with WASD to pick up three coins and bring them to the goal, with Escape to pause, F5 to save and
+with WASD to pick up three coins and bring them to the goal, with Escape to pause, F6 to save and
 F9 to load. Continuous integration plays it from its menu to its win with no display.
 
 ## The project
@@ -88,7 +88,7 @@ stop and the ground holds. It plays its walk while it moves, and reads `ContactS
 coins it touches, each
 taken away with a sound and counted in a `[Persist]` wallet, and for the goal once none is left.
 The HUD, the menu, the pause menu and the win are `Ui` nodes despawned as their state is left, and
-F5 and F9 save and load through `SaveGame`.
+F6 and F9 save and load through `SaveGame`.
 
 A level a load brings back has its bodies made by the plugin as the first one had, the runner is
 made a character again where it reads `SaveLoaded`, and the pause holds the simulation with

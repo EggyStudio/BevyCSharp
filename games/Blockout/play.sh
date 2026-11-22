@@ -2,7 +2,7 @@
 # Plays Blockout through bcs with no display, and fails when a step of the game does not happen:
 # the level made from its recipe with the walker on the ground floor, the walk up the stairs to the
 # room over the hall, a window cut in that room by a command with the counts read and the collider
-# made again, the modeling window opened on Tab, the recipe saved on F5 and the walk back down. The
+# made again, the modeling window opened on Tab, the recipe saved on F6 and the walk back down. The
 # autopilot's tour of every room is not walked here, since on lavapipe held to four processors it
 # would take most of the play's time.
 #
@@ -109,13 +109,13 @@ shot "$shots/4-modeling.png"
 quiet input.key Tab
 quiet frames.wait 5
 
-# F5 writes the recipe, the window's lines among it, to the file the game names, which is read
+# F6 writes the recipe, the window's lines among it, to the file the game names, which is read
 # where the game says it wrote it, the project's folder for a game built in Debug and the copy
 # beside the game for one built in Release.
-quiet input.key F5
+quiet input.key F6
 quiet frames.wait 5
 level=$(saved)
-[ -n "$level" ] || fail "F5 did not save the level"
+[ -n "$level" ] || fail "F6 did not save the level"
 grep -q "^cut window 1.4 1.2 4 1$" "$level" || fail "the recipe saved to $level holds no window's line"
 
 # Back down to the middle of the hall.
