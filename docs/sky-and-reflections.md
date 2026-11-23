@@ -157,7 +157,8 @@ horizon, where an atmosphere draws the planet's ground as an even gray, it draws
 color, darkening downward over `BandDegrees` to `GroundShade` of it. `Color` gives it a color of its
 own in place of the sky's, which a camera with no environment map needs. It reads the camera's
 depth, so it needs a camera drawn once a pixel, and `ClearSkyFog` takes it off. The console's
-`sky.fog` sets it while the app runs.
+`sky.fog` sets it while the app runs, and the settings panel's `sky` page sets each of its values
+alone, `sky.fog_visibility`, `sky.fog_height` and `sky.fog_base`.
 
 Near the camera the same fog can be worked out in froxels, cells of the view's frustum:
 
@@ -184,7 +185,8 @@ so the two meet with no seam. Over the sky only the shadows, the lamps and the b
 the sky already holds the layer's haze. Each froxel's point moves through it from frame to frame and
 blends with what it held last frame, which smooths the slices over a few frames. At 1280 by 720 the
 froxels take about 0.1 ms of the GPU at `Low`, 0.2 at `Medium` and 0.5 at `High`. The console's
-`sky.froxels` turns them on and off while the app runs.
+`sky.froxels` turns them on and off while the app runs, as `sky.froxel_quality` and
+`sky.froxel_distance` do on the `sky` page.
 
 Clouds fill the sky above the atmosphere's camera:
 
@@ -214,7 +216,8 @@ frame and its turn stays the program's. On a camera lit by the sky (`SetSkyLight
 are laid over the sky its lighting is filtered from as well, marched each frame into a small cube of
 their own after Bevy's atmosphere has drawn the sky, so an overcast grays and dims the light the
 ground and the rain are lit by and a clear patch lets its blue through, for some 0.18 ms more. The
-console's `sky.clouds` sets them while the app runs.
+console's `sky.clouds` sets them while the app runs, as `sky.cloud_quality` and `sky.cloud_cover`
+do on the `sky` page.
 
 The sky has a clock, and behind the atmosphere the stars, the galaxy and the moon stand by it:
 
@@ -384,7 +387,7 @@ clouds take the cover, the deck, the base, the top, the density and the wind, th
 some eighty meters as the weather's fog thickens, and its froxels drift on the same wind, and it
 rains and snows as hard as the weather does, on the gusting wind, and lightning strikes as often as
 its `Thunder` says. Any set of settings can be none, and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
-the forecast, while the app runs. What it costs is in [Compared with Bevy](compared-with-bevy.md).
+the forecast, while the app runs, and `sky.forecast` on the `sky` page turns the forecast on and off. What it costs is in [Compared with Bevy](compared-with-bevy.md).
 
 ### Light probes
 

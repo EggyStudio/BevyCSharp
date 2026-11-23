@@ -117,6 +117,16 @@ internal static class SkyWeather
     }
 
     /// <summary>
+    /// Whether a camera's weather gives it its fog each frame, and its clouds, from the settings
+    /// the weather starts from, so a set of either lasts until the next frame there.
+    /// </summary>
+    internal static (bool Fog, bool Clouds) Gives(Entity camera)
+    {
+        ForgetOtherApps();
+        return Weathers.TryGetValue(camera.Bits, out var weather) ? (weather.Parts.Fog is not null, weather.Parts.Clouds is not null) : (false, false);
+    }
+
+    /// <summary>
     /// Moves every camera's weather on a frame and gives the camera its clouds and fog.
     /// </summary>
     internal static void Tick(World world)

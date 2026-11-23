@@ -22,11 +22,7 @@ internal static class ConsoleSkyCommands
                     $"{f.Camera}: fog to 95% at {f.Settings.Visibility:0.#} m, thinning by e every {f.Settings.Height:0.#} m above {f.Settings.Base:0.#}{(f.Settings.Froxels is { } froxels ? $", in {froxels.Quality.ToString().ToLowerInvariant()} froxels to {froxels.Distance:0.#} m" : "")}, {(f.Ready ? "drawn" : "its draw compiling")}")));
         }
 
-        // The cameras drawing fog, or else the ones it was taken off, or else the field's.
-        var off = SkyFog.Off().ToList();
-        var cameras = fogged.Count > 0 ? fogged.Select(f => f.Camera).ToList()
-            : off.Count > 0 ? off.Select(f => f.Camera).ToList()
-            : SceneField.ViewCamera is { IsNone: false } view ? [view] : [];
+        var cameras = FogCameras();
         if (cameras.Count == 0)
         {
             ConsoleHost.Fail("NO_CAMERA", "No camera draws the sky's fog, and the scene's distance field lies around none.");
@@ -35,7 +31,7 @@ internal static class ConsoleSkyCommands
 
         if (word == "off")
         {
-            foreach (var camera in cameras) Render.ClearSkyFog(camera);
+            foreach (var (camera, _) in cameras) Render.ClearSkyFog(camera);
             return "the sky's fog is off";
         }
 
@@ -45,24 +41,13 @@ internal static class ConsoleSkyCommands
             return "sky.fog [off|visibility] [height] [base]";
         }
 
-        foreach (var camera in cameras)
+        foreach (var (camera, was) in cameras)
         {
-            var was = fogged.FirstOrDefault(f => f.Camera == camera).Settings
-                ?? off.FirstOrDefault(f => f.Camera == camera).Settings
-                ?? new SkyFogSettings();
-            Render.SetSkyFog(camera, new SkyFogSettings
-            {
-                Visibility = far,
-                Height = height,
-                Base = @base,
-                Start = was.Start,
-                HorizonDegrees = was.HorizonDegrees,
-                GroundShade = was.GroundShade,
-                BandDegrees = was.BandDegrees,
-                Color = was.Color,
-                Brightness = was.Brightness,
-                Froxels = was.Froxels,
-            });
+            var fog = SkyWeather.Copy(was);
+            fog.Visibility = far;
+            fog.Height = height;
+            fog.Base = @base;
+            Render.SetSkyFog(camera, fog);
         }
         return string.Create(CultureInfo.InvariantCulture, $"fog to 95% at {far:0.#} m, thinning by e every {height:0.#} m above {@base:0.#}, on {cameras.Count} camera{(cameras.Count == 1 ? "" : "s")}");
     }
@@ -80,7 +65,7 @@ internal static class ConsoleSkyCommands
                     $"{c.Camera}: clouds over {c.Settings.Coverage:0.##} of the sky from {c.Settings.Bottom:0} to {c.Settings.Top:0} m at {c.Settings.Quality.ToString().ToLowerInvariant()}")));
         }
 
-        var cameras = clouded.Count > 0 ? clouded.Select(c => c.Camera).ToList() : SkyFog.All().Select(f => f.Camera).ToList();
+        var cameras = CloudCameras();
         if (cameras.Count == 0)
         {
             ConsoleHost.Fail("NO_CAMERA", "No camera draws clouds or the sky's fog.");
@@ -89,7 +74,7 @@ internal static class ConsoleSkyCommands
 
         if (word == "off")
         {
-            foreach (var camera in cameras) Render.SetClouds(camera, null);
+            foreach (var (camera, _) in cameras) Render.SetClouds(camera, null);
             return "the clouds are off";
         }
 
@@ -106,9 +91,8 @@ internal static class ConsoleSkyCommands
             return "sky.clouds [off|coverage] [low|medium|high]";
         }
 
-        foreach (var camera in cameras)
+        foreach (var (camera, was) in cameras)
         {
-            var was = clouded.FirstOrDefault(c => c.Camera == camera).Settings;
             var settings = was is null ? new CloudSettings() : SkyWeather.Copy(was);
             settings.Coverage = cover;
             settings.Quality = level.Value;
@@ -206,31 +190,58 @@ internal static class ConsoleSkyCommands
 
         foreach (var (camera, was, _) in fogged)
         {
-            Render.SetSkyFog(camera, new SkyFogSettings
-            {
-                Visibility = was.Visibility,
-                Height = was.Height,
-                Base = was.Base,
-                Start = was.Start,
-                HorizonDegrees = was.HorizonDegrees,
-                GroundShade = was.GroundShade,
-                BandDegrees = was.BandDegrees,
-                Color = was.Color,
-                Brightness = was.Brightness,
-                Froxels = asked is { } level ? new FroxelFogSettings
-                {
-                    Quality = level,
-                    Distance = distance,
-                    Lumps = was.Froxels?.Lumps ?? 0.5f,
-                    LumpSize = was.Froxels?.LumpSize ?? 30f,
-                    Wind = was.Froxels?.Wind ?? new Vec3(1.5f, 0f, 0.8f),
-                    Lights = was.Froxels?.Lights ?? 16,
-                    Boxes = was.Froxels?.Boxes ?? [],
-                } : null,
-            });
+            var fog = SkyWeather.Copy(was);
+            fog.Froxels = asked is { } level ? KeptFroxels(was.Froxels, level, distance) : null;
+            Render.SetSkyFog(camera, fog);
         }
         return asked is { } q
             ? string.Create(CultureInfo.InvariantCulture, $"the fog in {q.ToString().ToLowerInvariant()} froxels to {distance:0.#} m, on {fogged.Count} camera{(fogged.Count == 1 ? "" : "s")}")
             : "the fog in closed form alone";
+    }
+
+    /// <summary>
+    /// The cameras <c>sky.fog</c> sets, with the settings each last had, those drawing fog, or else
+    /// those it was taken off, or else the camera the scene's distance field lies around.
+    /// </summary>
+    /// <remarks>
+    /// The sky's settings start the fog on the same cameras, so a row of the panel and a line of
+    /// the console put it where the other would.
+    /// </remarks>
+    internal static List<(Entity Camera, SkyFogSettings Was)> FogCameras()
+    {
+        var fogged = SkyFog.All().Select(f => (f.Camera, f.Settings)).ToList();
+        if (fogged.Count > 0) return fogged;
+        var off = SkyFog.Off().ToList();
+        if (off.Count > 0) return off;
+        return SceneField.ViewCamera is { IsNone: false } view ? [(view, new SkyFogSettings())] : [];
+    }
+
+    /// <summary>
+    /// The cameras <c>sky.clouds</c> sets, with the clouds each has, those drawing clouds, or else
+    /// those drawing the sky's fog, with none.
+    /// </summary>
+    internal static List<(Entity Camera, CloudSettings? Was)> CloudCameras()
+    {
+        var clouded = Clouds.All().Select(c => (c.Camera, (CloudSettings?)c.Settings)).ToList();
+        return clouded.Count > 0 ? clouded : [.. SkyFog.All().Select(f => (f.Camera, (CloudSettings?)null))];
+    }
+
+    /// <summary>
+    /// Froxels of a quality reaching a distance, with the lumps, the wind, the lights and the boxes
+    /// the fog's froxels had, or the froxels' defaults where it had none.
+    /// </summary>
+    internal static FroxelFogSettings KeptFroxels(FroxelFogSettings? was, FroxelQuality quality, float distance)
+    {
+        var kept = was ?? new FroxelFogSettings();
+        return new FroxelFogSettings
+        {
+            Quality = quality,
+            Distance = distance,
+            Lumps = kept.Lumps,
+            LumpSize = kept.LumpSize,
+            Wind = kept.Wind,
+            Lights = kept.Lights,
+            Boxes = kept.Boxes,
+        };
     }
 }

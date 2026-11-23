@@ -435,6 +435,14 @@ settings panel draws them on a page for each first word of their names.
 | `field.far` | How far ahead a far cascade reaches, in meters, 0 for none | 0 | |
 | `field.triangles` | The most triangles splatted into the field a frame | 32768 | |
 | `scenes.folder` | The folder the scene packs are fetched into and read from | the shared one | `BCS_SCENE_PACKS` |
+| `sky.fog_visibility` | How far the sky's fog has gone to 95% at its base, in meters, 0 for none | 0 | |
+| `sky.fog_height` | How far above its base the sky's fog thins by e, in meters | 80 | |
+| `sky.fog_base` | The height the sky's fog is thickest at, in meters | 0 | |
+| `sky.froxel_quality` | The quality the fog is worked out in froxels at, `Off`, `Low`, `Medium` or `High` | Off | |
+| `sky.froxel_distance` | How far from the cameras the froxels reach, in meters | 250 | |
+| `sky.cloud_quality` | The quality the clouds are marched at, `Off`, `Low`, `Medium` or `High` | Off | |
+| `sky.cloud_cover` | How much of the sky the clouds cover, 0 to 1 | 0.45 | |
+| `sky.forecast` | Whether the forecast writes the engine's weather | off | |
 | `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
 | `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
 | `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |
@@ -446,8 +454,11 @@ settings panel draws them on a page for each first word of their names.
 
 The `run` settings say how the run was started and only read, since no start reads a value set while
 the program runs. The others set the running app, and the commands that set them stand beside them,
-`app.frametime`, `app.hold`, `app.speed`, `app.pause`, `gi.set`, `gi.screen`, `gi.bounces` and
-`field.set`. A variable the environment holds overrides its setting for the whole run, and a set is
+`app.frametime`, `app.hold`, `app.speed`, `app.pause`, `gi.set`, `gi.screen`, `gi.bounces`,
+`field.set`, `sky.fog`, `sky.froxels`, `sky.clouds` and `sky.weather`. The `sky` settings read the
+first camera drawing their part and set every camera its command sets, and refuse where no camera
+draws it, save `sky.fog_visibility` and `sky.cloud_quality`, which start their part where the
+command would and take it off at 0 and `Off`. A variable the environment holds overrides its setting for the whole run, and a set is
 then kept for the settings file alone.
 
 ### The settings file

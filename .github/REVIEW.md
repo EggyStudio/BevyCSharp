@@ -1078,3 +1078,39 @@ Shared: 3DEngine's cameras read its managed input (`E3D.Cameras`), which its hol
 bridge's part has no counterpart there.
 
 NormTests passed, 19.
+
+155, step 3's sky settings, in the commit carrying this.
+
+The settings. The sky's values its commands set are settings of the Diagnostics module's registry on
+the panel's `sky` page, `sky.fog_visibility`, `sky.fog_height` and `sky.fog_base` for what `sky.fog`
+sets, `sky.froxel_quality` and `sky.froxel_distance` for `sky.froxels`, `sky.cloud_quality` and
+`sky.cloud_cover` for `sky.clouds`, and `sky.forecast` for the forecast `sky.weather` turns on and
+off. The fog, its froxels and the clouds are a camera's, so each setting reads the first camera
+drawing its part and sets every camera the part's command sets. A part no camera draws reads its
+default and refuses a set with the reason, save the fog's visibility and the clouds' quality, which
+start their part on the cameras the commands start it on and take it off at 0 and `Off`. The
+commands stand beside them for the scripts and guides that name them, and their choice of cameras
+and the froxels they keep are shared with the settings. None is saved, as none of the engine's is.
+
+Left out. The weather's preset is no setting, since the weather eases toward it and the forecast
+writes over it, so it holds no value that reads back, and `sky.strike` lasts a moment. Where the
+engine's weather gives a camera its fog or its clouds, as the feature test's does with its weather
+on, it gives them again each frame from the settings it starts from, so a set of that part there is
+refused with a reason that names `sky.weather` and `sky.forecast`. The commands set it all the same
+and the weather writes over it in the next frame, which this commit leaves as it was.
+
+The tests. `SkySettingsTests` holds that every setting is the registry's on the `sky` page and
+unsaved and refuses where no camera draws its part, that a console line of each sets a camera's fog,
+froxels and clouds with the rest of the fog as it was and takes the fog and the clouds off, and that
+on a camera with the weather the fog's and the clouds' settings refuse by the weather while
+`sky.forecast` sets the forecast. The guides' settings table takes the eight rows, and the sky guide
+names them beside each command.
+
+The whole suite passed from one tree, 2,207 passed, 0 failed and 5 skipped, 2,212 in all where the
+listing is 2,201, the solution built from nothing with warnings as errors, in 14 parts and the rest.
+The public listing and the cheatsheet are unchanged.
+
+Shared: 3DEngine's settings hold `sky.hours` on the same page, and these names are offered for its
+fog, froxels and clouds where it draws them from the module.
+
+NormTests passed, 19.
