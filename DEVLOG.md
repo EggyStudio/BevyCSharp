@@ -30,6 +30,19 @@ sharp against nearest beside them, equal blocks at a ratio of 2 but for the scen
 between captures, and at 1.5 each picture pixel one whole screen pixel and half of one blended with
 its neighbor.
 
+![](.github/assets/readings/2026-11-23-item-162-first-bounce-wall.webp)
+The meadow's near wall at 8:00 on the feature test, offscreen at 1280 by 720, its part in the east
+wall's shadow beside the sunlit paving split in six, each part's first bounce over a reference
+traced at one bounce and settled over the reference of every bounce, with the 36 screen probes whose
+rays were read against the same rays traced.
+
+![](.github/assets/readings/2026-11-23-item-164-window-picture.webp)
+The window's picture on the feature test in borderless fullscreen on a headless mutter's virtual
+screen of 1920 by 1080, a 4:3 picture as the screen's own shape, fitted with black at the sides and
+stretched over the screen, render.scale 67% in the linear, nearest and sharp filters on one crop
+with sharp against nearest beside them, and the settings panel's render and window pages drawn at
+the screen's size over the scaled picture, each page's rows in the order it gives them.
+
 ## 2026-11-22
 
 ![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)

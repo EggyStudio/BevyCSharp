@@ -77,6 +77,13 @@ viewport, the sky's, the weather's, the lighting's and its shaders', and count i
 viewport's corner, so a camera drawing half of a window shows what it shows in a window of that
 size alone.
 
+Where the window's picture is drawn at a size or a shape of its own, by the player's `render`
+settings or the game's `Render.Picture` (see the [window guide](window.md#the-window)), every
+camera on the window draws into the picture instead and takes its shape, and a viewport keeps its
+share of the window, scaled to the picture, so the same viewport shows the same part at any
+`render.scale`. A camera's pixels are then the picture's, the ones its effects count and
+`Render.PictureSize` reads.
+
 `Render.SetPerspective(camera, fieldOfView, near, far)` changes a camera's lens while it runs,
 since `CameraSettings` only decides it when the camera is made.
 

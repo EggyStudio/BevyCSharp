@@ -17353,3 +17353,188 @@ bridge's part has no counterpart there.
 NormTests passed, 19.
 
 155, step 3's sky settings, in the commit carrying this.
+
+The settings. The sky's values its commands set are settings of the Diagnostics module's registry on
+the panel's `sky` page, `sky.fog_visibility`, `sky.fog_height` and `sky.fog_base` for what `sky.fog`
+sets, `sky.froxel_quality` and `sky.froxel_distance` for `sky.froxels`, `sky.cloud_quality` and
+`sky.cloud_cover` for `sky.clouds`, and `sky.forecast` for the forecast `sky.weather` turns on and
+off. The fog, its froxels and the clouds are a camera's, so each setting reads the first camera
+drawing its part and sets every camera the part's command sets. A part no camera draws reads its
+default and refuses a set with the reason, save the fog's visibility and the clouds' quality, which
+start their part on the cameras the commands start it on and take it off at 0 and `Off`. The
+commands stand beside them for the scripts and guides that name them, and their choice of cameras
+and the froxels they keep are shared with the settings. None is saved, as none of the engine's is.
+
+Left out. The weather's preset is no setting, since the weather eases toward it and the forecast
+writes over it, so it holds no value that reads back, and `sky.strike` lasts a moment. Where the
+engine's weather gives a camera its fog or its clouds, as the feature test's does with its weather
+on, it gives them again each frame from the settings it starts from, so a set of that part there is
+refused with a reason that names `sky.weather` and `sky.forecast`. The commands set it all the same
+and the weather writes over it in the next frame, which this commit leaves as it was.
+
+The tests. `SkySettingsTests` holds that every setting is the registry's on the `sky` page and
+unsaved and refuses where no camera draws its part, that a console line of each sets a camera's fog,
+froxels and clouds with the rest of the fog as it was and takes the fog and the clouds off, and that
+on a camera with the weather the fog's and the clouds' settings refuse by the weather while
+`sky.forecast` sets the forecast. The guides' settings table takes the eight rows, and the sky guide
+names them beside each command.
+
+The whole suite passed from one tree, 2,207 passed, 0 failed and 5 skipped, 2,212 in all where the
+listing is 2,201, the solution built from nothing with warnings as errors, in 14 parts and the rest.
+The public listing and the cheatsheet are unchanged.
+
+Shared: 3DEngine's settings hold `sky.hours` on the same page, and these names are offered for its
+fog, froxels and clouds where it draws them from the module.
+
+NormTests passed, 19.
+
+160, the window's settings in the panel, in the commit carrying this.
+
+The page. `window.mode` (Windowed, Borderless and Fullscreen), `window.resizable`, `window.width`,
+`window.height`, `window.monitor` and `window.vsync` are settings of the Diagnostics module's
+registry, made in Core (`WindowSettings`), so the panel draws them as its `window` page. Each is
+saved, their names, choices and summaries are the sibling's, and no command holds a name of theirs,
+`window.list` and `window.shot` standing beside them. Each acts at once on Bevy's window, so none
+says "at the next start".
+
+The start. An app being made reads the settings file's lines of the page before it makes its window,
+the same file the module reads whole as the app starts (`SettingsPath`, which the kept settings take
+their path from too), and gives them to the bridge through four new fields of `BcsConfig`, the mode,
+the screen and whether the edges resize the window, with the size and vsync it gave before. The
+bridge makes the window in that mode, on that screen, before its first frame is shown. The ABI is at
+329 on both sides, and the five new entry points run under the guard. The first window is made in a
+module of its own, `window::first`, out of `build_app`, which holds app.rs to 767 lines (N 1.3).
+
+The refusal. Fullscreen is asked of the bridge before it is set, which refuses it on Wayland, whose
+winit gives no window a mode of the screen's, where the system names no screen under the window, and
+where the screen lists no mode at its own size and rate, where winit would leave the window as it
+was and Bevy would cover the screen borderless, each saying so in the log alone. The console answers
+REFUSED with the reason, and the window keeps the mode it holds. A compositor that refuses a mode
+after taking the request is not watched for, since the three checks find what it would refuse before
+the set and no test could reach it. Borderless covers the screen at its own mode and is not refused.
+
+The size. Leaving the window's mode keeps its size as a window, and `window.width` and
+`window.height` set it while the window covers its screen, given back on the return. A window
+manager answers the return a few frames on with a size of its own, which mutter gives an Xwayland
+window 37 pixels shorter than the one it had, so the size given back is held for 30 frames, set
+again in each that differs, from the engine's frame sync beside the window's memory.
+
+The screen and the reading. `window.monitor` reads where there is one screen and moves the window to
+the screen's middle where there are more, and a window on Wayland stays where the system put it,
+with the set saying so. A run that shows no window, a headless one, one drawn offscreen, one opening
+no window of its own and one on the headless bridge, has the page reading only with the reason,
+through the module's `Setting.Lock` at c8c2694, whose pointer moves in this commit. The file's lines
+of the page stay as they stand for a run that shows one.
+
+The tests. `WindowSettingsTests` holds the page in the registry, its settings saved and reading only
+in a headless run, and a start from a file giving the window each line in the file's order, a
+refused one leaving the line before it standing, with a run that shows no window taking its config
+alone. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` opens a window
+from a file of the page's lines, sets and reads each setting on it, takes Xvfb's refusal of
+fullscreen with its reason, whose modes carry no rate, holds the size given back over a size of the
+system's set a frame after the return, and opens the next start from the file the run wrote. With
+the hold taken out of the frame sync the window reads 1000 by 300 after the return and the test
+fails (N 3.1). The workflow's storm step looks for three passed tests. Xvfb runs no window manager,
+so the storm reads the modes the window holds and not the size it covers, which the sheet shows.
+
+The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
+through Xwayland, its window page and the three modes, with the refusal and the return, in the
+readings and the dump, sent to the owner.
+
+The guides. The tools guide's table gains the six rows and says the window's settings are saved and
+read before the window is made, and the window guide gains a paragraph on the page.
+
+The public listing gains four fields of `NativeConfig`, `Mode`, `FixedSize`, `HasMonitor` and
+`Monitor`, and loses nothing. The comments of the files touched are rewrapped to 100 columns (N
+4.12).
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 231 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
+failed and 6 skipped, 2,215 in all where the listing is 2,204, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The sixth skip is the new storm test, which runs with
+the storm's two others under Xvfb and passed there, 3 of 3. The cheatsheet is unchanged. A comment
+of the storm test and two of the bridge's manifest were reworded or rewrapped after it, the code as
+it was.
+
+Shared: the names, choices and summaries are 3DEngine's (`EngineSettings.Window.cs`), its start
+ordering the size, the screen and the mode as SDL takes them where Bevy's winit makes the window
+with all of them at once, and its vsync starting off where this one's starts at the config's.
+
+NormTests passed, 19.
+
+161. Done. `window.mode` reads Windowed, Borderless, BorderlessFullscreen and Fullscreen in any
+case, and `window.scaling` reads Linear, Nearest and Integer, Linear by default, as 3DEngine names
+them.
+
+Borderless. A window without the platform's frame at window.width by window.height, placed in the
+middle of the screen window.monitor names from the screen's rectangle in physical pixels, drawn
+pixel for pixel. A size reaching the screen's in both directions makes it Bevy's borderless
+fullscreen, which is the only way it covers, and a width or height set while borderless resizes it,
+centers it again, or covers or uncovers the screen at once. The size and place are held for 30
+frames against a window manager's own, as a return to a window was. The window opens without its
+frame in the middle of the screen Bevy finds for it, and the first frame the screens are listed
+places it on the screen set or makes it cover, since winit lists the screens only after it has made
+the window. A window a game made without its frame, as the editor's is, reads Windowed, and the
+settings give back only a frame they took. On Wayland the compositor places a borderless window, as
+it places every window.
+
+Borderless fullscreen. The window covers its screen at the screen's mode, and the picture is drawn
+at window.width by window.height and brought to the screen in one copy at the frame's end
+(`native/bevy_csharp/src/window/scaled.rs`). Each camera on the window is told the picture's size
+and a scale factor divided by the ratio, so its logical size stays the window's and the pointer,
+picking and a viewport read as they do unscaled. A copy system in the core 2D and 3D graphs, after
+the effects and before Bevy's own copy, draws the camera's picture over the part of the screen it
+spans and sets the camera's output mode to skip, so Bevy's copy leaves it out. Linear samples it
+filtered, Nearest from the nearest picture pixel, and Integer enlarges by the largest whole number
+that fits, the picture in the middle with black round it, its cameras' viewports set to the picture
+inside a target of the screen's size over the whole number. A picture as wide as the screen or as
+tall is drawn at the screen's size. The interface ImGui draws is drawn after the copy at the
+screen's size, its camera being left out of the scaling, and Bevy's interface is drawn on the game's
+cameras into the picture and scaled with it, since this engine has no split between them. The copy's
+shader converts an sRGB or Oklab picture to linear by an entry point of each, since the bridge hands
+WGSL to wgpu with no preprocessor between, which the first storm run found as a parse error at its
+first `#ifdef`. A unit test validates the shader and its three entry points.
+
+Windowed keeps its frame and its place, the place kept on leaving it and given back on the return
+with the size. Fullscreen takes the screen's mode as before, its refusal naming borderless
+fullscreen as the way to cover.
+
+The tests. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` reads a
+borderless window at 1000 by 450 standing at 460 by 315 on Xvfb's screen of 1920 by 1080 without its
+frame, its cover at 1920 by 1080, its return to the middle at 1000 by 450, borderless fullscreen
+with the integer scaling, and the return to a window at the size set there with its place and frame
+given back. `BorderlessFullscreenScalesItsPictureByTheLargestWholeNumberThatFits` reads the window's
+picture of 300 by 200 in a window of 1000 by 450, drawn green from 200 to 800 across and 24 to 424
+down with black corners. With the size of the window read in the frame of the mode the picture was
+the window's size and the test failed (N 3.1). The workflow's storm step looks for four passed
+tests. The bridge's tests add the plans of the three scalings and the copy's shader.
+
+The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
+through Xwayland, each whole screen taken through mutter's screencast on a PipeWire and WirePlumber
+of the run's own with WirePlumber's devices off, so the desktop round a borderless window shows. It
+holds the four modes, borderless at 1280 by 720 in the screen's middle beside borderless at the
+screen's size covering it, and the three scalings on one crop at 960 by 540 and at 1280 by 720,
+where the integer scaling draws pixel for pixel with black round it and ImGui's overlay stays in the
+screen's corner. In the readings and the dump, sent to the owner.
+
+The guides. The window guide says the four modes, the scaling and where the interface is drawn, and
+the tools guide's table gains `window.scaling` and the four modes. The cheatsheet's `Window.SetMode`
+line says the settings' borderless and borderless fullscreen, and five lines of `Render`'s global
+illumination move above its sky as the build lists them.
+
+ABI 330. The public listing gains three fields of `NativeConfig`, `Frameless`, `Scaled` and
+`Scaling`, and loses nothing. `bcs_window_shown` writes whether the window has its frame and whether
+its picture is scaled, and `bcs_window_set_decorations` and `bcs_window_set_scaling` are new.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 237 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
+failed and 7 skipped, 2,216 in all where the listing is 2,205, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The seventh skip is the new storm test of the scaled
+picture, which runs with the storm's three others under Xvfb and passed there, 4 of 4, beside the
+window settings' two. The comments of the files touched are rewrapped to 100 columns (N 4.12), the
+workflow's after the suite, and a comment of the window's settings and one of the copy are reworded
+after it, the code as it was.

@@ -151,14 +151,39 @@ public unsafe struct NativeConfig
     public uint Frameless;
 
     /// <summary>
-    /// Non-zero to draw the first window's picture at its width by its height while it covers its
-    /// screen borderless, brought to the screen as <see cref="Scaling"/> says.
+    /// The first window's picture in pixels, or 0 by 0 where it is <see cref="PictureShare"/> of
+    /// the window's size.
     /// </summary>
-    public uint Scaled;
+    public uint PictureWidth;
+
+    /// <summary>See <see cref="PictureWidth"/>.</summary>
+    public uint PictureHeight;
 
     /// <summary>
-    /// How a scaled picture is brought to the screen, 0 filtered, 1 from the nearest picture pixel
-    /// and 2 sharp with a picture pixel's edge blended, when <see cref="Scaled"/>.
+    /// The picture's share of the window's size along each side where its size is 0 by 0, 1 for
+    /// the window's own.
     /// </summary>
-    public uint Scaling;
+    public float PictureShare;
+
+    /// <summary>
+    /// The picture's shape as a width and a height, or 0 by 0 for its size's own.
+    /// </summary>
+    public float AspectWidth;
+
+    /// <summary>See <see cref="AspectWidth"/>.</summary>
+    public float AspectHeight;
+
+    /// <summary>
+    /// How a picture of a shape unlike the window's stands in it, 0 fitted and 1 stretched.
+    /// </summary>
+    public uint Fit;
+
+    /// <summary>
+    /// How the picture is brought to the window, 0 filtered, 1 from the nearest picture pixel and 2
+    /// sharp with a picture pixel's edge blended.
+    /// </summary>
+    public uint Filter;
+
+    /// <summary>The most frames drawn a second, or 0 for no cap.</summary>
+    public uint FrameLimit;
 }

@@ -70,11 +70,14 @@ pub(crate) fn install(
         crate::window::install(app);
     }
 
-    // A window's icon, which only a run with a window has one to show on, and the picture of a
-    // window covering its screen drawn at a size of its own and scaled to the screen.
+    // A window's icon, which only a run with a window has one to show on, the picture its
+    // cameras draw at a size and a shape of its own, brought to the window, and the cap on the
+    // frames a second.
     if !offscreen {
         crate::window::icon::install(app);
+        crate::window::picture::install(app);
         crate::window::scaled::install(app);
+        crate::window::pace::install(app);
     }
 
     // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since

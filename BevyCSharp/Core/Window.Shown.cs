@@ -65,16 +65,40 @@ public static unsafe partial class Window
         Native.Check(NativeCore.bcs_window_set_decorations(NativeCore.PrimaryWindow, decorations ? 1 : 0), "Window.SetDecorations");
 
     /// <summary>
-    /// Draws the primary window's picture at a size in its logical pixels while it covers its
-    /// screen borderless, brought to the screen by the filter, or at its own size again for none.
+    /// Draws the primary window's picture as it says, its scale or exact size, shape, fit and
+    /// filter, or the window's own picture where it is the window's size and shape.
     /// </summary>
     /// <exception cref="BevyNativeException">
     /// There is no window, or this build has none.
     /// </exception>
-    internal static void SetScaling((uint Width, uint Height)? size, WindowScaling filter) =>
+    internal static void SetPicture(Picture picture)
+    {
+        var (width, height) = picture.Size ?? (0u, 0u);
+        var (aspectWidth, aspectHeight) = picture.Aspect ?? (0f, 0f);
         Native.Check(
-            NativeCore.bcs_window_set_scaling(NativeCore.PrimaryWindow, size?.Width ?? 0, size?.Height ?? 0, (uint)filter),
-            "Window.SetScaling");
+            NativeCore.bcs_window_set_picture(NativeCore.PrimaryWindow, width, height, picture.Scale, aspectWidth, aspectHeight, (uint)picture.Fit, (uint)picture.Filter),
+            "Window.SetPicture");
+    }
+
+    /// <summary>
+    /// The size in pixels the primary window's picture is drawn at, the window's own where its
+    /// picture is, and the part of the window it stands in, in the window's logical pixels from its
+    /// corner, or none where there is no window or no world is lent to ask in.
+    /// </summary>
+    internal static ((uint Width, uint Height) Size, (float X, float Y, float Width, float Height) Area)? PictureInUse()
+    {
+        var size = stackalloc uint[2];
+        var area = stackalloc float[4];
+        if (NativeCore.bcs_window_picture(NativeCore.PrimaryWindow, size, area) != NativeStatus.Ok) return null;
+        return ((size[0], size[1]), (area[0], area[1], area[2], area[3]));
+    }
+
+    /// <summary>
+    /// Caps the frames drawn a second at a number, or takes the cap away at 0.
+    /// </summary>
+    /// <exception cref="BevyNativeException">This build has no window.</exception>
+    internal static void SetFrameLimit(int fps) =>
+        Native.Check(NativeCore.bcs_window_set_frame_limit(fps), "Window.SetFrameLimit");
 }
 
 /// <summary>What the system shows of a window, as <see cref="Window.Shown"/> reads it.</summary>
@@ -86,31 +110,9 @@ public static unsafe partial class Window
 /// <param name="Vsync">Whether a frame waits for the display.</param>
 /// <param name="Decorated">Whether it has the platform's frame.</param>
 /// <param name="Scaled">
-/// Whether its picture is drawn at a size of its own while it covers its screen borderless.
+/// Whether its picture is drawn at a size or a shape unlike its own (<see cref="Picture"/>).
 /// </param>
 internal readonly record struct WindowShown(WindowMode Mode, int Monitor, bool Resizable, bool Vsync, bool Decorated, bool Scaled);
-
-/// <summary>
-/// How a window's picture drawn at a size of its own is brought to its screen, the choices of
-/// <c>window.scaling</c>, by the numbers the bridge takes.
-/// </summary>
-internal enum WindowScaling
-{
-    /// <summary>Filtered, each screen pixel a blend of the picture pixels round it, soft.</summary>
-    Linear = 0,
-
-    /// <summary>
-    /// Each screen pixel from the picture pixel under it, sharp, and even only at a whole ratio.
-    /// </summary>
-    Nearest = 1,
-
-    /// <summary>
-    /// Each screen pixel inside a picture pixel from it whole and one across an edge a blend of the
-    /// two, so every picture pixel is a block of one width that holds still at any ratio, equal to
-    /// <see cref="Nearest"/> at a whole one.
-    /// </summary>
-    Sharp = 2,
-}
 
 /// <summary>Why the system would refuse a window a mode, as the bridge numbers it.</summary>
 internal enum WindowRefusal

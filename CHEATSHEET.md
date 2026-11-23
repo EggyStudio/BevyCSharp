@@ -1243,6 +1243,7 @@ static void SetEditableValue(Entity node, string text);         // Replaces what
 static void EditText(Entity field, TextEdit edit);              // Queues one of Bevy's text edits on a field, applied with those the keyboard makes in the frame, so a button or a virtual key types into a field as a key would
 static bool BeginHidden();                                      // Opens the hidden scope, answering whether what is drawn inside it is drawn this frame, false while Hidden holds
 static void EndHidden();                                        // Closes the hidden scope BeginHidden opened
+static void SetOnPicture(Entity node, bool on = true);          // Keeps a node over the part of the window the scene's picture stands in, or lets it go
 static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
 
 // UiGrid
@@ -1532,7 +1533,7 @@ static void SetSize(uint width, uint height);                   // Resizes the w
 static (uint Width, uint Height) Size();                        // The window's current size, in logical pixels
 static Entity Entity();                                         // The primary window's entity, or None where there is no window
 static float Scale();                                           // How many physical pixels a logical one is
-static void SetMode(WindowMode mode);                           // Sets how the window fills the screen, as the player's window.mode does, whose borderless is a frameless window at the size set and whose borderless fullscreen draws at the size set and scales the picture to the screen
+static void SetMode(WindowMode mode);                           // Sets how the window fills the screen, as the player's window.mode does, whose borderless is a frameless window at the resolution set and whose borderless fullscreen covers the screen
 static void SetPosition(int x, int y);                          // Moves the window, in physical pixels from the desktop's top-left corner
 static void SetIme(bool enabled, float x = 0f, float y = 0f);   // Turns the platform's input method on or off, and says where the text being composed is
 static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false);  // Sets whether the window has a title bar and border, whether it can be resized by dragging, and whether it stays above other windows

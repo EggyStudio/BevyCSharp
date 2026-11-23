@@ -243,9 +243,11 @@ public sealed unsafe partial class App : IDisposable
         var titleBytes = Encoding.UTF8.GetBytes(TitleFor(Config, Project) + "\0");
 
         // Where the window was left, read before it opens, so it opens there, and the mode, the
-        // size, the monitor and the vsync the player set on the settings' window page over it.
+        // resolution, the monitor and the vsync the player set on the settings' window page over
+        // it, with the picture and the cap on the frames of the render page.
         var opening = WindowMemory.Open(Config);
         var start = WindowSettings.Open(Config, opening);
+        var picture = PictureSettings.Current;
 
         fixed (byte* title = titleBytes)
         fixed (byte* assetRoot = assetRootBytes)
@@ -292,8 +294,14 @@ public sealed unsafe partial class App : IDisposable
                 HasMonitor = start.Monitor is null ? 0u : 1u,
                 Monitor = (uint)(start.Monitor ?? 0),
                 Frameless = start.Mode == WindowSettings.Mode.Borderless ? 1u : 0u,
-                Scaled = start.Mode == WindowSettings.Mode.BorderlessFullscreen ? 1u : 0u,
-                Scaling = (uint)start.Scaling,
+                PictureWidth = picture.Size?.Width ?? 0,
+                PictureHeight = picture.Size?.Height ?? 0,
+                PictureShare = picture.Scale,
+                AspectWidth = picture.Aspect?.Width ?? 0f,
+                AspectHeight = picture.Aspect?.Height ?? 0f,
+                Fit = (uint)picture.Fit,
+                Filter = (uint)picture.Filter,
+                FrameLimit = (uint)PictureSettings.FrameLimit,
             };
             _handle = Native.bcs_app_create(&native);
         }

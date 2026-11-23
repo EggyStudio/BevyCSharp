@@ -221,6 +221,9 @@ fn camera(mut commands: Commands) {
         // would be applied twice.
         Tonemapping::None,
         Msaa::Off,
+        // A picture of its own at the window's size, which a scaled camera on the window would
+        // otherwise share at the size it draws at.
+        crate::window::picture::interface_usages(),
         // A layer of its own, which nothing else is on.
         //
         // Every 2D camera is a camera the gizmo renderer queues into, and a gizmo queued into this

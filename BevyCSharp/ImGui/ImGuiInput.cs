@@ -24,7 +24,9 @@ internal static class ImGuiInput
     private static bool _right;
     private static bool _middle;
 
-    /// <summary>What ImGui says about a field being typed into, as <c>ImGuiPlatformImeData</c> lays it out.</summary>
+    /// <summary>
+    /// What ImGui says about a field being typed into, as <c>ImGuiPlatformImeData</c> lays it out.
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     internal struct ImeData
     {
@@ -36,10 +38,14 @@ internal static class ImGuiInput
     /// <summary>What ImGui last said about the caret of the field being typed into.</summary>
     private static ImeData _wanted;
 
-    /// <summary>What the window was last told, so it is told again only when that changes.</summary>
+    /// <summary>
+    /// What the window was last told, so it is told again only when that changes.
+    /// </summary>
     private static ImeData _told;
 
-    /// <summary>Whether the window turned the input method down, so it is not asked every frame.</summary>
+    /// <summary>
+    /// Whether the window turned the input method down, so it is not asked every frame.
+    /// </summary>
     private static bool _noWindow;
 
     /// <summary>
@@ -84,16 +90,21 @@ internal static class ImGuiInput
     /// Tells the interface what the pointer and the keyboard did, as they came, a panel holding the
     /// program's input or not.
     /// </summary>
+    /// <param name="io">The interface's input.</param>
+    /// <param name="input">The program's input.</param>
+    /// <param name="scale">
+    /// How many interface pixels a logical pixel of the window is, which the pointer's place is
+    /// turned into them by.
+    /// </param>
+    /// <param name="committed">Text the platform's input method committed.</param>
     internal static void Feed(ImGuiIOPtr io, Input input, float scale, ReadOnlySpan<ImeCommit> committed = default)
     {
-        _ = scale;
-
         // A pretend pointer wins, so a test that put it somewhere is not overruled by the hand
         // resting on the desk.
         if (SyntheticInput.Pretend is null)
         {
             var (x, y) = input.InterfaceMouse;
-            io.AddMousePosEvent(x, y);
+            io.AddMousePosEvent(x * scale, y * scale);
 
             Button(io, 0, input.InterfaceMouseDown(MouseButton.Left), ref _left);
             Button(io, 1, input.InterfaceMouseDown(MouseButton.Right), ref _right);
@@ -148,7 +159,9 @@ internal static class ImGuiInput
         io.AddMouseButtonEvent(button, down);
     }
 
-    /// <summary>What was down last frame, so a change can be reported rather than a state.</summary>
+    /// <summary>
+    /// What was down last frame, so a change can be reported rather than a state.
+    /// </summary>
     /// <remarks>
     /// Written after the table it is sized from, because a static field is built in the order it is
     /// written, and one built from a field below it is built from nothing.

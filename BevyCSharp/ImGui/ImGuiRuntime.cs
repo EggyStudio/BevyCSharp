@@ -47,7 +47,9 @@ public static unsafe class ImGuiRuntime
     /// </remarks>
     public static bool WantsMouse => IsRunning && ImGui.GetIO().WantCaptureMouse;
 
-    /// <summary>Whether the interface is taking the keyboard, so no key binding should fire.</summary>
+    /// <summary>
+    /// Whether the interface is taking the keyboard, so no key binding should fire.
+    /// </summary>
     public static bool WantsKeyboard => IsRunning && ImGui.GetIO().WantCaptureKeyboard;
 
     /// <summary>
@@ -62,10 +64,17 @@ public static unsafe class ImGuiRuntime
     /// </remarks>
     public static bool Typing => IsRunning && ImGui.GetIO().WantTextInput;
 
-    /// <summary>How large the interface thinks the window is, in logical pixels.</summary>
+    /// <summary>How large the interface thinks the window is, in the interface's pixels.</summary>
+    /// <remarks>
+    /// The window's physical pixels divided by <see cref="Scale"/>, which is the window's logical
+    /// pixels where <c>interface.scale</c> is native.
+    /// </remarks>
     public static Vector2 Size { get; private set; }
 
-    /// <summary>How many physical pixels a logical one is.</summary>
+    /// <summary>
+    /// How many physical pixels an interface pixel is, the display's scale factor unless
+    /// <c>interface.scale</c> sets another.
+    /// </summary>
     public static float Scale { get; private set; } = 1f;
 
     /// <summary>How large the text is, in logical pixels.</summary>
@@ -85,7 +94,9 @@ public static unsafe class ImGuiRuntime
     /// <paramref name="size"/> logical pixels.
     /// </param>
     /// <param name="size">How large the text is, in logical pixels.</param>
-    /// <param name="faces">The font files to load, the first being the one text uses by default.</param>
+    /// <param name="faces">
+    /// The font files to load, the first being the one text uses by default.
+    /// </param>
     public static void Start(string? fonts = null, float size = 15f, params string[] faces)
     {
         if (IsRunning) return;
@@ -143,6 +154,7 @@ public static unsafe class ImGuiRuntime
                 Faces[face] = io.Fonts.AddFontFromFileTTF(path, size);
             }
         }
+        (_fonts, _faces, _density) = (fonts, faces, 1f);
 
         Atlas(io);
 
@@ -167,6 +179,7 @@ public static unsafe class ImGuiRuntime
         IsRunning = false;
         _atlas = 0;
         Faces.Clear();
+        (_fonts, _faces, _density) = (null, [], 1f);
         _cursor = ImGuiMouseCursor.Arrow;
     }
 
@@ -187,6 +200,40 @@ public static unsafe class ImGuiRuntime
         io.Fonts.ClearTexData();
     }
 
+    // Where the faces were loaded from, which, and the interface scale they were made at.
+    private static string? _fonts;
+    private static string[] _faces = [];
+    private static float _density = 1f;
+
+    /// <summary>
+    /// Makes the faces again at the size they are shown at, the text's size times the interface's
+    /// scale, drawn at the scale's inverse, so a glyph's pixels are the screen's at any scale, and
+    /// gives the engine the new atlas in the old one's place.
+    /// </summary>
+    /// <remarks>
+    /// Called between frames, before a frame begins, so no draw list holds the faces it clears,
+    /// and every face is asked for by name (<see cref="Face"/>) each time it is pushed. The
+    /// built-in face, used where no file was found, is drawn at its one size and enlarged.
+    /// </remarks>
+    private static void Rasterize(ImGuiIOPtr io, float density)
+    {
+        _density = density;
+        if (_fonts is not { } fonts || Faces.Count == 0) return;
+
+        io.Fonts.Clear();
+        Faces.Clear();
+        foreach (var face in _faces)
+        {
+            var path = Path.Combine(fonts, face);
+            if (File.Exists(path)) Faces[face] = io.Fonts.AddFontFromFileTTF(path, FontSize * density);
+        }
+        io.FontGlobalScale = 1f / density;
+
+        var old = _atlas;
+        Atlas(io);
+        if (old != 0 && old != _atlas) NativeImGui.bcs_imgui_drop_texture(old);
+    }
+
     /// <summary>Every face that was asked for and found, by the file it came from.</summary>
     private static readonly Dictionary<string, ImFontPtr> Faces = [];
 
@@ -202,7 +249,9 @@ public static unsafe class ImGuiRuntime
     public static ImFontPtr Face(string face) =>
         Faces.TryGetValue(face, out var found) ? found : ImGui.GetFont();
 
-    /// <summary>Starts a frame, how large the window is, what the pointer did, what was typed.</summary>
+    /// <summary>
+    /// Starts a frame, how large the window is, what the pointer did, what was typed.
+    /// </summary>
     public static void Begin(BehaviorContext ctx)
     {
         ArgumentNullException.ThrowIfNull(ctx);
@@ -211,25 +260,34 @@ public static unsafe class ImGuiRuntime
         var io = ImGui.GetIO();
 
         var window = Window.Size();
-        var scale = Window.Scale();
+        var display = Window.Scale();
+        var scale = InterfaceSettings.Scale(display);
 
-        // Logical pixels, the unit of everything the bridge reports about a window and of the
-        // pointer. The scale is only what a clip rectangle is turned into.
-        Size = new Vector2(Math.Max(1f, window.Width), Math.Max(1f, window.Height));
+        // The interface's own pixels, the window's physical ones divided by the interface's scale,
+        // which is the display's unless a player sets another, so the window's logical pixels the
+        // bridge reports and the pointer comes in are turned into them by the two scales' ratio.
+        // The interface is drawn at the window's size whatever size the scene is drawn at, so it
+        // stays sharp over a picture drawn small. A clip rectangle is turned into the screen's
+        // pixels by the scale, and the faces are made again at it where it changes, so a glyph's
+        // pixels are the screen's.
+        Size = new Vector2(Math.Max(1f, window.Width * display / scale), Math.Max(1f, window.Height * display / scale));
         Scale = scale;
+        if (scale != _density) Rasterize(io, scale);
 
         io.DisplaySize = Size;
         io.DisplayFramebufferScale = new Vector2(scale, scale);
-        // The machine's clock, since a double click's window and a key's repeat are the player's time
-        // and go on at their pace while the game is paused or slowed.
+        // The machine's clock, since a double click's window and a key's repeat are the player's
+        // time and go on at their pace while the game is paused or slowed.
         io.DeltaTime = ctx.Time.RawDeltaSeconds > 0.0 ? (float)ctx.Time.RawDeltaSeconds : 1f / 60f;
 
-        ImGuiInput.Feed(io, ctx.Input, scale, ctx.Read<ImeCommit>());
+        ImGuiInput.Feed(io, ctx.Input, display / scale, ctx.Read<ImeCommit>());
 
         ImGui.NewFrame();
     }
 
-    /// <summary>The pointer shape last handed to the window, so it is handed over only on a change.</summary>
+    /// <summary>
+    /// The pointer shape last handed to the window, so it is handed over only on a change.
+    /// </summary>
     private static ImGuiMouseCursor _cursor = ImGuiMouseCursor.Arrow;
 
     /// <summary>

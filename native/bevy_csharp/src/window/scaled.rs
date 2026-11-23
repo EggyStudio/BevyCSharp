@@ -1,126 +1,63 @@
-//! A window covering its screen whose picture is drawn at a size of its own and brought to the
-//! screen in one copy at the frame's end, softer and cheaper at a size under the screen's, which
-//! the settings' borderless fullscreen asks for.
+//! The copy that brings a window's picture to it at the frame's end, where the picture differs
+//! from the window, which [`super::picture`] works out and the cameras draw.
 //!
-//! **How the cameras draw at the picture's size.** Each camera on such a window is told its target
-//! is the picture's size in pixels with the window's logical size, its scale factor divided by the
-//! ratio the picture is enlarged by, so every texture of its view, its passes and Bevy's interface
-//! on it are made at the picture's size, and a pointer at a place on the window lands on what is
-//! drawn there, since the camera's logical rectangle is the one it is shown over. Where the picture
-//! stands in the middle with black round it, as a shape unlike the screen's leaves it, the target
-//! is the screen divided by the ratio and the camera is given the middle of it as its viewport,
-//! which stands in the window's middle once the target is drawn over the window. A game's own
-//! viewport is scaled into that middle and given back when the scaling ends.
-//!
-//! **The copy.** Bevy's own copy to the window clips to the camera's viewport in the target's
-//! pixels, which here are not the window's, and samples the nearest pixel, so it is left out for a
-//! scaled camera's frame, and this copy draws the whole target over the window with the filter the
-//! settings chose, clipped to where the picture stands. The interface ImGui draws is on a camera
-//! of its own that is not scaled, so it is drawn after the copy at the screen's size, and Bevy's
-//! interface, drawn by the scene's camera, is scaled with the picture.
+//! Bevy's own copy to the window clips to the camera's viewport in the target's pixels, which here
+//! are not the window's, and samples the nearest pixel, so it is left out for a scaled camera's
+//! frame, and this copy draws the whole target over the window with the filter the settings chose,
+//! clipped to where the picture stands. A picture brought down to the window is copied smoothly
+//! whatever the filter. The interface ImGui draws, and Bevy's where the window's picture is its
+//! own camera's, is on a camera that is not scaled, so it is drawn after the copy at the window's
+//! size.
 
 #![cfg(feature = "render")]
 
-use bevy::app::{App, PostUpdate};
+use bevy::app::App;
 use bevy::asset::{AssetServer, Handle, embedded_asset, load_embedded_asset};
-use bevy::camera::visibility::update_frusta;
-use bevy::camera::{
-    Camera, CameraOutputMode, CameraUpdateSystems, CompositingSpace, NormalizedRenderTarget,
-    Projection, RenderTarget, RenderTargetInfo, Viewport,
-};
+use bevy::camera::{Camera2d, CameraOutputMode, CompositingSpace};
 use bevy::color::LinearRgba;
+use bevy::core_pipeline::core_2d::prepare_core_2d_depth_textures;
 use bevy::core_pipeline::upscaling::upscaling;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems, FullscreenShader};
 use bevy::ecs::prelude::*;
 use bevy::math::UVec2;
 use bevy::platform::collections::HashMap;
-use bevy::render::camera::{ExtractedCamera, camera_system};
+use bevy::render::camera::ExtractedCamera;
 use bevy::render::diagnostic::RecordDiagnostics;
 use bevy::render::render_resource::binding_types::{sampler, texture_2d};
 use bevy::render::render_resource::{
     BindGroup, BindGroupEntries, BindGroupLayoutDescriptor, BindGroupLayoutEntries, BlendState,
-    CachedRenderPipelineId, ColorTargetState, ColorWrites, FilterMode, FragmentState, PipelineCache,
+    CachedRenderPipelineId, ColorTargetState, ColorWrites, Extent3d, FilterMode, FragmentState, PipelineCache,
     RenderPassDescriptor, RenderPipelineDescriptor, Sampler, SamplerBindingType, SamplerDescriptor,
-    ShaderStages, SpecializedRenderPipeline, SpecializedRenderPipelines, TextureFormat, TextureSampleType,
-    TextureViewId,
+    ShaderStages, SpecializedRenderPipeline, SpecializedRenderPipelines, TextureDescriptor, TextureDimension,
+    TextureFormat, TextureSampleType, TextureViewId,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
 use bevy::render::sync_world::RenderEntity;
-use bevy::render::view::{ResolvedCompositingSpace, ViewTarget};
+use bevy::render::texture::TextureCache;
+use bevy::render::view::{ResolvedCompositingSpace, ViewDepthStencilTexture, ViewTarget};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderStartup, RenderSystems};
 use bevy::shader::Shader;
 use bevy::ui_render::ui_pass;
-use bevy::window::{PrimaryWindow, Window, WindowMode};
 
-use crate::imgui::render::InterfaceView;
+use super::picture::{ScaledCamera, filter};
 use crate::render::corners::DrawCorners;
 
-/// How a scaled window's picture is brought to its screen, by the numbers
-/// `bcs_window_set_scaling` takes.
-pub mod filter {
-    /// Filtered, each screen pixel a blend of the picture pixels round it, soft.
-    pub const LINEAR: u32 = 0;
-    /// Each screen pixel from the picture pixel under it, sharp, and even only at a whole ratio.
-    pub const NEAREST: u32 = 1;
-    /// Each screen pixel inside a picture pixel from it whole and one across an edge a blend of
-    /// the two by how much of each it spans, so every picture pixel is a block of one width with
-    /// one blended pixel at most on its edge, which holds still as the picture moves at any ratio
-    /// and equals [`NEAREST`] at a whole one.
-    pub const SHARP: u32 = 2;
-}
-
-/// On a window, the size its picture is drawn at while it covers its screen borderless, in the
-/// window's logical pixels as its own size is, and how the picture is brought to the screen.
-#[derive(Component, Clone, Copy, PartialEq, Eq, Debug)]
-pub struct WindowScaling {
-    /// The picture's size, which the window's scale factor turns into the pixels it is drawn at.
-    pub size: UVec2,
-    /// One of [`filter`]'s.
-    pub filter: u32,
-}
-
-/// On a camera drawing a scaled window's picture, the viewport its game gave it, the one set in
-/// its place, and what the frame's end copies of its picture.
-#[derive(Component)]
-struct ScaledCamera {
-    own: Option<Viewport>,
-    set: Option<Viewport>,
-    copy: WindowCopy,
-}
-
 /// What the frame's end copies of a scaled camera's picture, the part of the window from its
-/// corner the whole target is drawn over, the part of that the picture stands in, and the scaling's
-/// filter, one of [`filter`]'s.
+/// corner the whole target is drawn over, the part of that the picture stands in, the filter, one
+/// of [`filter`]'s, and whether the picture is brought down along either side, which is copied
+/// smoothly whatever the filter.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
-struct WindowCopy {
-    over: UVec2,
-    at: UVec2,
-    size: UVec2,
-    filter: u32,
+pub struct WindowCopy {
+    pub over: UVec2,
+    pub at: UVec2,
+    pub size: UVec2,
+    pub filter: u32,
+    pub down: bool,
 }
 
-/// How a camera on a scaled window draws, the target it is told of, the place and size of the
-/// picture in it, the window's size, and the copy.
-#[derive(Debug, PartialEq)]
-struct Plan {
-    target: UVec2,
-    scale_factor: f32,
-    at: UVec2,
-    picture: UVec2,
-    screen: UVec2,
-    copy: WindowCopy,
-}
-
-/// Adds what draws a scaled window's picture at its own size and brings it to the screen.
+/// Adds the copy that brings a scaled camera's picture to its window.
 pub fn install(app: &mut App) {
     embedded_asset!(app, "scaled.wgsl");
-
-    // After Bevy's camera system has sized each camera from its window, so the size given here
-    // stands, and before the frusta and Bevy's interface read it.
-    app.add_systems(
-        PostUpdate,
-        scale_cameras.in_set(CameraUpdateSystems).after(camera_system).before(update_frusta),
-    );
 
     let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
         return;
@@ -133,6 +70,10 @@ pub fn install(app: &mut App) {
         .add_systems(RenderStartup, init_pipeline)
         .add_systems(ExtractSchedule, extract_scaled)
         .add_systems(Render, prepare_scaled.in_set(RenderSystems::Prepare))
+        .add_systems(
+            Render,
+            own_depth.after(prepare_core_2d_depth_textures).in_set(RenderSystems::PrepareResources),
+        )
         // In the place of Bevy's copy to the window, after everything the camera does. Bevy's
         // interface and the rounded corners draw into the camera's picture in the same place,
         // after its effects and before the copy to the window, and nothing else orders them
@@ -147,161 +88,6 @@ pub fn install(app: &mut App) {
         );
 }
 
-/// How a camera on `window` draws where the window covers its screen borderless and is scaled,
-/// or none where it draws at the window's own size.
-///
-/// The picture is the scaling's size in the window's pixels, enlarged by the ratio of the screen
-/// to it that keeps its shape. A picture as large as the screen or larger is drawn at the screen's
-/// own size, since it would be shrunk.
-fn plan(window: &Window, scaling: &WindowScaling) -> Option<Plan> {
-    if !matches!(window.mode, WindowMode::BorderlessFullscreen(_)) {
-        return None;
-    }
-    let screen = window.physical_size();
-    let scale_factor = window.resolution.scale_factor();
-    let picture = (scaling.size.as_vec2() * scale_factor).round().as_uvec2().max(UVec2::ONE);
-    if screen.x == 0 || screen.y == 0 {
-        return None;
-    }
-    let ratio = (screen.as_vec2() / picture.as_vec2()).min_element();
-    if ratio <= 1.0 {
-        return None;
-    }
-
-    let target = (screen.as_vec2() / ratio).round().as_uvec2().max(picture);
-    let at = (target - picture) / 2;
-    let stretch = screen.as_vec2() / target.as_vec2();
-    let copy = WindowCopy {
-        over: screen,
-        at: (at.as_vec2() * stretch).round().as_uvec2(),
-        size: (picture.as_vec2() * stretch).round().as_uvec2().min(screen),
-        filter: scaling.filter,
-    };
-
-    Some(Plan { target, scale_factor: scale_factor / ratio, at, picture, screen, copy })
-}
-
-/// The viewport a scaled camera is given, the game's own scaled into where the picture stands, or
-/// where the picture stands where that is not the whole target.
-fn viewport(plan: &Plan, own: Option<&Viewport>) -> Option<Viewport> {
-    match own {
-        None if plan.at == UVec2::ZERO && plan.target == plan.picture => None,
-        None => Some(Viewport { physical_position: plan.at, physical_size: plan.picture, depth: 0.0..1.0 }),
-        Some(own) => {
-            let ratio = plan.picture.as_vec2() / plan.screen.as_vec2();
-            Some(Viewport {
-                physical_position: plan.at + (own.physical_position.as_vec2() * ratio).round().as_uvec2(),
-                physical_size: (own.physical_size.as_vec2() * ratio).round().as_uvec2().max(UVec2::ONE),
-                depth: own.depth.clone(),
-            })
-        }
-    }
-}
-
-fn same(a: &Option<Viewport>, b: &Option<Viewport>) -> bool {
-    match (a, b) {
-        (None, None) => true,
-        (Some(a), Some(b)) => {
-            a.physical_position == b.physical_position && a.physical_size == b.physical_size && a.depth == b.depth
-        }
-        _ => false,
-    }
-}
-
-fn same_target(a: &Option<RenderTargetInfo>, size: UVec2, scale_factor: f32) -> bool {
-    a.as_ref().is_some_and(|a| a.physical_size == size && a.scale_factor == scale_factor)
-}
-
-/// The camera's projection made again for its logical viewport, as Bevy's camera system makes it.
-///
-/// Written past change detection where the camera system wrote the projection this frame, which
-/// has marked it for the frusta, so the camera system does not make it again from the window in
-/// the next frame and this again after it, in every frame.
-fn reproject(camera: &mut Camera, projection: &mut Mut<Projection>) {
-    let Some(size) = camera.logical_viewport_size().filter(|size| size.x != 0.0 && size.y != 0.0) else {
-        return;
-    };
-    let marked = projection.is_changed();
-    let projection: &mut Projection = if marked { projection.bypass_change_detection() } else { &mut **projection };
-    projection.update(size.x, size.y);
-    camera.computed.clip_from_view = match &camera.sub_camera_view {
-        Some(sub) => projection.get_clip_from_view_for_sub(sub),
-        None => projection.get_clip_from_view(),
-    };
-}
-
-/// Tells each camera on a scaled window the picture's size as its target, and gives a camera told
-/// so whose window is unscaled its own viewport and its window's size back.
-///
-/// Only what differs from what the camera holds is written, so a camera stays unchanged from frame
-/// to frame once it is scaled, until the window or the game changes something.
-fn scale_cameras(
-    mut commands: Commands,
-    primary: Query<Entity, With<PrimaryWindow>>,
-    windows: Query<(&Window, Option<&WindowScaling>)>,
-    mut cameras: Query<
-        (Entity, &mut Camera, &RenderTarget, &mut Projection, Option<&mut ScaledCamera>),
-        Without<InterfaceView>,
-    >,
-) {
-    let primary = primary.iter().next();
-
-    for (entity, mut camera, target, mut projection, scaled) in &mut cameras {
-        let window = match target.normalize(primary) {
-            Some(NormalizedRenderTarget::Window(window)) => windows.get(window.entity()).ok(),
-            _ => None,
-        };
-        let planned = window.and_then(|(window, scaling)| plan(window, scaling?));
-
-        // The game's own viewport, the one set here standing for it until the game sets another.
-        let own = match &scaled {
-            Some(scaled) if same(&camera.viewport, &scaled.set) => scaled.own.clone(),
-            _ => camera.viewport.clone(),
-        };
-
-        match (planned, scaled) {
-            (Some(plan), scaled) => {
-                let set = viewport(&plan, own.as_ref());
-                if !same_target(&camera.computed.target_info, plan.target, plan.scale_factor) || !same(&camera.viewport, &set) {
-                    camera.viewport = set.clone();
-                    camera.computed.target_info = Some(RenderTargetInfo {
-                        physical_size: plan.target,
-                        scale_factor: plan.scale_factor,
-                    });
-                    reproject(&mut camera, &mut projection);
-                }
-                match scaled {
-                    Some(mut scaled) => {
-                        if !same(&scaled.set, &set) || scaled.copy != plan.copy || !same(&scaled.own, &own) {
-                            *scaled = ScaledCamera { own, set, copy: plan.copy };
-                        }
-                    }
-                    None => {
-                        commands.entity(entity).insert(ScaledCamera { own, set, copy: plan.copy });
-                    }
-                }
-            }
-            (None, Some(_)) => {
-                camera.viewport = own;
-                match window {
-                    Some((window, _)) => {
-                        camera.computed.target_info = Some(RenderTargetInfo {
-                            physical_size: window.physical_size(),
-                            scale_factor: window.resolution.scale_factor(),
-                        });
-                        reproject(&mut camera, &mut projection);
-                    }
-                    // A camera moved to another target has it sized by the camera system, which a
-                    // changed projection asks for.
-                    None => projection.set_changed(),
-                }
-                commands.entity(entity).remove::<ScaledCamera>();
-            }
-            (None, None) => {}
-        }
-    }
-}
-
 /// The copies the render world makes this frame, by the view of each scaled camera.
 #[derive(Resource, Default)]
 struct ScaledViews(HashMap<Entity, WindowCopy>);
@@ -309,6 +95,45 @@ struct ScaledViews(HashMap<Entity, WindowCopy>);
 /// The copy's pipeline for each scaled view, for its window's format and its blending.
 #[derive(Resource, Default)]
 struct ScalePipelines(HashMap<Entity, CachedRenderPipelineId>);
+
+/// Gives each 2D view a depth texture of its own size where Bevy gave it one of another.
+///
+/// Bevy makes one depth texture for all the 2D cameras on a target, at the size of the first,
+/// which holds while every camera on a window draws at the window's size. A scaled camera draws at
+/// its picture's, and the interface's camera on the same window at the window's, and wgpu refuses
+/// a pass whose depth and color differ in size. Each 2D pass clears its depth, so a texture of its
+/// own carries nothing another camera wrote, and a view whose depth is its size keeps Bevy's.
+fn own_depth(
+    mut commands: Commands,
+    mut textures: ResMut<TextureCache>,
+    device: Res<RenderDevice>,
+    views: Query<(Entity, &ExtractedCamera, &ViewDepthStencilTexture), With<Camera2d>>,
+) {
+    for (view, camera, depth) in &views {
+        let Some(size) = camera.physical_target_size else {
+            continue;
+        };
+        let shared = depth.texture();
+        let wanted = Extent3d { width: size.x, height: size.y, depth_or_array_layers: 1 };
+        if shared.size() == wanted {
+            continue;
+        }
+        let own = textures.get(
+            &device,
+            TextureDescriptor {
+                label: Some("bcs_picture_depth"),
+                size: wanted,
+                mip_level_count: 1,
+                sample_count: shared.sample_count(),
+                dimension: TextureDimension::D2,
+                format: shared.format(),
+                usage: shared.usage(),
+                view_formats: &[],
+            },
+        );
+        commands.entity(view).insert(ViewDepthStencilTexture::new(own, Some(0.0), None));
+    }
+}
 
 fn extract_scaled(mut views: ResMut<ScaledViews>, cameras: Extract<Query<(&RenderEntity, &ScaledCamera)>>) {
     views.0.clear();
@@ -331,7 +156,26 @@ struct ScaleKey {
     format: TextureFormat,
     blend: Option<BlendState>,
     space: Option<CompositingSpace>,
-    sharp: bool,
+    copy: Copied,
+}
+
+/// Which of the shader's copies a pipeline draws with, the sampler's filter alone, the sharp
+/// scaling's blend at a picture pixel's edge, or the smooth copy of a picture brought down.
+#[derive(PartialEq, Eq, Hash, Clone, Copy)]
+enum Copied {
+    Filtered,
+    Sharp,
+    Down,
+}
+
+impl Copied {
+    fn of(copy: &WindowCopy) -> Self {
+        match (copy.down, copy.filter) {
+            (true, _) => Copied::Down,
+            (false, filter::SHARP) => Copied::Sharp,
+            _ => Copied::Filtered,
+        }
+    }
 }
 
 fn init_pipeline(
@@ -373,13 +217,16 @@ impl SpecializedRenderPipeline for ScalePipeline {
     type Key = ScaleKey;
 
     fn specialize(&self, key: Self::Key) -> RenderPipelineDescriptor {
-        let entry_point = match (key.sharp, key.space) {
-            (false, Some(CompositingSpace::Srgb)) => "fragment_srgb",
-            (false, Some(CompositingSpace::Oklab)) => "fragment_oklab",
-            (false, Some(CompositingSpace::Linear) | None) => "fragment",
-            (true, Some(CompositingSpace::Srgb)) => "sharp_srgb",
-            (true, Some(CompositingSpace::Oklab)) => "sharp_oklab",
-            (true, Some(CompositingSpace::Linear) | None) => "sharp",
+        let entry_point = match (key.copy, key.space) {
+            (Copied::Filtered, Some(CompositingSpace::Srgb)) => "fragment_srgb",
+            (Copied::Filtered, Some(CompositingSpace::Oklab)) => "fragment_oklab",
+            (Copied::Filtered, Some(CompositingSpace::Linear) | None) => "fragment",
+            (Copied::Sharp, Some(CompositingSpace::Srgb)) => "sharp_srgb",
+            (Copied::Sharp, Some(CompositingSpace::Oklab)) => "sharp_oklab",
+            (Copied::Sharp, Some(CompositingSpace::Linear) | None) => "sharp",
+            (Copied::Down, Some(CompositingSpace::Srgb)) => "down_srgb",
+            (Copied::Down, Some(CompositingSpace::Oklab)) => "down_oklab",
+            (Copied::Down, Some(CompositingSpace::Linear) | None) => "down",
         };
 
         RenderPipelineDescriptor {
@@ -437,7 +284,7 @@ fn prepare_scaled(
             format,
             blend: blend_of(camera),
             space: ResolvedCompositingSpace::space(space),
-            sharp: copy.filter == filter::SHARP,
+            copy: Copied::of(copy),
         };
         let id = specialized.specialize(&cache, &pipeline, key);
         cache.block_on_render_pipeline(id);
@@ -475,9 +322,10 @@ fn copy_scaled(
 
     // One for each of the two textures a view's picture alternates between, by sampler, and made
     // anew where the views' textures have all changed, as they do as a window is resized. The
-    // sharp scaling reads its picture pixels by their place and takes the linear one unused.
+    // sharp scaling reads its picture pixels by their place and takes the linear one unused, and a
+    // picture brought down takes the linear one whatever the filter.
     let source = target.main_texture_view();
-    let nearest = copy.filter == filter::NEAREST;
+    let nearest = copy.filter == filter::NEAREST && !copy.down;
     if groups.len() > 16 {
         groups.clear();
     }
@@ -517,65 +365,6 @@ fn copy_scaled(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
-    fn window(width: u32, height: u32) -> Window {
-        Window {
-            mode: WindowMode::BorderlessFullscreen(bevy::window::MonitorSelection::Primary),
-            resolution: bevy::window::WindowResolution::new(width, height).with_scale_factor_override(1.0),
-            ..Default::default()
-        }
-    }
-
-    fn scaling(width: u32, height: u32, filter: u32) -> WindowScaling {
-        WindowScaling { size: UVec2::new(width, height), filter }
-    }
-
-    #[test]
-    fn a_picture_of_the_screens_shape_is_drawn_over_the_whole_window() {
-        let plan = plan(&window(1920, 1080), &scaling(1280, 720, filter::LINEAR)).unwrap();
-        assert_eq!(plan.target, UVec2::new(1280, 720));
-        assert_eq!(plan.at, UVec2::ZERO);
-        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::ZERO, size: UVec2::new(1920, 1080), filter: filter::LINEAR });
-        assert!((plan.scale_factor - 1.0 / 1.5).abs() < 1e-6);
-        assert!(viewport(&plan, None).is_none());
-    }
-
-    #[test]
-    fn the_sharp_scaling_fills_the_screen_as_the_other_two_do() {
-        let plan = plan(&window(1920, 1080), &scaling(800, 450, filter::SHARP)).unwrap();
-        assert_eq!(plan.target, UVec2::new(800, 450));
-        assert_eq!(plan.at, UVec2::ZERO);
-        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::ZERO, size: UVec2::new(1920, 1080), filter: filter::SHARP });
-        assert!(viewport(&plan, None).is_none());
-    }
-
-    #[test]
-    fn a_shape_unlike_the_screens_keeps_its_own_with_black_at_the_sides() {
-        let plan = plan(&window(1920, 1080), &scaling(1000, 1000, filter::NEAREST)).unwrap();
-        assert_eq!(plan.target, UVec2::new(1778, 1000));
-        assert_eq!(plan.at, UVec2::new(389, 0));
-        assert_eq!(plan.copy.size.y, 1080);
-        assert_eq!(plan.copy.filter, filter::NEAREST);
-    }
-
-    #[test]
-    fn a_picture_as_large_as_the_screen_or_a_window_that_does_not_cover_it_is_not_scaled() {
-        assert!(plan(&window(1920, 1080), &scaling(1920, 1080, filter::LINEAR)).is_none());
-        assert!(plan(&window(1920, 1080), &scaling(2560, 1000, filter::SHARP)).is_none());
-        let mut windowed = window(1920, 1080);
-        windowed.mode = WindowMode::Windowed;
-        assert!(plan(&windowed, &scaling(1280, 720, filter::LINEAR)).is_none());
-    }
-
-    #[test]
-    fn a_games_own_viewport_is_scaled_into_where_the_picture_stands() {
-        let plan = plan(&window(1920, 1080), &scaling(1000, 1000, filter::SHARP)).unwrap();
-        let own = Viewport { physical_position: UVec2::new(960, 0), physical_size: UVec2::new(960, 1080), depth: 0.0..1.0 };
-        let set = viewport(&plan, Some(&own)).unwrap();
-        assert_eq!((set.physical_position, set.physical_size), (UVec2::new(889, 0), UVec2::new(500, 1000)));
-    }
-
     /// The copy's shader is valid WGSL as wgpu takes it, with the entry point of each scaling and
     /// conversion its pipeline is specialized with.
     #[test]
@@ -588,6 +377,9 @@ mod tests {
             panic!("{}", error.emit_to_string(text));
         }
         let points: Vec<_> = module.entry_points.iter().map(|point| point.name.as_str()).collect();
-        assert_eq!(points, ["fragment", "fragment_srgb", "fragment_oklab", "sharp", "sharp_srgb", "sharp_oklab"]);
+        assert_eq!(
+            points,
+            ["fragment", "fragment_srgb", "fragment_oklab", "sharp", "sharp_srgb", "sharp_oklab", "down", "down_srgb", "down_oklab"]
+        );
     }
 }

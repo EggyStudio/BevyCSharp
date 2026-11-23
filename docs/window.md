@@ -165,33 +165,71 @@ monitor nothing often enough that a settings screen needs the fallback shown abo
 has no window, and every call here says so rather than doing nothing.
 
 The settings panel's `window` page holds the same for the player, `window.mode` (`Windowed`,
-`Borderless`, `BorderlessFullscreen` or `Fullscreen`, read in any case), `window.resizable`,
-`window.width` and `window.height` for its size, `window.monitor`, the screen by its number from 0
-where there is more than one, `window.vsync` and `window.scaling`. Each acts at once and is kept in
-the settings file, which the app reads for them before it makes its window, so the window opens as
-the player left it before its first frame is shown.
+`Borderless`, `BorderlessFullscreen` or `Fullscreen`, read in any case), `window.resolution`,
+`window.resizable`, `window.monitor`, the screen by its number from 0 where there is more than one,
+and `window.vsync`. Each acts at once and is kept in the settings file by its text, which the app
+reads for them before it makes its window, so the window opens as the player left it before its
+first frame is shown.
 
-The four modes share the size. Windowed is a window with the platform's frame, where it was left.
-Borderless is a window without the frame at the size set, in the middle of its screen with the
-desktop round it and drawn pixel for pixel, and a size as large as the screen's covers the screen,
-which is the only way it covers. Borderless fullscreen always covers the screen at the screen's own
-mode, and draws the picture at the size set and scales it to the screen, softer at a smaller size
-and at less cost. Fullscreen takes the screen's mode, which Wayland gives no window and a screen
-listing no mode at its own size and rate cannot give, so a set of it there is refused in the
-console with the reason and the window keeps the mode it holds. A window that leaves windowed keeps
-its size and place for its return, and a run that shows no window has the page only reading.
+`window.resolution` is `native`, a size the panel offers, or any size in pixels the console names,
+as `1600x900`. It is the window's size in windowed and borderless and the screen's mode in
+fullscreen, `native` being the game's own window and the screen's own mode. Fullscreen takes only a
+size the screen lists, which the panel offers, and a window takes any size up to the screen's, so a
+larger one is refused in the console with the reason and the window keeps its own. A size kept in
+the file that the screen of the next start cannot take opens the window at native with a warning in
+the log.
 
-`window.scaling` says how borderless fullscreen brings its picture to the screen. `Linear`, the
-default, filters it and is soft. `Nearest` takes each screen pixel from the picture pixel under it
-and is sharp, which is even where the screen is a whole number of times the picture, as 1920 by
-1080 is on a screen of 3840 by 2160, and uneven at any other ratio, where some picture pixels come
-out a screen pixel wider than others. `Sharp` takes each screen pixel inside a picture pixel from
-it whole and blends the two picture pixels of an edge in the one screen pixel that spans it, so
-every picture pixel is a block of one width with one blended screen pixel at most on its edge,
-nothing crawls as the picture moves, and at a whole ratio it equals `Nearest`. A picture as wide as the screen or as tall is drawn at the screen's size. The cameras keep the
-window's size in logical pixels, so the pointer, picking and a camera's viewport read as they do
-unscaled, and the interface ImGui draws is drawn after the scaling at the screen's own size, while
-Bevy's interface is drawn into the picture and scaled with it.
+The four modes share it. Windowed is a window with the platform's frame, where it was left.
+Borderless is a window without the frame at the resolution, in the middle of its screen with the
+desktop round it, and a resolution as large as the screen's covers the screen, which is the only way
+it covers. Borderless fullscreen always covers the screen at the screen's own mode and reads no
+resolution. Fullscreen takes the screen's mode, which Wayland gives no window and a screen listing
+no mode at its own size and rate cannot give, so a set of it there is refused in the console with
+the reason and the window keeps the mode it holds. A window that leaves windowed keeps its size and
+place for its return, and a run that shows no window has the page only reading.
+
+The `render` page holds the picture drawn into the window, which is the window's size times
+`render.scale`, shaped by `render.aspect`. `render.scale` is a share of the window's size from above
+0% to 200%, softer and quicker below 100% and finer and slower above it, and a picture larger than
+the window is brought down to it smoothly. `render.aspect` is `native` for the window's own shape,
+or a width to a height, `16:9`, `16:10`, `21:9`, `4:3` or any the console names, the picture being
+the largest of that shape inside the window's. `render.fit` says how a shape unlike the window's
+stands in it, `Fit` keeping its shape with black at the sides and `Stretch` covering the whole
+window. `render.fps_limit` caps the frames drawn a second beside the display's vertical sync, or is
+`off`.
+
+`render.filter` says how a picture smaller than the window is brought up to it. `Linear`, the
+default, filters it and is soft. `Nearest` takes each window pixel from the picture pixel under it
+and is sharp, which is even where the window is a whole number of times the picture, as 1920 by
+1080 is in a window of 3840 by 2160, and uneven at any other ratio, where some picture pixels come
+out a window pixel wider than others. `Sharp` takes each window pixel inside a picture pixel from it
+whole and blends the two picture pixels of an edge in the one window pixel that spans it, so every
+picture pixel is a block of one width with one blended window pixel at most on its edge, nothing
+crawls as the picture moves, and at a whole ratio it equals `Nearest`.
+
+A game sets the whole picture at once from its code, and alone sets an exact size, which no setting
+keeps:
+
+<!-- compiled with:
+Entity hud = default;
+-->
+```csharp
+Render.Picture = new Picture { Scale = 0.67f, Aspect = (4f, 3f), Fit = PictureFit.Fit, Filter = PictureFilter.Sharp };
+Render.Picture = Render.Picture with { Size = (640, 360) };    // a pixel-art game's own size
+var drawn = Render.PictureSize;                                  // the size in use, none with no window
+Ui.SetOnPicture(hud);                                            // the node covers the picture, not the window
+```
+
+A set from code writes the page's values as a program does, so the panel reads them and the file
+keeps what the player set. While the game holds an exact size, `render.scale` is kept unused and its
+row says the game fixes the size, and setting `Size` back to none brings the scale back.
+
+Cameras take the picture's shape and keep their viewports' share of it, so the pointer, picking and
+a camera's viewport read as they do unscaled. The interface, Bevy's and ImGui's alike, is drawn
+after the picture at the window's own size and is never scaled with it. A node of Bevy's interface
+covers the whole window unless `Ui.SetOnPicture` keeps it over the part the picture stands in. The
+debug panels, the console and the overlay always take the whole window, drawn at
+`interface.scale`, which is `native` for the display's own scale or a share from 50% to 400%.
 
 A window made without the platform's frame (`SetStyle(decorations: false)`) has no title bar to be
 moved by and no border to be resized from, so an app drawing its own asks the platform to do both

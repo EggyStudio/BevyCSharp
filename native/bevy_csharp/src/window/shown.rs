@@ -33,15 +33,14 @@ pub mod refusal {
 /// fullscreen at a mode of the screen's, the monitor it is on, by the index
 /// [`super::monitors::bcs_monitor_count`] counts up to, or -1 where the system names none, whether
 /// its edges resize it, whether it waits for the display, whether it has the platform's frame, and
-/// whether its picture is drawn at a size of its own while it covers its screen borderless
-/// ([`bcs_window_set_scaling`]).
+/// whether its picture is drawn at a size or a shape of its own ([`bcs_window_set_picture`]).
 ///
 /// Wayland's winit names every window that covers its screen borderless, since Wayland has no mode
 /// of a screen's to take, and answers as the compositor last configured the window, a frame or two
 /// after it was asked. X11's answers with the mode last asked for. A monitor is matched to Bevy's
 /// by its place and size, which both read from winit. Waiting for the display is the present mode
 /// Bevy holds, since the surface takes it as it is made again. The frame is winit's, as the
-/// platform shows it, and the scaling is the one the window holds whatever its mode.
+/// platform shows it, and the picture is the one the window holds whatever its mode.
 ///
 /// # Safety
 /// `mode`, `monitor`, `resizable`, `vsync`, `decorated` and `scaled` must be writable.
@@ -83,7 +82,7 @@ pub unsafe extern "C" fn bcs_window_shown(
                     world.get::<Window>(entity).map(|w| w.present_mode),
                     Some(PresentMode::AutoVsync | PresentMode::Fifo | PresentMode::FifoRelaxed)
                 );
-                let drawn_scaled = world.get::<super::scaled::WindowScaling>(entity).is_some();
+                let drawn_scaled = world.get::<super::picture::WindowPicture>(entity).is_some();
 
                 let shown = bevy::winit::WINIT_WINDOWS.with_borrow(|windows| {
                     let shown = windows.get_window(entity)?;
@@ -282,39 +281,138 @@ pub extern "C" fn bcs_window_set_decorations(window: u64, decorations: i32) -> i
     })
 }
 
-/// Draws the window's picture at `width` by `height` in its logical pixels while it covers its
-/// screen borderless, brought to the screen by `filter`, 0 filtered, 1 from the nearest picture
-/// pixel and 2 enlarged by the largest whole number that fits with black round it, or at the
-/// window's own size again where `width` or `height` is 0.
+/// Draws the window's picture at `width` by `height` pixels, or at `share` of the window's size
+/// along each side where either is 0, cut to the shape `aspect_width` by `aspect_height` where both
+/// are above 0, standing in the window as `fit` says, 0 with its shape kept and black round it and
+/// 1 stretched over it, and brought to it by `filter`, 0 filtered, 1 from the nearest picture pixel
+/// and 2 sharp with a picture pixel's edge blended. A picture of the window's own size and shape
+/// takes the window's own drawing back.
 ///
-/// The window keeps the size in any mode and draws at it only while it covers its screen
-/// borderless, at a size under the screen's (see [`super::scaled`]). The interface ImGui draws is
-/// drawn after the picture at the screen's size, and Bevy's is drawn with it.
+/// The picture holds in every mode of the window's and follows a share of the window's size as the
+/// window changes (see [`super::picture`]). The interface is drawn after the picture at the
+/// window's size.
 #[unsafe(no_mangle)]
-pub extern "C" fn bcs_window_set_scaling(window: u64, width: u32, height: u32, filter: u32) -> i32 {
+#[allow(clippy::too_many_arguments)]
+pub extern "C" fn bcs_window_set_picture(
+    window: u64,
+    width: u32,
+    height: u32,
+    share: f32,
+    aspect_width: f32,
+    aspect_height: f32,
+    fit: u32,
+    filter: u32,
+) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (window, width, height, filter);
+            let _ = (window, width, height, share, aspect_width, aspect_height, fit, filter);
             status::UNSUPPORTED
         }
 
         #[cfg(feature = "render")]
         {
-            use super::scaled::{WindowScaling, filter::SHARP};
+            use super::picture::WindowPicture;
 
-            if filter > SHARP {
+            let Ok(picture) = WindowPicture::from_numbers(width, height, share, (aspect_width, aspect_height), fit, filter) else {
                 return status::NULL_ARG;
-            }
+            };
             with_world(|world| {
                 let Some(entity) = super::window_entity(world, window) else {
                     return status::NOT_PRESENT;
                 };
                 let mut found = world.entity_mut(entity);
-                if width == 0 || height == 0 {
-                    found.remove::<WindowScaling>();
+                match picture {
+                    None => {
+                        found.remove::<WindowPicture>();
+                    }
+                    Some(picture) if found.get::<WindowPicture>() != Some(&picture) => {
+                        found.insert(picture);
+                    }
+                    Some(_) => {}
+                }
+                status::OK
+            })
+        }
+    })
+}
+
+/// Writes the size in pixels the window's cameras draw its picture at, the window's own where its
+/// picture is, and the part of the window the picture stands in, from its corner in the window's
+/// logical pixels as `x`, `y`, width and height.
+///
+/// # Safety
+/// `size` must be writable for two `u32`s and `area` for four `f32`s.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_window_picture(window: u64, size: *mut u32, area: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        if size.is_null() || area.is_null() {
+            return status::NULL_ARG;
+        }
+
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = window;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::picture::{WindowPicture, area as area_of, plan};
+
+            with_world(|world| {
+                let Some(entity) = super::window_entity(world, window) else {
+                    return status::NOT_PRESENT;
+                };
+                let Some(shown) = world.get::<Window>(entity) else {
+                    return status::NOT_PRESENT;
+                };
+                let picture = world.get::<WindowPicture>(entity);
+                let drawn = picture.and_then(|picture| plan(shown, picture)).map_or(shown.physical_size(), |plan| plan.picture);
+                let rect = area_of(shown, picture);
+                unsafe {
+                    size.write(drawn.x);
+                    size.add(1).write(drawn.y);
+                    area.write(rect.min.x);
+                    area.add(1).write(rect.min.y);
+                    area.add(2).write(rect.width());
+                    area.add(3).write(rect.height());
+                }
+                status::OK
+            })
+        }
+    })
+}
+
+/// Keeps an interface node over the part of the first window its picture stands in, `1` to keep
+/// it there and `0` to let it go, where it keeps the place it had until the game gives it another.
+///
+/// The node is placed absolutely at the picture's part of the window, inside the bars of a picture
+/// fitted with its shape kept, in each frame the part moves (see [`super::picture`]).
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_node_on_picture(entity: u64, on: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (entity, on);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::picture::OnPicture;
+
+            with_world(|world| {
+                let Ok(mut node) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
+                    return status::NO_ENTITY;
+                };
+                if !node.contains::<bevy::ui::Node>() {
+                    return status::NOT_PRESENT;
+                }
+                if on != 0 {
+                    node.insert(OnPicture);
                 } else {
-                    found.insert(WindowScaling { size: bevy::math::UVec2::new(width, height), filter });
+                    node.remove::<OnPicture>();
                 }
                 status::OK
             })

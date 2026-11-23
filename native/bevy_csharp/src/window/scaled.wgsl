@@ -1,10 +1,11 @@
-// A camera's picture brought to a window larger than it, in one copy at the frame's end.
+// A camera's picture brought to its window, in one copy at the frame's end.
 //
 // The vertex stage is Bevy's full-screen triangle, drawn over the part of the window the whole
 // picture spans, so each window pixel reads the picture at its own place. For the linear and the
 // nearest scaling the sampler decides how, filtered for a soft picture or the nearest picture pixel
-// for a sharp one, and the sharp scaling has entry points of its own that work out the blend at a
-// picture pixel's edge. A picture kept in sRGB or Oklab to be blended in is turned linear here, as
+// for a sharp one, the sharp scaling has entry points of its own that work out the blend at a
+// picture pixel's edge, and a picture larger than the window has entry points that bring it down
+// smoothly. A picture kept in sRGB or Oklab to be blended in is turned linear here, as
 // Bevy's own copy does, by an entry point of each, since the bridge hands its WGSL to wgpu as it is
 // written, with no preprocessor between.
 
@@ -96,5 +97,36 @@ fn sharp_srgb(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
 @fragment
 fn sharp_oklab(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let color = sharp_color(in.uv);
+    return vec4(oklab_to_linear_rgb(color.rgb), color.a);
+}
+
+// A picture brought down to the window, at up to twice its size along a side. The four linear
+// samples stand a quarter of the window pixel's span from its middle along each side, so at twice
+// each lands on the middle of one of the four picture pixels under the window pixel and reads it
+// alone, which takes in every one of them evenly, and nearer one the four draw together into the
+// linear filter's one sample.
+fn down_color(uv: vec2<f32>) -> vec4<f32> {
+    let step = abs(vec2(dpdx(uv.x), dpdy(uv.y))) * 0.25;
+    let a = textureSample(picture, picture_sampler, uv + vec2(-step.x, -step.y));
+    let b = textureSample(picture, picture_sampler, uv + vec2(step.x, -step.y));
+    let c = textureSample(picture, picture_sampler, uv + vec2(-step.x, step.y));
+    let d = textureSample(picture, picture_sampler, uv + vec2(step.x, step.y));
+    return (a + b + c + d) * 0.25;
+}
+
+@fragment
+fn down(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
+    return down_color(in.uv);
+}
+
+@fragment
+fn down_srgb(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
+    let color = down_color(in.uv);
+    return vec4(srgb_to_linear(color.rgb), color.a);
+}
+
+@fragment
+fn down_oklab(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
+    let color = down_color(in.uv);
     return vec4(oklab_to_linear_rgb(color.rgb), color.a);
 }

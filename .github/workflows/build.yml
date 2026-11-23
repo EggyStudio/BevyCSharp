@@ -839,13 +839,13 @@ jobs:
           path: ${{ runner.temp }}/examples
           if-no-files-found: ignore
 
-  # A real window stormed while it draws, resized through odd sizes, minimized and given back,
-  # moved and set to a last size it must then draw at with nothing logged, and the monitor that
-  # window is on described, a monitor past the last refused (WindowStormTests). Only where the
-  # bridges are built, since the test job's headless bridge draws nothing and knows no monitor, and
-  # in X11 under xvfb-run, which gives a minimized window back where nothing else on the runner
-  # would show one and lists its screen as a monitor. The tests skip where they are not asked for,
-  # so the step asks and fails when one was skipped.
+  # A real window stormed while it draws, resized through odd sizes, minimized and given back, moved
+  # and set to a last size it must then draw at with nothing logged, the monitor that window is on
+  # described, a monitor past the last refused, and its settings and its picture's set and read back
+  # (WindowStormTests). Only where the bridges are built, since the test job's headless bridge draws
+  # nothing and knows no monitor, and in X11 under xvfb-run, which gives a minimized window back
+  # where nothing else on the runner would show one and lists its screen as a monitor. The tests
+  # skip where they are not asked for, so the step asks and fails when one was skipped.
   storm:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
@@ -911,8 +911,8 @@ jobs:
             echo "::error title=The window storm failed::dotnet test ended with $tested. What it printed, then the test host's standard error:%0A${said//$'\n'/%0A}"
             exit 1
           fi
-          if ! grep -Eq "Passed: +5, Skipped: +0" "$out"; then
-            echo "::error::The window storm, the monitors' test, the window page's test and the two scaled pictures' tests did not all run, so a window, a monitor, a setting of the window or its scaling went unchecked. The tests skip where they are not asked for or have no X11 display."
+          if ! grep -Eq "Passed: +7, Skipped: +0" "$out"; then
+            echo "::error::The window storm, the monitors' test, the window page's test, the two filters' tests, the fits' test and the interface's did not all run, so a window, a monitor, a setting of the window or its picture went unchecked. The tests skip where they are not asked for or have no X11 display."
             exit 1
           fi
 

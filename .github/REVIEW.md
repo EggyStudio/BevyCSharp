@@ -402,6 +402,56 @@ one crop at a whole ratio and at a ratio of one and a half.
     black-bordered whole multiple is not kept as a fourth. The sheet replaces the Integer column
     with Sharp at both ratios, and the guides and the cheatsheet follow.
 
+164. **Display resolution, render resolution, aspect and fit, each with a native choice.** The
+picture and the display get their own sizes, so a player sets what the display shows and what the
+scene is drawn at apart, and every setting defaults to native so that a player who touches none sees
+the display's own size throughout. The settings are these. `window.mode` keeps its four choices, and
+borderless fullscreen always covers the screen. `window.resolution` is Native or one of the sizes
+the screen lists, and any width by height from the console. It is the window's size in windowed and
+borderless, the screen's mode in fullscreen, and unused in borderless fullscreen, and it takes the
+place of `window.width` and `window.height`. `render.resolution` is Native, which is the window's
+size, or a size of its own, and the scene is drawn at it. `render.scale` is a helper and holds no
+state of its own. Setting it writes `render.resolution` as that share of the window's size, and
+reading it gives the share the two stand in. `render.aspect` is Native or one of 16 to 9, 16 to 10,
+21 to 9, 32 to 9, 4 to 3, 1 to 1, 9 to 16 and 10 to 16, and where set the scene is drawn at the
+largest size of that shape inside `render.resolution`. `render.fit` says how the picture sits in the
+window where the shapes differ. Fit keeps the shape with black bars, Fill keeps the shape and covers
+the window with the overhang cut, Stretch covers the window and gives up the shape. `render.filter`
+is Linear, Nearest or Sharp and takes the place of `window.scaling`. The interface, the panels and
+the overlay are drawn after the picture is brought to the window, at the window's own size, so they
+stay sharp at any render size, and the pointer and touch reach the scene through the same placement.
+Cameras take the picture's shape and not the window's. Tests hold each setting's native choice, the
+helper's write and read, each fit at a shape unlike the window's, and the interface's size under a
+small render size. The sheet shows a 4 to 3 picture on a 16 to 9 screen in the three fits, a render
+scale of 67% in the three filters with a panel sharp over it, and the page of settings. The guides
+and the cheatsheet follow. Where the settings module lacks a kind of setting this needs, the ask
+comes to the review and the module's session writes it. Four rules complete it. What was set last
+holds when the window's size changes, so after `render.scale` the share holds and the render size
+follows the window, and after `render.resolution` that size holds whatever the window does. The
+debug panels, the console and the overlay take the whole window always, and a game's own interface
+takes the whole window unless the game asks for the picture's area, which one call gives. The aspect
+belongs to the picture alone, so in windowed and borderless the window keeps its size and the bars
+stand inside it. The render size may stand above the window's, to twice it, the panel offering 50,
+67, 75, 100, 150 and 200%, and a picture brought down to the window is filtered smoothly whatever
+`render.filter` says, since Nearest and Sharp only bring a picture up. In 3DEngine the scene and the
+interface leave their shared pass for this, which is wanted for its own sake. The review's later
+choices change three things in the above and stand over it. First, who sets what. The panel's page
+shows the mode, the window's size, the render scale and the filter, with the aspect and the fit
+under them, and `render.resolution` is a console setting and a call a game makes and has no row.
+Second, `render.fit` has two choices, Fit and Stretch, and no Fill, and `render.aspect` lists
+Native, 16 to 9, 16 to 10, 21 to 9 and 4 to 3 and takes any ratio from the console. Third, two
+settings join. `interface.scale` sizes the panels, the console and the overlay's text by one number
+and defaults to the display's own scale factor. `render.fps_limit` caps the frames a second beside
+the vertical sync and has an Off choice. The render scale is never changed by the engine itself, and
+no dynamic scale is built. One more cut stands over all of the above. There is no
+`render.resolution` setting, in the panel, the console or the settings file, and no rule of what was
+set last. A game's code keeps it. The picture's typed value carries an optional exact render size
+beside the scale, a game sets it with the same one call, and code reads the render size in use at
+any time. While a game holds an exact size, `render.scale` is kept but not applied, its panel row
+says the game fixes the size, and clearing the exact size brings the scale back. The render size is
+always the window's size times `render.scale`, shaped by the aspect, and the scale is a stored
+setting of its own and no helper.
+
 ## Verdicts
 
 Verdict 94 is settled at 23:11 on 2026-11-22, the build on `8089a06e` green with the scripted run's
@@ -730,191 +780,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-The settings. The sky's values its commands set are settings of the Diagnostics module's registry on
-the panel's `sky` page, `sky.fog_visibility`, `sky.fog_height` and `sky.fog_base` for what `sky.fog`
-sets, `sky.froxel_quality` and `sky.froxel_distance` for `sky.froxels`, `sky.cloud_quality` and
-`sky.cloud_cover` for `sky.clouds`, and `sky.forecast` for the forecast `sky.weather` turns on and
-off. The fog, its froxels and the clouds are a camera's, so each setting reads the first camera
-drawing its part and sets every camera the part's command sets. A part no camera draws reads its
-default and refuses a set with the reason, save the fog's visibility and the clouds' quality, which
-start their part on the cameras the commands start it on and take it off at 0 and `Off`. The
-commands stand beside them for the scripts and guides that name them, and their choice of cameras
-and the froxels they keep are shared with the settings. None is saved, as none of the engine's is.
-
-Left out. The weather's preset is no setting, since the weather eases toward it and the forecast
-writes over it, so it holds no value that reads back, and `sky.strike` lasts a moment. Where the
-engine's weather gives a camera its fog or its clouds, as the feature test's does with its weather
-on, it gives them again each frame from the settings it starts from, so a set of that part there is
-refused with a reason that names `sky.weather` and `sky.forecast`. The commands set it all the same
-and the weather writes over it in the next frame, which this commit leaves as it was.
-
-The tests. `SkySettingsTests` holds that every setting is the registry's on the `sky` page and
-unsaved and refuses where no camera draws its part, that a console line of each sets a camera's fog,
-froxels and clouds with the rest of the fog as it was and takes the fog and the clouds off, and that
-on a camera with the weather the fog's and the clouds' settings refuse by the weather while
-`sky.forecast` sets the forecast. The guides' settings table takes the eight rows, and the sky guide
-names them beside each command.
-
-The whole suite passed from one tree, 2,207 passed, 0 failed and 5 skipped, 2,212 in all where the
-listing is 2,201, the solution built from nothing with warnings as errors, in 14 parts and the rest.
-The public listing and the cheatsheet are unchanged.
-
-Shared: 3DEngine's settings hold `sky.hours` on the same page, and these names are offered for its
-fog, froxels and clouds where it draws them from the module.
-
-NormTests passed, 19.
-
-160, the window's settings in the panel, in the commit carrying this.
-
-The page. `window.mode` (Windowed, Borderless and Fullscreen), `window.resizable`, `window.width`,
-`window.height`, `window.monitor` and `window.vsync` are settings of the Diagnostics module's
-registry, made in Core (`WindowSettings`), so the panel draws them as its `window` page. Each is
-saved, their names, choices and summaries are the sibling's, and no command holds a name of theirs,
-`window.list` and `window.shot` standing beside them. Each acts at once on Bevy's window, so none
-says "at the next start".
-
-The start. An app being made reads the settings file's lines of the page before it makes its window,
-the same file the module reads whole as the app starts (`SettingsPath`, which the kept settings take
-their path from too), and gives them to the bridge through four new fields of `BcsConfig`, the mode,
-the screen and whether the edges resize the window, with the size and vsync it gave before. The
-bridge makes the window in that mode, on that screen, before its first frame is shown. The ABI is at
-329 on both sides, and the five new entry points run under the guard. The first window is made in a
-module of its own, `window::first`, out of `build_app`, which holds app.rs to 767 lines (N 1.3).
-
-The refusal. Fullscreen is asked of the bridge before it is set, which refuses it on Wayland, whose
-winit gives no window a mode of the screen's, where the system names no screen under the window, and
-where the screen lists no mode at its own size and rate, where winit would leave the window as it
-was and Bevy would cover the screen borderless, each saying so in the log alone. The console answers
-REFUSED with the reason, and the window keeps the mode it holds. A compositor that refuses a mode
-after taking the request is not watched for, since the three checks find what it would refuse before
-the set and no test could reach it. Borderless covers the screen at its own mode and is not refused.
-
-The size. Leaving the window's mode keeps its size as a window, and `window.width` and
-`window.height` set it while the window covers its screen, given back on the return. A window
-manager answers the return a few frames on with a size of its own, which mutter gives an Xwayland
-window 37 pixels shorter than the one it had, so the size given back is held for 30 frames, set
-again in each that differs, from the engine's frame sync beside the window's memory.
-
-The screen and the reading. `window.monitor` reads where there is one screen and moves the window to
-the screen's middle where there are more, and a window on Wayland stays where the system put it,
-with the set saying so. A run that shows no window, a headless one, one drawn offscreen, one opening
-no window of its own and one on the headless bridge, has the page reading only with the reason,
-through the module's `Setting.Lock` at c8c2694, whose pointer moves in this commit. The file's lines
-of the page stay as they stand for a run that shows one.
-
-The tests. `WindowSettingsTests` holds the page in the registry, its settings saved and reading only
-in a headless run, and a start from a file giving the window each line in the file's order, a
-refused one leaving the line before it standing, with a run that shows no window taking its config
-alone. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` opens a window
-from a file of the page's lines, sets and reads each setting on it, takes Xvfb's refusal of
-fullscreen with its reason, whose modes carry no rate, holds the size given back over a size of the
-system's set a frame after the return, and opens the next start from the file the run wrote. With
-the hold taken out of the frame sync the window reads 1000 by 300 after the return and the test
-fails (N 3.1). The workflow's storm step looks for three passed tests. Xvfb runs no window manager,
-so the storm reads the modes the window holds and not the size it covers, which the sheet shows.
-
-The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
-through Xwayland, its window page and the three modes, with the refusal and the return, in the
-readings and the dump, sent to the owner.
-
-The guides. The tools guide's table gains the six rows and says the window's settings are saved and
-read before the window is made, and the window guide gains a paragraph on the page.
-
-The public listing gains four fields of `NativeConfig`, `Mode`, `FixedSize`, `HasMonitor` and
-`Monitor`, and loses nothing. The comments of the files touched are rewrapped to 100 columns (N
-4.12).
-
-The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 231 with
-render, and native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
-failed and 6 skipped, 2,215 in all where the listing is 2,204, the solution built from nothing with
-warnings as errors, in 13 parts and the rest. The sixth skip is the new storm test, which runs with
-the storm's two others under Xvfb and passed there, 3 of 3. The cheatsheet is unchanged. A comment
-of the storm test and two of the bridge's manifest were reworded or rewrapped after it, the code as
-it was.
-
-Shared: the names, choices and summaries are 3DEngine's (`EngineSettings.Window.cs`), its start
-ordering the size, the screen and the mode as SDL takes them where Bevy's winit makes the window
-with all of them at once, and its vsync starting off where this one's starts at the config's.
-
-NormTests passed, 19.
-
-161. Done. `window.mode` reads Windowed, Borderless, BorderlessFullscreen and Fullscreen in any
-case, and `window.scaling` reads Linear, Nearest and Integer, Linear by default, as 3DEngine names
-them.
-
-Borderless. A window without the platform's frame at window.width by window.height, placed in the
-middle of the screen window.monitor names from the screen's rectangle in physical pixels, drawn
-pixel for pixel. A size reaching the screen's in both directions makes it Bevy's borderless
-fullscreen, which is the only way it covers, and a width or height set while borderless resizes it,
-centers it again, or covers or uncovers the screen at once. The size and place are held for 30
-frames against a window manager's own, as a return to a window was. The window opens without its
-frame in the middle of the screen Bevy finds for it, and the first frame the screens are listed
-places it on the screen set or makes it cover, since winit lists the screens only after it has made
-the window. A window a game made without its frame, as the editor's is, reads Windowed, and the
-settings give back only a frame they took. On Wayland the compositor places a borderless window, as
-it places every window.
-
-Borderless fullscreen. The window covers its screen at the screen's mode, and the picture is drawn
-at window.width by window.height and brought to the screen in one copy at the frame's end
-(`native/bevy_csharp/src/window/scaled.rs`). Each camera on the window is told the picture's size
-and a scale factor divided by the ratio, so its logical size stays the window's and the pointer,
-picking and a viewport read as they do unscaled. A copy system in the core 2D and 3D graphs, after
-the effects and before Bevy's own copy, draws the camera's picture over the part of the screen it
-spans and sets the camera's output mode to skip, so Bevy's copy leaves it out. Linear samples it
-filtered, Nearest from the nearest picture pixel, and Integer enlarges by the largest whole number
-that fits, the picture in the middle with black round it, its cameras' viewports set to the picture
-inside a target of the screen's size over the whole number. A picture as wide as the screen or as
-tall is drawn at the screen's size. The interface ImGui draws is drawn after the copy at the
-screen's size, its camera being left out of the scaling, and Bevy's interface is drawn on the game's
-cameras into the picture and scaled with it, since this engine has no split between them. The copy's
-shader converts an sRGB or Oklab picture to linear by an entry point of each, since the bridge hands
-WGSL to wgpu with no preprocessor between, which the first storm run found as a parse error at its
-first `#ifdef`. A unit test validates the shader and its three entry points.
-
-Windowed keeps its frame and its place, the place kept on leaving it and given back on the return
-with the size. Fullscreen takes the screen's mode as before, its refusal naming borderless
-fullscreen as the way to cover.
-
-The tests. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` reads a
-borderless window at 1000 by 450 standing at 460 by 315 on Xvfb's screen of 1920 by 1080 without its
-frame, its cover at 1920 by 1080, its return to the middle at 1000 by 450, borderless fullscreen
-with the integer scaling, and the return to a window at the size set there with its place and frame
-given back. `BorderlessFullscreenScalesItsPictureByTheLargestWholeNumberThatFits` reads the window's
-picture of 300 by 200 in a window of 1000 by 450, drawn green from 200 to 800 across and 24 to 424
-down with black corners. With the size of the window read in the frame of the mode the picture was
-the window's size and the test failed (N 3.1). The workflow's storm step looks for four passed
-tests. The bridge's tests add the plans of the three scalings and the copy's shader.
-
-The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
-through Xwayland, each whole screen taken through mutter's screencast on a PipeWire and WirePlumber
-of the run's own with WirePlumber's devices off, so the desktop round a borderless window shows. It
-holds the four modes, borderless at 1280 by 720 in the screen's middle beside borderless at the
-screen's size covering it, and the three scalings on one crop at 960 by 540 and at 1280 by 720,
-where the integer scaling draws pixel for pixel with black round it and ImGui's overlay stays in the
-screen's corner. In the readings and the dump, sent to the owner.
-
-The guides. The window guide says the four modes, the scaling and where the interface is drawn, and
-the tools guide's table gains `window.scaling` and the four modes. The cheatsheet's `Window.SetMode`
-line says the settings' borderless and borderless fullscreen, and five lines of `Render`'s global
-illumination move above its sky as the build lists them.
-
-ABI 330. The public listing gains three fields of `NativeConfig`, `Frameless`, `Scaled` and
-`Scaling`, and loses nothing. `bcs_window_shown` writes whether the window has its frame and whether
-its picture is scaled, and `bcs_window_set_decorations` and `bcs_window_set_scaling` are new.
-
-The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 237 with
-render, and native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
-failed and 7 skipped, 2,216 in all where the listing is 2,205, the solution built from nothing with
-warnings as errors, in 13 parts and the rest. The seventh skip is the new storm test of the scaled
-picture, which runs with the storm's three others under Xvfb and passed there, 4 of 4, beside the
-window settings' two. The comments of the files touched are rewrapped to 100 columns (N 4.12), the
-workflow's after the suite, and a comment of the window's settings and one of the copy are reworded
-after it, the code as it was.
-
 Shared: the names and choices are 3DEngine's (`EngineSettings.Window.cs`). Its surface source
 carries the scaling to its own presenter, where here the cameras draw at the picture's size and one
 copy takes the place of Bevy's last, and SDL centers a window by its own flag where winit is given
@@ -1050,5 +915,107 @@ the dump, sent to the owner.
 Shared: 3DEngine's screen probes take one of sixteen places by tile too (`BounceRoomsTests.cs`), so
 a reading of a few of its probes set at an even spacing may stand on one row of places, as the first
 reading here did, and read the places beside the light.
+
+NormTests passed, 19.
+
+164. Done. The window's size and the picture's are settings of their own, each native until set.
+`window.resolution` takes the place of `window.width` and `window.height` and is `native`, a size
+the screen lists, or any width by height from the console. It is the window's size in windowed and
+borderless and the screen's mode in fullscreen, and borderless fullscreen covers the screen and
+reads none. Fullscreen takes only a listed size and a window any size up to the screen's, so a
+larger one is refused with the screen's size as the reason and the window keeps its own, and a size
+kept in the file that the next start's screen cannot take opens the window at native with a warning.
+
+The render page holds `render.scale`, `render.filter`, `render.aspect`, `render.fit` and
+`render.fps_limit`, each kept in the file by its text. The picture is the window's size times the
+scale, from above 0% to 200%, cut to the aspect's shape where one is set, the largest of that shape
+inside it. The aspect offers native, 16:9, 16:10, 21:9 and 4:3 and takes any ratio from the console,
+the fit is Fit or Stretch, and the frame cap is off or 1 to 1000, a wait at the main world's end
+that sleeps to two milliseconds short of the frame's time and spins through them. `interface.scale`
+sizes the panels, the console and the overlay, native being the display's scale factor, from 50% to
+400%, with the fonts rasterized again at the new density as it changes. Nothing in the engine
+changes the scale by itself.
+
+A game sets the whole picture at once through `Render.Picture`, a `Picture` of the scale, an
+optional exact size, the aspect, the fit and the filter, and reads the size in use and the part of
+the window it stands in through `Render.PictureSize` and `Render.PictureArea`. A set from code
+writes the page's values as a program does, so the panel reads them and the file keeps the player's.
+While the game holds an exact size, `render.scale` is kept unused and its row is locked with the
+reason, and setting the size back to none brings the scale back. No setting keeps an exact size.
+
+Each camera on the window takes the picture's shape and keeps its viewport's share of it, so the
+pointer and picking reach the scene through Bevy's logical viewport as they do unscaled, and a
+stretched picture's picking rays are cast again by its stretch. The picture is copied to the window
+in the place of Bevy's own copy, by the filter where it is brought up and by an average of four
+samples where it is brought down, whatever the filter says. Bevy's interface is drawn after it at
+the window's size on a camera of its own, spawned only while some camera is scaled and no ImGui
+camera takes the interface, so a run whose pictures are their windows' own keeps the entities it
+had. A node covers the whole window unless `Ui.SetOnPicture` keeps it over the picture's part, and
+ImGui's panels, the console and the overlay take the whole window always.
+
+Two of Bevy's caches were met on the way. Bevy makes one depth texture for all the 2D cameras on a
+target, and one picture for the cameras on a target whose uses, format and multisampling match, each
+at the first camera's size, which held while every camera drew at its window's size. A scaled 2D
+camera beside the interface's camera gave wgpu a pass of two sizes, and the app quit on its first
+frame with a picture, as the storm did before both were met. A 2D view whose depth is unlike its
+size is given one of its own after Bevy's, and both interface cameras ask a use of their picture no
+game camera asks, so each has a picture of its own at the window's size.
+
+The panel listed a page's rows by name, so the order the item gives waited on the Diagnostics
+module, whose `Setting.Order` (162f7f0) this batch pins. The window page reads mode, resolution,
+resizable, monitor and vsync, the render page scale, filter, aspect, fit and fps_limit, and
+`interface.scale` stands on its own page.
+
+The tests. The window page's and the render page's hold each setting's native choice, its offers and
+its order, a start reading each value from the file by its text with a refused line leaving the one
+before it standing, and a run with no window refusing each set with the reason. `Render.Picture`
+sets the page, its exact size locks `render.scale` with the reason and lets it go, the file keeping
+the player's, and five pictures out of range are refused. `interface.scale` reads the display's
+scale until a share is set. The window storm under Xvfb sets its window through `window.resolution`,
+covering the screen at the screen's size and refusing 2560x1440 with the reason, and reads the
+nearest and the sharp filter at a ratio of two by a scale of 50% and of one and a half by an exact
+size of 600 by 300, which hold as they did. Two tests join it. A 4:3 picture in the window of 900 by
+450 fitted has 150 black columns at either side and no black pixel between, stretched has none, and
+a node kept over the fitted picture stands 600 by 450 about the window's middle. Under a picture of
+450 by 225 the interface's whole node lays out at 900 by 450. The storm passed 7 of 7 beside the
+settings' 6, and the workflow's count follows.
+
+The sheet, `2026-11-23-item-164-window-picture.webp`, shows the feature test in borderless
+fullscreen on a headless mutter's virtual screen of 1920 by 1080, a 4:3 picture beside the screen's
+own shape, fitted and stretched, a scale of 67% in the three filters on one crop with sharp against
+nearest beside them, 17,001 of the crop's 32,400 pixels differing at the picture pixels' edges, and
+the render and window pages drawn at the screen's size over a picture at 67%. In the readings and
+the dump, sent to the owner.
+
+The guides. The window guide's settings follow the resolution, the render page, a game's picture and
+the interface, with a block of a game's code that compiles. The tools guide's table names the
+window's five settings, the render page's five and `interface.scale`. The cameras guide says a
+camera on a scaled window draws into the picture and keeps its viewport's share. The cheatsheet
+gains `Ui.SetOnPicture` and recasts `Window.SetMode`.
+
+ABI 332. The config's tail carries the picture's size, share, aspect, fit and filter and the frame
+cap in the place of the scaled flag and the scaling, `bcs_window_set_scaling` gives way to
+`bcs_window_set_picture`, and `bcs_window_picture`, `bcs_window_node_on_picture` and
+`bcs_window_set_frame_limit` join it.
+
+The public listing loses `NativeConfig.Scaled` and `NativeConfig.Scaling`, whose meaning moved to
+the picture's fields, and gains `Picture`, `PictureFit`, `PictureFilter`, `Render.Picture`,
+`Render.PictureSize`, `Render.PictureArea`, `Ui.SetOnPicture` and the config's eight fields.
+`Window.SetScaling` and `WindowScaling` were internal.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 241 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,213 passed, 0
+failed and 10 skipped, 2,223 in all where the listing is 2,212, the solution built with no warning,
+in 13 parts and the rest. Seven of the skips are the storm's, which passed under Xvfb as said above.
+The comments of the files touched lie within 100 columns (N 4.12). Four phrases of the comments and
+the cameras guide were recast after it for words STYLE.md keeps out, and the build and NormTests
+held after them.
+
+Shared: Bevy keeps one depth texture and one picture for the cameras on a target at the first
+camera's size, so a camera drawn at a size unlike its window's needs both of its own beside a camera
+at the window's. A renderer whose scene and interface leave one pass for two meets the same choice
+of which size each texture takes.
 
 NormTests passed, 19.

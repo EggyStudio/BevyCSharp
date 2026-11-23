@@ -1,6 +1,6 @@
 //! The first window of a drawing app as the config C# filled asks for it, given to Bevy's window
 //! plugin, which winit makes it from before it is shown, so its size, place, mode, screen, edges,
-//! frame, vsync, alpha and the size its picture is drawn at are its own from its first frame.
+//! frame, vsync, alpha and the picture its cameras draw are its own from its first frame.
 
 use bevy::window::{
     CompositeAlphaMode, MonitorSelection, PresentMode, VideoModeSelection, Window, WindowMode, WindowPosition,
@@ -63,21 +63,29 @@ pub fn primary(config: &BcsConfig, title: Option<String>) -> Window {
     }
 }
 
-/// Gives the first window the size its picture is drawn at while it covers its screen, where the
-/// config asks for that, before its first frame is drawn (see [`super::scaled`]).
+/// Gives the first window the picture the config asks for, its size or share, shape, fit and
+/// filter, before its first frame is drawn (see [`super::picture`]), and the run the cap on its
+/// frames a second.
 pub fn scale(app: &mut bevy::app::App, config: &BcsConfig) {
     use bevy::ecs::query::With;
     use bevy::window::PrimaryWindow;
 
-    if config.scaled == 0 {
+    super::pace::set(config.frame_limit);
+
+    let numbers = (config.aspect_width, config.aspect_height);
+    let Ok(Some(picture)) = super::picture::WindowPicture::from_numbers(
+        config.picture_width,
+        config.picture_height,
+        config.picture_share,
+        numbers,
+        config.fit,
+        config.filter,
+    ) else {
         return;
-    }
+    };
     let world = app.world_mut();
     let Some(window) = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>().iter(world).next() else {
         return;
     };
-    world.entity_mut(window).insert(super::scaled::WindowScaling {
-        size: bevy::math::UVec2::new(config.width.max(1), config.height.max(1)),
-        filter: config.scaling.min(super::scaled::filter::SHARP),
-    });
+    world.entity_mut(window).insert(picture);
 }

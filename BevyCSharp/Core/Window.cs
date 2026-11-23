@@ -90,13 +90,14 @@ public static unsafe partial class Window
 
     /// <summary>
     /// Sets how the window fills the screen, as the player's <c>window.mode</c> does, whose
-    /// borderless is a frameless window at the size set and whose borderless fullscreen draws at
-    /// the size set and scales the picture to the screen.
+    /// borderless is a frameless window at the resolution set and whose borderless fullscreen
+    /// covers the screen.
     /// </summary>
     /// <remarks>
-    /// <see cref="WindowMode.BorderlessFullscreen"/> set here covers the screen and draws at the
-    /// screen's size. The settings' four modes, and <c>window.scaling</c> for the picture drawn at
-    /// a size of its own, are in the guide's page on the window.
+    /// <see cref="WindowMode.BorderlessFullscreen"/> set here covers the screen at the screen's
+    /// size. The settings' four modes, with <c>window.resolution</c> for the window's size and
+    /// <c>render.scale</c> for a picture drawn at a size of its own, are in the guide's page on the
+    /// window.
     /// </remarks>
     public static void SetMode(WindowMode mode) =>
         Native.Check(NativeCore.bcs_window_set_mode(NativeCore.PrimaryWindow, (int)mode), "Window.SetMode");

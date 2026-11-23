@@ -308,13 +308,26 @@ pub struct BcsConfig {
     /// Non-zero to open the first window as a window without the platform's frame, in the middle
     /// of its monitor, which the settings' borderless asks for.
     pub frameless: u32,
-    /// Non-zero to draw the first window's picture at `width` by `height` while it covers its
-    /// screen borderless, and bring it to the screen as `scaling` says, which the settings'
-    /// borderless fullscreen asks for.
-    pub scaled: u32,
-    /// How a scaled picture is brought to the screen, by the numbers `bcs_window_set_scaling`
-    /// takes, when `scaled`.
-    pub scaling: u32,
+    /// The first window's picture in pixels, or 0 by 0 where it is `picture_share` of the window's
+    /// size, by the numbers `bcs_window_set_picture` takes, as the settings' render resolution
+    /// asks for.
+    pub picture_width: u32,
+    /// See `picture_width`.
+    pub picture_height: u32,
+    /// The picture's share of the window's size along each side where its size is 0 by 0, 1 for
+    /// the window's own.
+    pub picture_share: f32,
+    /// The picture's shape as a width and a height, or 0 by 0 for its size's own.
+    pub aspect_width: f32,
+    /// See `aspect_width`.
+    pub aspect_height: f32,
+    /// How a picture of a shape unlike the window's stands in it, 0 fitted and 1 stretched.
+    pub fit: u32,
+    /// How the picture is brought to the window, 0 filtered, 1 from the nearest picture pixel and
+    /// 2 sharp.
+    pub filter: u32,
+    /// The most frames drawn a second, or 0 for no cap.
+    pub frame_limit: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

@@ -145,12 +145,32 @@ internal static unsafe partial class NativeCore
     internal static partial int bcs_window_set_decorations(ulong window, int decorations);
 
     /// <summary>
-    /// Draws the window's picture at a size of its own while it covers its screen borderless, or
-    /// at its own size again where the width or the height is 0.
+    /// Draws the window's picture at a size of its own, or at a share of the window's where the
+    /// width or the height is 0, cut to a shape where both of its sides are above 0, fitted or
+    /// stretched, and brought to the window by a filter.
     /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_set_scaling(ulong window, uint width, uint height, uint filter);
+    internal static partial int bcs_window_set_picture(ulong window, uint width, uint height, float share, float aspectWidth, float aspectHeight, uint fit, uint filter);
+
+    /// <summary>
+    /// Writes the size the window's picture is drawn at and the part of the window it stands in.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_picture(ulong window, uint* size, float* area);
+
+    /// <summary>
+    /// Keeps an interface node over the part of the window the picture stands in, or lets it go.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_node_on_picture(ulong entity, int on);
+
+    /// <summary>Caps the frames drawn a second, or takes the cap away at 0.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_frame_limit(int fps);
 
     /// <summary>Hands the window to the platform to be moved by the pointer.</summary>
     [LibraryImport(Library)]

@@ -3055,6 +3055,9 @@ struct Bevy.Interop.NativeConfig
   byte* UserRoot
   double FixedHz
   double FrameSeconds
+  float AspectHeight
+  float AspectWidth
+  float PictureShare
   float ScaleFactor
   float SpatialScale
   int X
@@ -3066,7 +3069,10 @@ struct Bevy.Interop.NativeConfig
   uint DevTools
   uint Diagnostics
   uint Feathers
+  uint Filter
+  uint Fit
   uint FixedSize
+  uint FrameLimit
   uint Frameless
   uint GpuTimings
   uint Gui
@@ -3082,9 +3088,9 @@ struct Bevy.Interop.NativeConfig
   uint Monitor
   uint NoPrimaryWindow
   uint Offscreen
+  uint PictureHeight
+  uint PictureWidth
   uint RayTracedLighting
-  uint Scaled
-  uint Scaling
   uint TransformGizmo
   uint Transparent
   uint Vsync
@@ -4987,6 +4993,26 @@ enum Bevy.PickingDebugMode : int
   Disabled = 0
   Noisy = 2
   Normal = 1
+readonly struct Bevy.Picture : IEquatable<Picture>
+  (float, float)? Aspect { get; init; }
+  (uint, uint)? Size { get; init; }
+  Picture()
+  PictureFilter Filter { get; init; }
+  PictureFit Fit { get; init; }
+  bool Equals(Picture other)
+  float Scale { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(Picture left, Picture right)
+  static bool op_Inequality(Picture left, Picture right)
+enum Bevy.PictureFilter : int
+  Linear = 0
+  Nearest = 1
+  Sharp = 2
+enum Bevy.PictureFit : int
+  Fit = 0
+  Stretch = 1
 readonly struct Bevy.PinchGesture : IEquatable<PinchGesture>
   PinchGesture(float Delta)
   bool Equals(PinchGesture other)
@@ -11963,7 +11989,9 @@ readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedE
   static bool op_Inequality(Remove<T> left, Remove<T> right)
   void Deconstruct(out Entity Entity, out T Value)
 static class Bevy.Render
+  static (float, float, float, float)? PictureArea { get; }
   static (int, int) PointLightsDrawn { get; }
+  static (uint, uint)? PictureSize { get; }
   static AssetHandle CreateClusterMaterial(uint seed = 0u)
   static AssetHandle CreateDecalMaterial(MaterialSettings settings, float depthFadeFactor = 1f, float depthBias = 0f)
   static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth)
@@ -11994,6 +12022,7 @@ static class Bevy.Render
   static MeshData? DataOf(AssetHandle mesh)
   static MeshRecipe? RecipeOf(AssetHandle mesh)
   static PanCameraSettings? PanCameraOf(Entity camera)
+  static Picture Picture { get; set; }
   static RenderErrorPolicy ErrorPolicy { get; set; }
   static ThunderStrike? StrikeLightning(Entity camera, Vec3? at = null)
   static bool CompressMesh(AssetHandle mesh)
@@ -13329,6 +13358,7 @@ static class Bevy.Ui
   static void SetImage(Entity entity, AssetHandle image)
   static void SetImage(Entity entity, UiImageSettings settings)
   static void SetMaterial(Entity entity, AssetHandle material)
+  static void SetOnPicture(Entity node, bool on = true)
   static void SetScroll(Entity entity, float x, float y)
   static void SetStrikethrough(Entity text, bool struck = true)
   static void SetText(Entity entity, string text)

@@ -444,12 +444,16 @@ settings panel draws them on a page for each first word of their names.
 | `sky.cloud_cover` | How much of the sky the clouds cover, 0 to 1 | 0.45 | |
 | `sky.forecast` | Whether the forecast writes the engine's weather | off | |
 | `window.mode` | How the window covers its screen, `Windowed`, `Borderless`, `BorderlessFullscreen` or `Fullscreen` | Windowed | |
+| `window.resolution` | The window's size in windowed and borderless and the screen's mode in fullscreen, `native` or a size as `1600x900` | native | |
 | `window.resizable` | Whether the window's edges resize it | on | |
-| `window.width` | The width of the window, and of the picture in borderless fullscreen | 1280 | |
-| `window.height` | The height of the window, and of the picture in borderless fullscreen | 720 | |
 | `window.monitor` | The screen the window is on, by its number from 0 | 0 | |
 | `window.vsync` | Whether a frame waits for the display | on | |
-| `window.scaling` | How borderless fullscreen brings its picture to the screen, `Linear`, `Nearest` or `Sharp` | Linear | |
+| `render.scale` | The size the picture is drawn at as a share of the window's, above 0% to 200% | 100% | |
+| `render.filter` | How a picture smaller than the window is brought up to it, `Linear`, `Nearest` or `Sharp` | Linear | |
+| `render.aspect` | The picture's shape as a width to a height, as `4:3`, or `native` for the window's | native | |
+| `render.fit` | How a shape unlike the window's stands in it, `Fit` with black at the sides or `Stretch` | Fit | |
+| `render.fps_limit` | The most frames drawn a second, 1 to 1000, or `off` | off | |
+| `interface.scale` | The size the panels, the console and the overlay are drawn at, `native` for the display's or 50% to 400% | native | |
 | `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
 | `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
 | `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |
@@ -465,10 +469,11 @@ the program runs. The others set the running app, and the commands that set them
 `field.set`, `sky.fog`, `sky.froxels`, `sky.clouds` and `sky.weather`. The `sky` settings read the
 first camera drawing their part and set every camera its command sets, and refuse where no camera
 draws it, save `sky.fog_visibility` and `sky.cloud_quality`, which start their part where the
-command would and take it off at 0 and `Off`. The `window` settings set the first window and only
-read in a run that shows none, and a mode the system cannot give is refused with the reason, the
-window keeping its own (see the window guide). A variable the environment holds overrides its
-setting for the whole run, and a set is then kept for the settings file alone.
+command would and take it off at 0 and `Off`. The `window` and `render` settings set the first
+window and its picture and only read in a run that shows none, and a mode or a size the system
+cannot give is refused with the reason, the window keeping its own (see the window guide). A
+variable the environment holds overrides its setting for the whole run, and a set is then kept for
+the settings file alone.
 
 ### The settings file
 
