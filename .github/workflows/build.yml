@@ -911,8 +911,8 @@ jobs:
             echo "::error title=The window storm failed::dotnet test ended with $tested. What it printed, then the test host's standard error:%0A${said//$'\n'/%0A}"
             exit 1
           fi
-          if ! grep -Eq "Passed: +4, Skipped: +0" "$out"; then
-            echo "::error::The window storm, the monitors' test, the window page's test and the scaled picture's test did not all run, so a window, a monitor, a setting of the window or its scaling went unchecked. The tests skip where they are not asked for or have no X11 display."
+          if ! grep -Eq "Passed: +5, Skipped: +0" "$out"; then
+            echo "::error::The window storm, the monitors' test, the window page's test and the two scaled pictures' tests did not all run, so a window, a monitor, a setting of the window or its scaling went unchecked. The tests skip where they are not asked for or have no X11 display."
             exit 1
           fi
 

@@ -78,6 +78,6 @@ pub fn scale(app: &mut bevy::app::App, config: &BcsConfig) {
     };
     world.entity_mut(window).insert(super::scaled::WindowScaling {
         size: bevy::math::UVec2::new(config.width.max(1), config.height.max(1)),
-        filter: config.scaling.min(super::scaled::filter::INTEGER),
+        filter: config.scaling.min(super::scaled::filter::SHARP),
     });
 }

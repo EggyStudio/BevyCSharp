@@ -82,38 +82,63 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
                 "window.mode borderless: done", "window.mode reads Borderless", "window.width reads 800", "window.width 1000: done",
                 $"window.mode fullscreen: {Answer.Refused}, The screen lists no mode at its own size and rate for a fullscreen window to take, so the window stays borderless. Borderless fullscreen covers the screen at its own mode.",
                 "borderless at 1000 by 450, at 460 315, no frame", "window.width 1920: done", "window.height 1080: done",
-                "covering its screen, not scaled", "window.mode reads Borderless", "window.height 450: done", "window.width 1000: done",
-                "borderless at 1000 by 450, at 460 315, no frame", "window.mode borderlessfullscreen: done", "window.scaling integer: done",
-                "window.width 300: done", "window.height 200: done",
-                "window.mode reads BorderlessFullscreen", "window.scaling reads Integer", "window.width reads 300",
-                "window.mode windowed: done", "window.mode reads Windowed", "windowed at 300 by 200, at 40 40, framed", "window.resizable off: done",
+                "covering its screen, not scaled", "window.mode reads Borderless", "window.height 450: done", "window.width 900: done",
+                "borderless at 900 by 450, at 510 315, no frame", "window.mode borderlessfullscreen: done", "window.scaling nearest: done",
+                "window.width 450: done", "window.height 225: done",
+                "window.mode reads BorderlessFullscreen", "window.scaling reads Nearest", "window.width reads 450",
+                "window.width 600: done", "window.height 300: done", "window.scaling sharp: done",
+                "window.width 450: done", "window.height 225: done", "window.scaling reads Sharp",
+                "window.mode windowed: done", "window.mode reads Windowed", "windowed at 450 by 225, at 40 40, framed", "window.resizable off: done",
                 "window.resizable reads off", "window.resizable on: done", "window.vsync on: done", "window.vsync reads on", "window.monitor reads 0",
                 $"window.monitor 0: {Answer.NotSettable}", $"window.monitor 1: {Answer.NotSettable}",
             ],
             run.Page);
-        Assert.Equal(["window.height 200", "window.scaling Integer", "window.width 300"], run.Kept);
-        Assert.Equal("Windowed, resizable, 300 by 200, no monitor, vsync, Integer", run.Next);
+        Assert.Equal(["window.height 225", "window.scaling Sharp", "window.width 450"], run.Kept);
+        Assert.Equal("Windowed, resizable, 450 by 225, no monitor, vsync, Sharp", run.Next);
     }
 
     /// <summary>
-    /// Borderless fullscreen draws its picture at the size set, and the integer scaling brings it
-    /// to the window by the largest whole number that fits, in the window's middle with black
-    /// round it.
+    /// Borderless fullscreen's sharp scaling equals the nearest one to the bit where the screen is
+    /// a whole number of times the picture.
     /// </summary>
     /// <remarks>
-    /// With no window manager the window covering its screen keeps the size it had, 1000 by 450,
-    /// which the picture of 300 by 200 fits twice in, so it is drawn at 600 by 400 from 200 across
-    /// and 24 down. The run reads the green of the camera's clear along the window's middle row
-    /// and column, and the black at its corners.
+    /// With no window manager the window covering its screen keeps the size it had, 900 by 450,
+    /// which a picture of 450 by 225 fills twice over. The picture is a noise image laid over the
+    /// camera's interface, so neighboring picture pixels differ, and it is read as the noise only
+    /// where Bevy's interface is drawn into the camera's picture before the picture is scaled.
     /// </remarks>
     [SkippableFact]
-    public void BorderlessFullscreenScalesItsPictureByTheLargestWholeNumberThatFits()
+    public void TheSharpScalingEqualsTheNearestAtAWholeRatio()
     {
         Needs.WindowStorm();
 
         var run = storm.Run;
         Assert.Equal(0, run.Exit);
-        Assert.Equal("green from 200 to 800 across and from 24 to 424 down of 1000 by 450, black corners", run.Scaled);
+        Assert.Equal("sharp equals nearest at every pixel of 900 by 450", run.WholeRatio);
+    }
+
+    /// <summary>
+    /// At one and a half the sharp scaling fills the screen, every window pixel inside a picture
+    /// pixel takes it whole as the nearest scaling does, and every one across an edge lies between
+    /// the picture pixels round it.
+    /// </summary>
+    /// <remarks>
+    /// A picture of 600 by 300 in the window of 900 by 450. Of every three window pixels across or
+    /// down, the first and the last lie inside a picture pixel and the middle one spans the edge
+    /// between two, whose colors are read from the nearest scaling's picture at a window pixel
+    /// inside each. The linear scaling blends every window pixel and fails it.
+    /// </remarks>
+    [SkippableFact]
+    public void TheSharpScalingFillsTheScreenAtOneAndAHalfWithEachEdgeInOnePixel()
+    {
+        Needs.WindowStorm();
+
+        var run = storm.Run;
+        Assert.Equal(0, run.Exit);
+        Assert.Equal(
+            "180000 of 180000 window pixels inside a picture pixel equal nearest's, 225000 of 225000 across an edge lie between "
+                + "the picture pixels round it, 0 black, 900 by 450",
+            run.HalfRatio);
     }
 
     /// <summary>
@@ -122,7 +147,7 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
     /// </summary>
     public sealed record Result(
         int Exit, string Picture, int Monitors, MonitorInfo First, string? Name, VideoMode[] Modes, List<string> Refused,
-        string Opened, List<string> Page, string[] Kept, string Next, string Scaled);
+        string Opened, List<string> Page, string[] Kept, string Next, string WholeRatio, string HalfRatio);
 
     /// <summary>
     /// The window stormed, made once for the tests that read it, when the first of them that is
@@ -173,7 +198,15 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
             var (monitors, first, name, modes) = (0, default(MonitorInfo), (string?)null, Array.Empty<VideoMode>());
             var refused = new List<string>();
             var (opened, page) = ("", new List<string>());
-            var (capture, scaled) = (default(Capture?), "no picture was read");
+            // The scaled pictures read back, the nearest and the sharp scaling's at a ratio of two
+            // and of one and a half.
+            var (capture, into) = (default(Capture?), 0);
+            var pictures = new CapturedImage?[4];
+            void Begin(int index)
+            {
+                if (capture is not null) page.Add($"picture {into} was still being read");
+                (capture, into) = (Render.BeginCapture(), index);
+            }
 
             // A line as the console or the panel gives it, with the reason of a refusal, and a
             // setting's value as its row reads it.
@@ -195,8 +228,25 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
             {
                 app.AddPlugin(new EnginePlugin());
 
+                // A noise picture over the camera's interface, so neighboring picture pixels differ
+                // in a scaled picture read back, none of its colors near black.
                 app.AddSystem(Stage.Startup, new SystemDescriptor(
-                    _ => Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0.1f, 0.6f, 0.2f, 1f) }),
+                    _ =>
+                    {
+                        var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0.1f, 0.6f, 0.2f, 1f) });
+                        var noise = new byte[450 * 225 * 4];
+                        var random = new Random(163);
+                        for (var i = 0; i < noise.Length; i += 4)
+                            (noise[i], noise[i + 1], noise[i + 2], noise[i + 3]) = ((byte)random.Next(48, 256), (byte)random.Next(48, 256), (byte)random.Next(48, 256), 255);
+                        var node = Ui.SpawnNode(new UiSettings
+                        {
+                            Absolute = true,
+                            Width = Length.Percent(100f),
+                            Height = Length.Percent(100f),
+                            Camera = camera,
+                        });
+                        Ui.SetImage(node, new UiImageSettings { Image = Render.CreateImage(noise, 450, 225) });
+                    },
                     "Test.Camera"));
 
                 app.AddSystem(Stage.Update, new SystemDescriptor(
@@ -262,49 +312,68 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
                                 page.Add($"covering its screen, {(drawnScaled ? "scaled" : "not scaled")}");
                             Read("window.mode");
                             Line(world, "window.height 450");
-                            Line(world, "window.width 1000");
+                            Line(world, "window.width 900");
                         }
                         if (frame == 184)
                         {
                             page.Add(Placed("borderless"));
                             Line(world, "window.mode borderlessfullscreen");
-                            Line(world, "window.scaling integer");
-                            Line(world, "window.width 300");
-                            Line(world, "window.height 200");
+                            Line(world, "window.scaling nearest");
+                            Line(world, "window.width 450");
+                            Line(world, "window.height 225");
                         }
 
-                        // The scaled picture read back once it has reached the window.
+                        // Each scaled picture read back once it has reached the window, the nearest
+                        // scaling's at a ratio of two and of one and a half, then the sharp one's.
                         if (frame == 190)
                         {
                             Read("window.mode");
                             Read("window.scaling");
                             Read("window.width");
-                            capture = Render.BeginCapture();
+                            Begin(0);
+                        }
+                        if (frame == 196)
+                        {
+                            Line(world, "window.width 600");
+                            Line(world, "window.height 300");
+                        }
+                        if (frame == 202) Begin(1);
+                        if (frame == 208) Line(world, "window.scaling sharp");
+                        if (frame == 214) Begin(2);
+                        if (frame == 220)
+                        {
+                            Line(world, "window.width 450");
+                            Line(world, "window.height 225");
+                        }
+                        if (frame == 226)
+                        {
+                            Read("window.scaling");
+                            Begin(3);
                         }
                         if (capture is { } asked && Render.TryReadCapture(asked, out var read))
                         {
-                            scaled = Described(read!);
+                            pictures[into] = read;
                             capture = null;
                         }
-                        if (frame == 210) Line(world, "window.mode windowed");
+                        if (frame == 232) Line(world, "window.mode windowed");
 
                         // A size of the system's own a frame on, as a window manager restores the
                         // one it saved as the window leaves its screen, which the size given back
                         // is set over.
-                        if (frame == 212) Window.SetSize(1000, 300);
-                        if (frame == 218)
+                        if (frame == 234) Window.SetSize(1000, 300);
+                        if (frame == 240)
                         {
                             Read("window.mode");
                             page.Add(Placed("windowed"));
                             Line(world, "window.resizable off");
                         }
-                        if (frame == 222)
+                        if (frame == 244)
                         {
                             Read("window.resizable");
                             Line(world, "window.resizable on");
                             Line(world, "window.vsync on");
                         }
-                        if (frame == 226)
+                        if (frame == 248)
                         {
                             Read("window.vsync");
                             Read("window.monitor");
@@ -312,7 +381,7 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
                             Line(world, $"window.monitor {monitors}");
                         }
 
-                        if (frame == 290) App.RequestExit();
+                        if (frame == 312) App.RequestExit();
                     },
                     "Test.Storm"));
 
@@ -328,25 +397,76 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
             var next = WindowSettings.Open(Config.Windowed("Storm", 640, 400), new WindowPlace(false, 0, 0, 640, 400, false));
             var said = $"{next.Mode}, {(next.Resizable ? "resizable" : "fixed")}, {next.Width} by {next.Height}, "
                 + $"{(next.Monitor is { } monitor ? $"monitor {monitor}" : "no monitor")}, {(next.Vsync ? "vsync" : "no vsync")}, {next.Scaling}";
-            return new Result(exit, picture, monitors, first, name, modes, refused, opened, page, kept, said, scaled);
+            return new Result(exit, picture, monitors, first, name, modes, refused, opened, page, kept, said,
+                Matched(pictures[3], pictures[0]), Blended(pictures[2], pictures[1]));
         }
 
-        // Where the picture's green lies along the window's middle row and column, and whether
-        // the corners are black.
-        private static string Described(CapturedImage window)
+        // Whether a scaled picture shows the noise, its picture pixels nearly all of different
+        // colors, where a picture with the interface left out holds the camera's clear color alone.
+        private static string? NotTheNoise(CapturedImage picture)
         {
-            static bool Green((byte R, byte G, byte B, byte A) pixel) => pixel.G > 100 && pixel.G > pixel.R + 40;
-            static bool Black((byte R, byte G, byte B, byte A) pixel) => pixel.R < 8 && pixel.G < 8 && pixel.B < 8;
+            var colors = new HashSet<(byte, byte, byte, byte)>();
+            for (var y = 0u; y < picture.Height; y++)
+                for (var x = 0u; x < picture.Width; x++)
+                    colors.Add(picture.At(x, y));
+            return colors.Count > 450 * 225 / 2 ? null : $"the nearest scaling's picture holds {colors.Count} colors, not the noise";
+        }
 
-            var (row, column) = (window.Height / 2, window.Width / 2);
-            var across = Enumerable.Range(0, (int)window.Width).Where(x => Green(window.At((uint)x, row))).ToArray();
-            var down = Enumerable.Range(0, (int)window.Height).Where(y => Green(window.At(column, (uint)y))).ToArray();
-            if (across.Length == 0 || down.Length == 0) return $"no green in {window.Width} by {window.Height}";
+        // The sharp scaling's picture at a whole ratio against the nearest one's, pixel by pixel.
+        private static string Matched(CapturedImage? sharp, CapturedImage? nearest)
+        {
+            if (sharp is null || nearest is null) return "a scaled picture was not read";
+            if ((sharp.Width, sharp.Height) != (nearest.Width, nearest.Height))
+                return $"sharp {sharp.Width} by {sharp.Height} against nearest {nearest.Width} by {nearest.Height}";
+            if (NotTheNoise(nearest) is { } plain) return plain;
+            var differ = 0;
+            for (var y = 0u; y < sharp.Height; y++)
+                for (var x = 0u; x < sharp.Width; x++)
+                    if (sharp.At(x, y) != nearest.At(x, y)) differ++;
+            return differ == 0
+                ? $"sharp equals nearest at every pixel of {sharp.Width} by {sharp.Height}"
+                : $"{differ} of {sharp.Width * sharp.Height} pixels differ from nearest's";
+        }
 
-            uint[] xs = [0, window.Width - 1];
-            uint[] ys = [0, window.Height - 1];
-            var corners = xs.All(x => ys.All(y => Black(window.At(x, y)))) ? "black corners" : "corners not black";
-            return $"green from {across[0]} to {across[^1] + 1} across and from {down[0]} to {down[^1] + 1} down of {window.Width} by {window.Height}, {corners}";
+        // The sharp scaling's picture at one and a half against the nearest one's. Of every three
+        // window pixels along an axis the first and the last lie inside the first and the second
+        // of two picture pixels and the middle one spans the edge between them, so a picture pixel
+        // is read from the nearest scaling's window pixel inside it, the first of three for an
+        // even one and the last for an odd one.
+        private static string Blended(CapturedImage? sharp, CapturedImage? nearest)
+        {
+            if (sharp is null || nearest is null) return "a scaled picture was not read";
+            if ((sharp.Width, sharp.Height) != (nearest.Width, nearest.Height))
+                return $"sharp {sharp.Width} by {sharp.Height} against nearest {nearest.Width} by {nearest.Height}";
+            if (NotTheNoise(nearest) is { } plain) return plain;
+
+            static uint Inside(uint pixel) => pixel % 2 == 0 ? 3 * pixel / 2 : (3 * pixel + 1) / 2;
+            // The picture pixels a window pixel takes along an axis, the one it lies inside or the
+            // two either side of the edge it spans.
+            static uint[] Under(uint at) => at % 3 == 1 ? [at / 3 * 2, at / 3 * 2 + 1] : [(2 * at + 1) / 3];
+
+            var (inside, equal, edges, between, black) = (0, 0, 0, 0, 0);
+            for (var y = 0u; y < sharp.Height; y++)
+                for (var x = 0u; x < sharp.Width; x++)
+                {
+                    var seen = sharp.At(x, y);
+                    if (seen.R < 8 && seen.G < 8 && seen.B < 8) black++;
+                    if (x % 3 != 1 && y % 3 != 1)
+                    {
+                        inside++;
+                        if (seen == nearest.At(x, y)) equal++;
+                        continue;
+                    }
+                    edges++;
+                    var round = Under(x).SelectMany(px => Under(y).Select(py => nearest.At(Inside(px), Inside(py)))).ToArray();
+                    // A blend lies between the colors it is made of, give or take the rounding of
+                    // its eight bits.
+                    static bool Within(byte value, IEnumerable<byte> those) => value + 1 >= those.Min() && value <= those.Max() + 1;
+                    if (Within(seen.R, round.Select(p => p.R)) && Within(seen.G, round.Select(p => p.G)) && Within(seen.B, round.Select(p => p.B)))
+                        between++;
+                }
+            return $"{equal} of {inside} window pixels inside a picture pixel equal nearest's, {between} of {edges} across an edge "
+                + $"lie between the picture pixels round it, {black} black, {sharp.Width} by {sharp.Height}";
         }
     }
 

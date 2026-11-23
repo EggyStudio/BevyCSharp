@@ -17227,3 +17227,129 @@ The panel draws the settings by the first word of their names, `field`, `gi`, `k
 section, a table of every setting with its default and variable and how the file is kept, with a
 block of a game's own setting built on the package, its keys paragraph says a rebound key is kept,
 and the feature test's README names `settings.txt` beside its own file.
+
+The tests. `EngineSettingsTests` holds every setting in the registry on the page of its first word,
+a run setting refusing a set and a clock setting refused with no app, the clock's and the field's
+settings set through console lines in a running app, the file read as the app starts and written as
+a key changes with a note and a line of no setting kept, and no file for a run with no window. With
+the registration and the file's system taken out, the first three fail (N 3.1).
+
+The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-155-settings.webp`, of the
+feature test offscreen, its console answering the settings with a refused value in red and the
+candidates of `time.`, and its settings panel on its first page, its time page and its run page,
+with its line in the readings' captions.
+
+A mend of 158's in the same commit, for Verdict 94. Its Escape station in
+`build/drive-feature-test.sh` ran before the hub's walk, and
+`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` runs the script against a stand-in for
+bcs that keeps no panels and answers done to a command it does not know, so the run stopped at F5
+opening no panel where the test looks for the walk. The station, unchanged, follows the hub's walk
+and the modes, before the course, and the test passes with it there and fails at 284819d0. 158's
+whole suite ran from 15:52 to 17:09 and the station went in at 18:49, with only the touched classes
+run after it, so a run of the test alone, two seconds with no device, would have found it before
+284819d0. A batch that changes a script under `build` runs the tests that read it, and the whole
+suite after its last change.
+
+The checks. The whole suite on this commit's tree, the commit before it with these files, ran 2205,
+the 2194 listed and 11, with 2200 passed, 5 skipped and none failed. The classes of the diagnostics,
+the command line, ImGui, the editor and scenes passed 241 with one skipped before it, the solution
+builds with warnings as errors, and the cheatsheet and the listing come out of their generators
+unchanged, since every type this adds is internal. The package of the commit before, `0.0.0-diag9`,
+was packed from a tree holding these files, and the tools guide's blocks, the game's own setting
+among them, build on it.
+
+Shared: the engine's settings in the module's registry as 3DEngine's `EngineSettings` holds them,
+the run's own unsaved and the run's start only reading, and the player's settings file kept for a
+run that shows a window, in the player's folder of the engine, are offered to SHARED.md as both
+engines having them.
+
+NormTests passed, 19.
+
+159, part one, the managed hold, in the commit carrying this.
+
+The hold. `Input` asks once a frame, as the frame's input comes in, and again once the areas' work
+has run, whether a panel that takes input is open, which the Diagnostics module answers at bcb4513
+(`Debug.Keys.Panels.HoldsInput`, the console and the settings panel joining as panels that take
+input), the pin this commit moves. While one is, every read of the program's answers as though
+nothing were pressed or moved. No key, logical key, mouse button, pad button or touch reads down,
+the pointer stands where it stood as the panel opened, the motion, the wheel and the text are empty,
+and each pad in `Gamepads` is a copy at rest. As it ends, what is down stays unseen until it is let
+go, its release with it, and a stick past a quarter of its travel until it comes back within it, the
+rest 3DEngine's hold uses. ImGui reads the pointer, the wheel, the modifiers and the text as they
+came, and the diagnostics' keys read their presses as they came, so the panels work and their keys
+act. The overlay holds nothing.
+
+The messages. A program reading the messages builds its own state from them, so they keep to what it
+read rather than to each frame's picture. A press, a touch's start, a move and a value past rest are
+left out while the hold lasts. A release or a touch's end comes where the program read the press, at
+any time, and never where it did not, a repeat comes only while the program reads its key down, and
+a value back within rest always comes, so a program holds no key, button or stick down after the
+hand lets go. A pad's connection still comes, and the IME's messages are left as they are, since the
+console's field reads them from the same bus.
+
+The test. `HeldInputTests` presses a key and pushes a stick before the console or the settings panel
+opens, presses another key, a pad's button and the other stick while it is open and holds them as it
+closes, lets everything go and presses the second key and the button again, writing down each
+frame's reads of the program's under the part of the run they came in. With either panel the program
+reads the first key and the stick before, nothing while the panel is open or held after it, the
+first key's release as a message and the stick back near rest, and the second presses as its own. A
+run with the overlay shown reads as a run with nothing open. With the area's hand-off of the
+module's answer taken out, both panels' rows fail (N 3.1). The engine's test stands for the feature
+test's case, whose player and admin panel read the same `Input`.
+
+The guides. The input guide gains a section, An open console holds the program's input, the tools
+guide's debug keys a paragraph pointing at it, and `Input`'s remarks say it. Bevy's own camera
+controllers read the input in the bridge and are not held, as both say, until the second commit, the
+bridge's flag with the ABI's bump and a test of a controller held while the panel is open, which
+follows this.
+
+The whole suite passed from one tree, 2,203 passed, 0 failed and 5 skipped, 2,208 in all where the
+listing is 2,197, the solution built from nothing with warnings as errors, in 13 parts and the rest.
+The public listing and the cheatsheet are unchanged.
+
+Shared: the hold is 3DEngine's HoldWhile and SyncHold, its rest of a quarter of a stick's travel
+with it. This engine posts the input as messages as well, so they keep to what the program read, a
+release for each press it read and a value back at rest always coming, and a touch down as the panel
+closes stays unseen until it ends, which 3DEngine's touches, held only while the hold lasts, leave
+out.
+
+NormTests passed, 19.
+
+159, part two, the bridge's hold on Bevy's camera controllers, in the commit carrying this.
+
+The hold. As the managed side's hold begins and ends it tells the bridge by a new entry point,
+`bcs_input_hold`, under the guard, with the ABI at 328 on both sides. Bevy's free and pan cameras
+read Bevy's input resources in the fixed main loop's first set, so the bridge swaps the keys, the
+mouse buttons, the mouse's motion and scroll and the touches for held copies around that set alone
+and puts them back after it, and every other reader in the frame, the interface and the managed side
+among them, reads them as they came. While the hold lasts every key and button comes up for the
+controllers in its first frame, so the free camera eases to a stop and lets the cursor go as it does
+when a hand lets go, and after that nothing is down and the mouse is still. As it ends, what is down
+stays hidden from them until it comes up, its release with it, as the managed side keeps it from the
+program. The pan-orbit camera's pointer, which the bridge reads itself, ends the drag under way as
+the hold begins and starts none and moves none while it lasts. No controller of Bevy's reads a pad,
+so the pads are left as they are. The swap is added only where the app asks for a controller.
+
+The test. `CameraControllerTests.TheFreeCameraStandsStillWhileThePanelIsOpen` opens the settings
+panel over a free camera, presses its forward key under the panel, holds it as the panel closes, and
+lets it go and presses it again, and the camera stands still through the first two and walks on the
+third. With the managed side's word to the bridge taken out, the camera walks under the panel and
+the test fails (N 3.1). The pan camera and the pan-orbit camera have no test of the hold of their
+own, as the review asked for one controller's, the pan camera's swap being the free camera's.
+
+The guides. The input guide's section says Bevy's controllers are held alike, the cameras guide's
+controllers part gains a paragraph pointing at it, and `Input`'s remarks say it.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,204 passed, 0
+failed and 5 skipped, 2,209 in all where the listing is 2,198, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The public listing and the cheatsheet are unchanged.
+
+Shared: 3DEngine's cameras read its managed input (`E3D.Cameras`), which its hold covers, so the
+bridge's part has no counterpart there.
+
+NormTests passed, 19.
+
+155, step 3's sky settings, in the commit carrying this.

@@ -22,6 +22,14 @@ without one in the screen's middle, borderless fullscreen and fullscreen coverin
 nearest and integer scaling on one crop at 960 by 540 and at 1280 by 720, the integer at 1.5 drawn
 pixel for pixel with black round it and ImGui's overlay in the screen's corner.
 
+![](.github/assets/readings/2026-11-23-item-163-window-scaling.webp)
+The window's four modes and borderless fullscreen's three scalings on the feature test as an X11
+window on a headless mutter's virtual screen of 1920 by 1080, the modes retaken with the copy after
+Bevy's interface, and linear, nearest and sharp on one crop at 960 by 540 and at 1280 by 720 with
+sharp against nearest beside them, equal blocks at a ratio of 2 but for the scene moving a little
+between captures, and at 1.5 each picture pixel one whole screen pixel and half of one blended with
+its neighbor.
+
 ## 2026-11-22
 
 ![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)

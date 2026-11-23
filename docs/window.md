@@ -185,9 +185,10 @@ its size and place for its return, and a run that shows no window has the page o
 default, filters it and is soft. `Nearest` takes each screen pixel from the picture pixel under it
 and is sharp, which is even where the screen is a whole number of times the picture, as 1920 by
 1080 is on a screen of 3840 by 2160, and uneven at any other ratio, where some picture pixels come
-out a screen pixel wider than others. `Integer` enlarges the picture by the largest whole number
-that fits, in the screen's middle with black round it, every picture pixel a square block. A
-picture as wide as the screen or as tall is drawn at the screen's size. The cameras keep the
+out a screen pixel wider than others. `Sharp` takes each screen pixel inside a picture pixel from
+it whole and blends the two picture pixels of an edge in the one screen pixel that spans it, so
+every picture pixel is a block of one width with one blended screen pixel at most on its edge,
+nothing crawls as the picture moves, and at a whole ratio it equals `Nearest`. A picture as wide as the screen or as tall is drawn at the screen's size. The cameras keep the
 window's size in logical pixels, so the pointer, picking and a camera's viewport read as they do
 unscaled, and the interface ImGui draws is drawn after the scaling at the screen's own size, while
 Bevy's interface is drawn into the picture and scaled with it.

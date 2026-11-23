@@ -297,7 +297,7 @@ internal static class WindowSettings
         { Lock = Unshown };
 
         yield return new Setting<WindowScaling>("window.scaling",
-            "How borderless fullscreen brings its picture to the screen, filtered and soft, from the nearest picture pixel and sharp, which is even only where the screen is a whole number of times the picture's size, or by the largest whole number that fits with black round it.",
+            "How borderless fullscreen brings its picture to the screen, filtered and soft, from the nearest picture pixel and sharp, which is even only where the screen is a whole number of times the picture's size, or sharp and even at any ratio, a picture pixel's edge blended in one screen pixel at most.",
             WindowScaling.Linear, () => _opening?.Scaling ?? _scaling, apply: SetScaling)
         { Lock = Unshown };
     }

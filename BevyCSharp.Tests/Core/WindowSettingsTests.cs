@@ -35,7 +35,7 @@ public sealed class WindowSettingsTests : IDisposable
             Assert.False(setting.AtNextStart, setting.Name);
         }
         Assert.Equal(["Windowed", "Borderless", "BorderlessFullscreen", "Fullscreen"], Registry.Process.FindSetting("window.mode")!.Choices);
-        Assert.Equal(["Linear", "Nearest", "Integer"], Registry.Process.FindSetting("window.scaling")!.Choices);
+        Assert.Equal(["Linear", "Nearest", "Sharp"], Registry.Process.FindSetting("window.scaling")!.Choices);
 
         using var harness = new EngineHarness(frames: 3);
         var seen = new List<string>();

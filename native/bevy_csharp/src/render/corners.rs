@@ -26,7 +26,7 @@ use bevy::core_pipeline::upscaling::upscaling;
 use bevy::ecs::component::Component;
 use bevy::ecs::query::With;
 use bevy::ecs::resource::Resource;
-use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::Res;
 use bevy::render::camera::ExtractedCamera;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
@@ -50,6 +50,11 @@ pub struct BcsRoundedCorners {
     pub radius: f32,
     pub fill: [f32; 4],
 }
+
+/// Where the corners are taken off a camera's picture, so a copy of the picture to the window can
+/// run after them.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct DrawCorners;
 
 /// The shader, made in the main world where shader assets live.
 #[derive(Resource, Clone)]
@@ -283,8 +288,8 @@ pub fn install(app: &mut App) {
     render_app
         .insert_resource(CornerShader(shader))
         .init_resource::<CornerPipelines>()
-        .add_systems(Core3d, draw_corners.after(Core3dSystems::PostProcess).before(upscaling))
-        .add_systems(Core2d, draw_corners.after(Core2dSystems::PostProcess).before(upscaling));
+        .add_systems(Core3d, draw_corners.in_set(DrawCorners).after(Core3dSystems::PostProcess).before(upscaling))
+        .add_systems(Core2d, draw_corners.in_set(DrawCorners).after(Core2dSystems::PostProcess).before(upscaling));
 }
 
 /// Rounds a camera's corners with a fill outside them, or with a radius of nothing squares them

@@ -7,10 +7,10 @@
 //! ratio the picture is enlarged by, so every texture of its view, its passes and Bevy's interface
 //! on it are made at the picture's size, and a pointer at a place on the window lands on what is
 //! drawn there, since the camera's logical rectangle is the one it is shown over. Where the picture
-//! stands in the middle with black round it, as a whole ratio leaves it or a shape unlike the
-//! screen's does, the target is the screen divided by the ratio and the camera is given the middle
-//! of it as its viewport, which stands in the window's middle once the target is drawn over the
-//! window. A game's own viewport is scaled into that middle and given back when the scaling ends.
+//! stands in the middle with black round it, as a shape unlike the screen's leaves it, the target
+//! is the screen divided by the ratio and the camera is given the middle of it as its viewport,
+//! which stands in the window's middle once the target is drawn over the window. A game's own
+//! viewport is scaled into that middle and given back when the scaling ends.
 //!
 //! **The copy.** Bevy's own copy to the window clips to the camera's viewport in the target's
 //! pixels, which here are not the window's, and samples the nearest pixel, so it is left out for a
@@ -49,9 +49,11 @@ use bevy::render::sync_world::RenderEntity;
 use bevy::render::view::{ResolvedCompositingSpace, ViewTarget};
 use bevy::render::{Extract, ExtractSchedule, Render, RenderApp, RenderStartup, RenderSystems};
 use bevy::shader::Shader;
+use bevy::ui_render::ui_pass;
 use bevy::window::{PrimaryWindow, Window, WindowMode};
 
 use crate::imgui::render::InterfaceView;
+use crate::render::corners::DrawCorners;
 
 /// How a scaled window's picture is brought to its screen, by the numbers
 /// `bcs_window_set_scaling` takes.
@@ -60,9 +62,11 @@ pub mod filter {
     pub const LINEAR: u32 = 0;
     /// Each screen pixel from the picture pixel under it, sharp, and even only at a whole ratio.
     pub const NEAREST: u32 = 1;
-    /// Enlarged by the largest whole number that fits, each picture pixel a square block of screen
-    /// pixels, in the screen's middle with black round it.
-    pub const INTEGER: u32 = 2;
+    /// Each screen pixel inside a picture pixel from it whole and one across an edge a blend of
+    /// the two by how much of each it spans, so every picture pixel is a block of one width with
+    /// one blended pixel at most on its edge, which holds still as the picture moves at any ratio
+    /// and equals [`NEAREST`] at a whole one.
+    pub const SHARP: u32 = 2;
 }
 
 /// On a window, the size its picture is drawn at while it covers its screen borderless, in the
@@ -85,14 +89,14 @@ struct ScaledCamera {
 }
 
 /// What the frame's end copies of a scaled camera's picture, the part of the window from its
-/// corner the whole target is drawn over, the part of that the picture stands in, and whether each
-/// window pixel takes the nearest picture pixel.
+/// corner the whole target is drawn over, the part of that the picture stands in, and the scaling's
+/// filter, one of [`filter`]'s.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct WindowCopy {
     over: UVec2,
     at: UVec2,
     size: UVec2,
-    nearest: bool,
+    filter: u32,
 }
 
 /// How a camera on a scaled window draws, the target it is told of, the place and size of the
@@ -129,17 +133,26 @@ pub fn install(app: &mut App) {
         .add_systems(RenderStartup, init_pipeline)
         .add_systems(ExtractSchedule, extract_scaled)
         .add_systems(Render, prepare_scaled.in_set(RenderSystems::Prepare))
-        // In the place of Bevy's copy to the window, after everything the camera does.
-        .add_systems(Core3d, copy_scaled.after(Core3dSystems::PostProcess).before(upscaling))
-        .add_systems(Core2d, copy_scaled.after(Core2dSystems::PostProcess).before(upscaling));
+        // In the place of Bevy's copy to the window, after everything the camera does. Bevy's
+        // interface and the rounded corners draw into the camera's picture in the same place,
+        // after its effects and before the copy to the window, and nothing else orders them
+        // against this copy, which would take the picture without them and leave them undrawn.
+        .add_systems(
+            Core3d,
+            copy_scaled.after(Core3dSystems::PostProcess).after(ui_pass).after(DrawCorners).before(upscaling),
+        )
+        .add_systems(
+            Core2d,
+            copy_scaled.after(Core2dSystems::PostProcess).after(ui_pass).after(DrawCorners).before(upscaling),
+        );
 }
 
 /// How a camera on `window` draws where the window covers its screen borderless and is scaled,
 /// or none where it draws at the window's own size.
 ///
 /// The picture is the scaling's size in the window's pixels, enlarged by the ratio of the screen
-/// to it that keeps its shape, the whole number below that ratio for [`filter::INTEGER`]. A picture
-/// as large as the screen or larger is drawn at the screen's own size, since it would be shrunk.
+/// to it that keeps its shape. A picture as large as the screen or larger is drawn at the screen's
+/// own size, since it would be shrunk.
 fn plan(window: &Window, scaling: &WindowScaling) -> Option<Plan> {
     if !matches!(window.mode, WindowMode::BorderlessFullscreen(_)) {
         return None;
@@ -155,24 +168,17 @@ fn plan(window: &Window, scaling: &WindowScaling) -> Option<Plan> {
         return None;
     }
 
-    let integer = scaling.filter == filter::INTEGER;
-    let by = if integer { ratio.floor() } else { ratio };
-    let target = if integer { (screen.as_vec2() / by).floor() } else { (screen.as_vec2() / by).round() };
-    let target = target.as_uvec2().max(picture);
+    let target = (screen.as_vec2() / ratio).round().as_uvec2().max(picture);
     let at = (target - picture) / 2;
-
-    // A whole ratio drawn over the window's corner at exactly that ratio, so every picture pixel is
-    // the same block, and any other over the whole window.
-    let over = if integer { (target.as_vec2() * by).as_uvec2().min(screen) } else { screen };
-    let stretch = over.as_vec2() / target.as_vec2();
+    let stretch = screen.as_vec2() / target.as_vec2();
     let copy = WindowCopy {
-        over,
+        over: screen,
         at: (at.as_vec2() * stretch).round().as_uvec2(),
-        size: (picture.as_vec2() * stretch).round().as_uvec2().min(over),
-        nearest: scaling.filter != filter::LINEAR,
+        size: (picture.as_vec2() * stretch).round().as_uvec2().min(screen),
+        filter: scaling.filter,
     };
 
-    Some(Plan { target, scale_factor: scale_factor / by, at, picture, screen, copy })
+    Some(Plan { target, scale_factor: scale_factor / ratio, at, picture, screen, copy })
 }
 
 /// The viewport a scaled camera is given, the game's own scaled into where the picture stands, or
@@ -325,6 +331,7 @@ struct ScaleKey {
     format: TextureFormat,
     blend: Option<BlendState>,
     space: Option<CompositingSpace>,
+    sharp: bool,
 }
 
 fn init_pipeline(
@@ -366,10 +373,13 @@ impl SpecializedRenderPipeline for ScalePipeline {
     type Key = ScaleKey;
 
     fn specialize(&self, key: Self::Key) -> RenderPipelineDescriptor {
-        let entry_point = match key.space {
-            Some(CompositingSpace::Srgb) => "fragment_srgb",
-            Some(CompositingSpace::Oklab) => "fragment_oklab",
-            Some(CompositingSpace::Linear) | None => "fragment",
+        let entry_point = match (key.sharp, key.space) {
+            (false, Some(CompositingSpace::Srgb)) => "fragment_srgb",
+            (false, Some(CompositingSpace::Oklab)) => "fragment_oklab",
+            (false, Some(CompositingSpace::Linear) | None) => "fragment",
+            (true, Some(CompositingSpace::Srgb)) => "sharp_srgb",
+            (true, Some(CompositingSpace::Oklab)) => "sharp_oklab",
+            (true, Some(CompositingSpace::Linear) | None) => "sharp",
         };
 
         RenderPipelineDescriptor {
@@ -416,14 +426,19 @@ fn prepare_scaled(
     ids.0.clear();
     let Some(pipeline) = pipeline else { return };
 
-    for &view in views.0.keys() {
+    for (&view, copy) in &views.0 {
         let Ok((target, camera, space)) = targets.get(view) else {
             continue;
         };
         let Some(format) = target.out_texture_view_format() else {
             continue;
         };
-        let key = ScaleKey { format, blend: blend_of(camera), space: ResolvedCompositingSpace::space(space) };
+        let key = ScaleKey {
+            format,
+            blend: blend_of(camera),
+            space: ResolvedCompositingSpace::space(space),
+            sharp: copy.filter == filter::SHARP,
+        };
         let id = specialized.specialize(&cache, &pipeline, key);
         cache.block_on_render_pipeline(id);
         ids.0.insert(view, id);
@@ -458,19 +473,21 @@ fn copy_scaled(
         return;
     };
 
-    // One for each of the two textures a view's picture alternates between, by filter, and made
-    // anew where the views' textures have all changed, as they do as a window is resized.
+    // One for each of the two textures a view's picture alternates between, by sampler, and made
+    // anew where the views' textures have all changed, as they do as a window is resized. The
+    // sharp scaling reads its picture pixels by their place and takes the linear one unused.
     let source = target.main_texture_view();
+    let nearest = copy.filter == filter::NEAREST;
     if groups.len() > 16 {
         groups.clear();
     }
     let bind_group = groups
-        .entry((source.id(), copy.nearest))
+        .entry((source.id(), nearest))
         .or_insert_with(|| {
             ctx.render_device().create_bind_group(
                 "bcs_scaled_bind_group",
                 &cache.get_bind_group_layout(&pipeline.layout),
-                &BindGroupEntries::sequential((source, if copy.nearest { &pipeline.nearest } else { &pipeline.linear })),
+                &BindGroupEntries::sequential((source, if nearest { &pipeline.nearest } else { &pipeline.linear })),
             )
         })
         .clone();
@@ -519,20 +536,18 @@ mod tests {
         let plan = plan(&window(1920, 1080), &scaling(1280, 720, filter::LINEAR)).unwrap();
         assert_eq!(plan.target, UVec2::new(1280, 720));
         assert_eq!(plan.at, UVec2::ZERO);
-        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::ZERO, size: UVec2::new(1920, 1080), nearest: false });
+        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::ZERO, size: UVec2::new(1920, 1080), filter: filter::LINEAR });
         assert!((plan.scale_factor - 1.0 / 1.5).abs() < 1e-6);
         assert!(viewport(&plan, None).is_none());
     }
 
     #[test]
-    fn a_whole_ratio_stands_in_the_middle_with_black_round_it() {
-        let plan = plan(&window(1920, 1080), &scaling(800, 450, filter::INTEGER)).unwrap();
-        // Twice fits, three times does not.
-        assert_eq!(plan.target, UVec2::new(960, 540));
-        assert_eq!(plan.at, UVec2::new(80, 45));
-        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::new(160, 90), size: UVec2::new(1600, 900), nearest: true });
-        let set = viewport(&plan, None).unwrap();
-        assert_eq!((set.physical_position, set.physical_size), (UVec2::new(80, 45), UVec2::new(800, 450)));
+    fn the_sharp_scaling_fills_the_screen_as_the_other_two_do() {
+        let plan = plan(&window(1920, 1080), &scaling(800, 450, filter::SHARP)).unwrap();
+        assert_eq!(plan.target, UVec2::new(800, 450));
+        assert_eq!(plan.at, UVec2::ZERO);
+        assert_eq!(plan.copy, WindowCopy { over: UVec2::new(1920, 1080), at: UVec2::ZERO, size: UVec2::new(1920, 1080), filter: filter::SHARP });
+        assert!(viewport(&plan, None).is_none());
     }
 
     #[test]
@@ -541,13 +556,13 @@ mod tests {
         assert_eq!(plan.target, UVec2::new(1778, 1000));
         assert_eq!(plan.at, UVec2::new(389, 0));
         assert_eq!(plan.copy.size.y, 1080);
-        assert!(plan.copy.nearest);
+        assert_eq!(plan.copy.filter, filter::NEAREST);
     }
 
     #[test]
     fn a_picture_as_large_as_the_screen_or_a_window_that_does_not_cover_it_is_not_scaled() {
         assert!(plan(&window(1920, 1080), &scaling(1920, 1080, filter::LINEAR)).is_none());
-        assert!(plan(&window(1920, 1080), &scaling(2560, 1000, filter::INTEGER)).is_none());
+        assert!(plan(&window(1920, 1080), &scaling(2560, 1000, filter::SHARP)).is_none());
         let mut windowed = window(1920, 1080);
         windowed.mode = WindowMode::Windowed;
         assert!(plan(&windowed, &scaling(1280, 720, filter::LINEAR)).is_none());
@@ -555,14 +570,14 @@ mod tests {
 
     #[test]
     fn a_games_own_viewport_is_scaled_into_where_the_picture_stands() {
-        let plan = plan(&window(1920, 1080), &scaling(800, 450, filter::INTEGER)).unwrap();
+        let plan = plan(&window(1920, 1080), &scaling(1000, 1000, filter::SHARP)).unwrap();
         let own = Viewport { physical_position: UVec2::new(960, 0), physical_size: UVec2::new(960, 1080), depth: 0.0..1.0 };
         let set = viewport(&plan, Some(&own)).unwrap();
-        assert_eq!((set.physical_position, set.physical_size), (UVec2::new(480, 45), UVec2::new(400, 450)));
+        assert_eq!((set.physical_position, set.physical_size), (UVec2::new(889, 0), UVec2::new(500, 1000)));
     }
 
-    /// The copy's shader is valid WGSL as wgpu takes it, with the entry point of each conversion
-    /// its pipeline is specialized with.
+    /// The copy's shader is valid WGSL as wgpu takes it, with the entry point of each scaling and
+    /// conversion its pipeline is specialized with.
     #[test]
     fn the_copy_shader_validates_with_each_conversion() {
         use naga::valid::{Capabilities, ValidationFlags, Validator};
@@ -573,6 +588,6 @@ mod tests {
             panic!("{}", error.emit_to_string(text));
         }
         let points: Vec<_> = module.entry_points.iter().map(|point| point.name.as_str()).collect();
-        assert_eq!(points, ["fragment", "fragment_srgb", "fragment_oklab"]);
+        assert_eq!(points, ["fragment", "fragment_srgb", "fragment_oklab", "sharp", "sharp_srgb", "sharp_oklab"]);
     }
 }

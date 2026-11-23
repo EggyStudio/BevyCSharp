@@ -449,7 +449,7 @@ settings panel draws them on a page for each first word of their names.
 | `window.height` | The height of the window, and of the picture in borderless fullscreen | 720 | |
 | `window.monitor` | The screen the window is on, by its number from 0 | 0 | |
 | `window.vsync` | Whether a frame waits for the display | on | |
-| `window.scaling` | How borderless fullscreen brings its picture to the screen, `Linear`, `Nearest` or `Integer` | Linear | |
+| `window.scaling` | How borderless fullscreen brings its picture to the screen, `Linear`, `Nearest` or `Sharp` | Linear | |
 | `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
 | `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
 | `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |

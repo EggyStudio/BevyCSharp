@@ -374,6 +374,34 @@ whole number that fits and stands the picture in the screen's middle with black 
 picture pixel a square block of screen pixels. The default is Linear. The sheet shows the three on
 one crop at a whole ratio and at a ratio of one and a half.
 
+162. **The first bounce read against its own reference, and where a screen ray's light comes from.**
+    In the other engine a wall's first bounce read 2.3 times its traced light, and one reading laid
+    all of it on rays that end past their short reach and take the cascades' light there, level ways
+    being lent a sunlit floor's light where in truth they meet unlit faces, while every term of a
+    hit within reach agreed. A claim about the shared way of reading needs this engine's figures
+    too. A reading and no mend. In the target scene, in a view with a wall beside a sunlit floor,
+    with the light past the first bounce held at zero, give the wall's light in six parts over a
+    reference traced at one bounce, and settled over the reference of every bounce. Then for the
+    screen rays of the worst part and of a good part, give the share that ends on a hit within reach
+    and the share that ends past it, and the mean light of each kind beside the same rays traced
+    against the triangles. The Reply holds two small tables and one sentence on whether the surplus
+    is here too.
+
+163. **The third scaling fills the screen and holds still.** `window.scaling` Integer draws the
+    picture at the largest whole multiple with black round it, so at a ratio of one and a half it
+    stands small in the screen's middle. The third choice is to differ from Nearest in one thing
+    only, that it holds still at an uneven ratio, and it fills the screen as the other two do. So
+    Integer goes and Sharp takes its place. Sharp scales the picture by the largest whole number
+    under the ratio with no filtering and brings that to the screen's size with the linear filter,
+    done in one pass by moving each sample toward its texel's middle. Every picture pixel is then a
+    block of even color with one blended screen pixel at most on an edge, the blocks all of one
+    width, and nothing crawls as the picture moves. At a whole ratio Sharp equals Nearest to the
+    bit, which a test holds, and a second test holds at one and a half that the picture covers the
+    screen and that no screen pixel differs from Nearest's by more than a blend of two neighboring
+    picture pixels. The choices are Linear, Nearest and Sharp, Linear the default, and the
+    black-bordered whole multiple is not kept as a fourth. The sheet replaces the Integer column
+    with Sharp at both ratios, and the guides and the cheatsheet follow.
+
 ## Verdicts
 
 Verdict 94 is settled at 23:11 on 2026-11-22, the build on `8089a06e` green with the scripted run's
@@ -702,132 +730,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-The tests. `EngineSettingsTests` holds every setting in the registry on the page of its first word,
-a run setting refusing a set and a clock setting refused with no app, the clock's and the field's
-settings set through console lines in a running app, the file read as the app starts and written as
-a key changes with a note and a line of no setting kept, and no file for a run with no window. With
-the registration and the file's system taken out, the first three fail (N 3.1).
-
-The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-155-settings.webp`, of the
-feature test offscreen, its console answering the settings with a refused value in red and the
-candidates of `time.`, and its settings panel on its first page, its time page and its run page,
-with its line in the readings' captions.
-
-A mend of 158's in the same commit, for Verdict 94. Its Escape station in
-`build/drive-feature-test.sh` ran before the hub's walk, and
-`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` runs the script against a stand-in for
-bcs that keeps no panels and answers done to a command it does not know, so the run stopped at F5
-opening no panel where the test looks for the walk. The station, unchanged, follows the hub's walk
-and the modes, before the course, and the test passes with it there and fails at 284819d0. 158's
-whole suite ran from 15:52 to 17:09 and the station went in at 18:49, with only the touched classes
-run after it, so a run of the test alone, two seconds with no device, would have found it before
-284819d0. A batch that changes a script under `build` runs the tests that read it, and the whole
-suite after its last change.
-
-The checks. The whole suite on this commit's tree, the commit before it with these files, ran 2205,
-the 2194 listed and 11, with 2200 passed, 5 skipped and none failed. The classes of the diagnostics,
-the command line, ImGui, the editor and scenes passed 241 with one skipped before it, the solution
-builds with warnings as errors, and the cheatsheet and the listing come out of their generators
-unchanged, since every type this adds is internal. The package of the commit before, `0.0.0-diag9`,
-was packed from a tree holding these files, and the tools guide's blocks, the game's own setting
-among them, build on it.
-
-Shared: the engine's settings in the module's registry as 3DEngine's `EngineSettings` holds them,
-the run's own unsaved and the run's start only reading, and the player's settings file kept for a
-run that shows a window, in the player's folder of the engine, are offered to SHARED.md as both
-engines having them.
-
-NormTests passed, 19.
-
-159, part one, the managed hold, in the commit carrying this.
-
-The hold. `Input` asks once a frame, as the frame's input comes in, and again once the areas' work
-has run, whether a panel that takes input is open, which the Diagnostics module answers at bcb4513
-(`Debug.Keys.Panels.HoldsInput`, the console and the settings panel joining as panels that take
-input), the pin this commit moves. While one is, every read of the program's answers as though
-nothing were pressed or moved. No key, logical key, mouse button, pad button or touch reads down,
-the pointer stands where it stood as the panel opened, the motion, the wheel and the text are empty,
-and each pad in `Gamepads` is a copy at rest. As it ends, what is down stays unseen until it is let
-go, its release with it, and a stick past a quarter of its travel until it comes back within it, the
-rest 3DEngine's hold uses. ImGui reads the pointer, the wheel, the modifiers and the text as they
-came, and the diagnostics' keys read their presses as they came, so the panels work and their keys
-act. The overlay holds nothing.
-
-The messages. A program reading the messages builds its own state from them, so they keep to what it
-read rather than to each frame's picture. A press, a touch's start, a move and a value past rest are
-left out while the hold lasts. A release or a touch's end comes where the program read the press, at
-any time, and never where it did not, a repeat comes only while the program reads its key down, and
-a value back within rest always comes, so a program holds no key, button or stick down after the
-hand lets go. A pad's connection still comes, and the IME's messages are left as they are, since the
-console's field reads them from the same bus.
-
-The test. `HeldInputTests` presses a key and pushes a stick before the console or the settings panel
-opens, presses another key, a pad's button and the other stick while it is open and holds them as it
-closes, lets everything go and presses the second key and the button again, writing down each
-frame's reads of the program's under the part of the run they came in. With either panel the program
-reads the first key and the stick before, nothing while the panel is open or held after it, the
-first key's release as a message and the stick back near rest, and the second presses as its own. A
-run with the overlay shown reads as a run with nothing open. With the area's hand-off of the
-module's answer taken out, both panels' rows fail (N 3.1). The engine's test stands for the feature
-test's case, whose player and admin panel read the same `Input`.
-
-The guides. The input guide gains a section, An open console holds the program's input, the tools
-guide's debug keys a paragraph pointing at it, and `Input`'s remarks say it. Bevy's own camera
-controllers read the input in the bridge and are not held, as both say, until the second commit, the
-bridge's flag with the ABI's bump and a test of a controller held while the panel is open, which
-follows this.
-
-The whole suite passed from one tree, 2,203 passed, 0 failed and 5 skipped, 2,208 in all where the
-listing is 2,197, the solution built from nothing with warnings as errors, in 13 parts and the rest.
-The public listing and the cheatsheet are unchanged.
-
-Shared: the hold is 3DEngine's HoldWhile and SyncHold, its rest of a quarter of a stick's travel
-with it. This engine posts the input as messages as well, so they keep to what the program read, a
-release for each press it read and a value back at rest always coming, and a touch down as the panel
-closes stays unseen until it ends, which 3DEngine's touches, held only while the hold lasts, leave
-out.
-
-NormTests passed, 19.
-
-159, part two, the bridge's hold on Bevy's camera controllers, in the commit carrying this.
-
-The hold. As the managed side's hold begins and ends it tells the bridge by a new entry point,
-`bcs_input_hold`, under the guard, with the ABI at 328 on both sides. Bevy's free and pan cameras
-read Bevy's input resources in the fixed main loop's first set, so the bridge swaps the keys, the
-mouse buttons, the mouse's motion and scroll and the touches for held copies around that set alone
-and puts them back after it, and every other reader in the frame, the interface and the managed side
-among them, reads them as they came. While the hold lasts every key and button comes up for the
-controllers in its first frame, so the free camera eases to a stop and lets the cursor go as it does
-when a hand lets go, and after that nothing is down and the mouse is still. As it ends, what is down
-stays hidden from them until it comes up, its release with it, as the managed side keeps it from the
-program. The pan-orbit camera's pointer, which the bridge reads itself, ends the drag under way as
-the hold begins and starts none and moves none while it lasts. No controller of Bevy's reads a pad,
-so the pads are left as they are. The swap is added only where the app asks for a controller.
-
-The test. `CameraControllerTests.TheFreeCameraStandsStillWhileThePanelIsOpen` opens the settings
-panel over a free camera, presses its forward key under the panel, holds it as the panel closes, and
-lets it go and presses it again, and the camera stands still through the first two and walks on the
-third. With the managed side's word to the bridge taken out, the camera walks under the panel and
-the test fails (N 3.1). The pan camera and the pan-orbit camera have no test of the hold of their
-own, as the review asked for one controller's, the pan camera's swap being the free camera's.
-
-The guides. The input guide's section says Bevy's controllers are held alike, the cameras guide's
-controllers part gains a paragraph pointing at it, and `Input`'s remarks say it.
-
-The bridge checks clean on its three profiles, its tests pass, 126 with no feature, and
-native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,204 passed, 0
-failed and 5 skipped, 2,209 in all where the listing is 2,198, the solution built from nothing with
-warnings as errors, in 13 parts and the rest. The public listing and the cheatsheet are unchanged.
-
-Shared: 3DEngine's cameras read its managed input (`E3D.Cameras`), which its hold covers, so the
-bridge's part has no counterpart there.
-
-NormTests passed, 19.
-
-155, step 3's sky settings, in the commit carrying this.
-
 The settings. The sky's values its commands set are settings of the Diagnostics module's registry on
 the panel's `sky` page, `sky.fog_visibility`, `sky.fog_height` and `sky.fog_base` for what `sky.fog`
 sets, `sky.froxel_quality` and `sky.froxel_distance` for `sky.froxels`, `sky.cloud_quality` and
@@ -1017,5 +919,78 @@ Shared: the names and choices are 3DEngine's (`EngineSettings.Window.cs`). Its s
 carries the scaling to its own presenter, where here the cameras draw at the picture's size and one
 copy takes the place of Bevy's last, and SDL centers a window by its own flag where winit is given
 the middle worked out from the screen's rectangle.
+
+NormTests passed, 19.
+
+163. Done. `window.scaling` reads Linear, Nearest and Sharp, Linear by default, and Integer is gone
+with no fourth choice kept. Sharp fills the screen at any ratio as the other two do. A window pixel
+inside a picture pixel takes it whole, and one across an edge blends the two picture pixels either
+side by the share of its width past the edge, so every picture pixel is a block of one width with
+one blended window pixel at most on an edge. At a whole ratio no window pixel crosses an edge, and
+it equals Nearest.
+
+The blend is worked out from the ratio itself and not from the largest whole number under it. At one
+and a half that number is one, so the picture scaled by it is the picture as it stands, and the
+linear filter bringing it to the screen blends every window pixel, which is Linear and leaves no
+even block where the item asks for blocks with one blended pixel at most. Moving each sample toward
+its picture pixel's middle by the ratio gives those blocks, and at a whole ratio the two ways agree.
+
+The shader reads the four picture pixels round a sample with loads and blends them by the shares it
+works out, rather than leaving the blend to the linear filter, because the filter's weights are
+fixed point and a sample a float's step from a picture pixel's middle can take a part of the next
+one and move a color by a level. A share under half of a 256th is taken as none, which absorbs the
+float error of the ratio read from the step across a window pixel, so a whole ratio equals Nearest
+to the bit. The linear and nearest scalings keep the sampler, and the sharp one has an entry point
+for each of the three color spaces a picture is kept in, chosen when the pipeline is specialized,
+since the bridge's WGSL has no preprocessor.
+
+A fault of item 161 was found on the way and is mended here. The copy to the window ran in the same
+place as Bevy's interface pass and the rounded corners, after the camera's effects and before Bevy's
+own copy, with nothing ordering it against them, and it ran first, so a scaled camera's picture
+reached the window without Bevy's interface. The storm's pictures held the camera's clear color
+alone until the copy was ordered after Bevy's `ui_pass` and after `DrawCorners`, a set the corners'
+system joins. The corners and Bevy's interface stay unordered against each other, which this item
+leaves as it is.
+
+The tests. The window storm lays a noise picture of 450 by 225 over its camera's interface, and in
+borderless fullscreen in its window of 900 by 450 it reads the window with the nearest and the sharp
+scaling at 450 by 225 and at 600 by 300. At a ratio of two the sharp picture equals the nearest one
+at every pixel of 900 by 450. At one and a half the 180,000 window pixels inside a picture pixel
+equal the nearest scaling's, and the 225,000 across an edge lie within a level of the picture pixels
+round them, read from the nearest scaling's picture, with none black, so the picture covers the
+window. Each reading fails on a picture that is not the noise, as the pictures were before the
+copy's order was set, and with the linear scaling in the sharp one's place 404,996 of 405,000 pixels
+differ at two and 23 of the 180,000 inside a picture pixel are equal at one and a half. These two
+take the place of the integer scaling's test. The storm passed under Xvfb, 5 of 5 beside the window
+settings' 2, and the workflow's count follows. The bridge's tests of the plan hold that the sharp
+scaling fills the screen, and its validation of the shader lists the six entry points.
+
+The sheet, `2026-11-23-item-163-window-scaling.webp`, retakes the four modes and borderless at and
+under the screen's size on a headless mutter's virtual screen, and puts the sharp scaling in the
+integer's column at 960 by 540 and at 1280 by 720, with sharp against nearest beside it. At two the
+crop's 104 differing pixels of 32,400 lie in whole blocks where the scene moved a little between the
+captures, and nearest and sharp have the same 197 uneven blocks of 2 by 2 across the whole screen.
+At one and a half each picture pixel is one whole screen pixel and half of one blended with its
+neighbor. In the readings and the dump, sent to the owner.
+
+The guides. The window guide's Integer sentence gives way to Sharp's, the tools guide's row names
+the three choices, the window settings' help and the bridge's config say the sharp scaling, and the
+cheatsheet, which names no scaling, comes out unchanged.
+
+ABI 331. The scaling's number two means the sharp scaling where it meant the integer one, so a
+bridge of item 161 beside this library would draw Integer when Sharp is asked, and the number moves
+so the load refuses it. The public listing is unchanged, the scaling's enum being internal.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 237 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
+failed and 8 skipped, 2,217 in all where the listing is 2,206, the solution built with no warning,
+in 13 parts and the rest. Five of the skips are the storm's, which passed under Xvfb as said above.
+The comments of the files touched lie within 100 columns (N 4.12).
+
+Shared: 3DEngine keeps Integer among its choices (`WindowScaling.cs`). The sharp scaling here, a
+blend by the share of a window pixel past a picture pixel's edge read with four loads, is the model
+if it takes Sharp in Integer's place.
 
 NormTests passed, 19.

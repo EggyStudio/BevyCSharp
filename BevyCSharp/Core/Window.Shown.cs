@@ -105,9 +105,11 @@ internal enum WindowScaling
     Nearest = 1,
 
     /// <summary>
-    /// Enlarged by the largest whole number that fits, in the screen's middle with black round it.
+    /// Each screen pixel inside a picture pixel from it whole and one across an edge a blend of the
+    /// two, so every picture pixel is a block of one width that holds still at any ratio, equal to
+    /// <see cref="Nearest"/> at a whole one.
     /// </summary>
-    Integer = 2,
+    Sharp = 2,
 }
 
 /// <summary>Why the system would refuse a window a mode, as the bridge numbers it.</summary>

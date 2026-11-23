@@ -158,7 +158,7 @@ public unsafe struct NativeConfig
 
     /// <summary>
     /// How a scaled picture is brought to the screen, 0 filtered, 1 from the nearest picture pixel
-    /// and 2 by the largest whole number that fits, when <see cref="Scaled"/>.
+    /// and 2 sharp with a picture pixel's edge blended, when <see cref="Scaled"/>.
     /// </summary>
     public uint Scaling;
 }

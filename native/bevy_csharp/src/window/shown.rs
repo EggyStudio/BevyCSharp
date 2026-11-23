@@ -301,9 +301,9 @@ pub extern "C" fn bcs_window_set_scaling(window: u64, width: u32, height: u32, f
 
         #[cfg(feature = "render")]
         {
-            use super::scaled::{WindowScaling, filter::INTEGER};
+            use super::scaled::{WindowScaling, filter::SHARP};
 
-            if filter > INTEGER {
+            if filter > SHARP {
                 return status::NULL_ARG;
             }
             with_world(|world| {
