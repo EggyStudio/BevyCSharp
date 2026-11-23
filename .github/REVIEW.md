@@ -994,3 +994,61 @@ blend by the share of a window pixel past a picture pixel's edge read with four 
 if it takes Sharp in Integer's place.
 
 NormTests passed, 19.
+
+162. Read, and no mend. The view is the meadow's near wall at 8:00 from (14, 1.8, 60) toward (6,
+-0.5, 45), its part in the east wall's shadow with the sunlit paving to its left and the floor
+before it in the same shadow for the rays' 4 m reach, a box of 350 by 191 pixels the wall fills to
+82%, in thirds across and halves down. The far wall, the one shaded wall with sunlit paving close
+before it, stands behind the forest once every tree is dressed. Both references were traced at 256
+paths a pixel once the trees were dressed, 235 meshes, each with its own regions, since a region's
+number differs between traces. Each figure is the mean of 16 frames, the first bounce with
+`gi.bounces 0` over the reference of one bounce, and settled with every bounce over the reference of
+every bounce.
+
+| Part | First bounce over one bounce | Settled over every bounce |
+|---|---|---|
+| Top left | 1.25 | 1.02 |
+| Top middle | 1.12 | 0.98 |
+| Top right | 1.09 | 0.97 |
+| Bottom left | 1.30 | 1.06 |
+| Bottom middle | 1.19 | 1.02 |
+| Bottom right | 1.16 | 1.02 |
+| Whole wall | 1.17 | 1.01 |
+
+The worst part is the bottom left and a good one the top right. Six screen probes in each part were
+read with `gi.screenprobe` at 128 paths a way and one bounce while the probes held the first bounce,
+and each ray's light is set beside the reference's along the same way, weighed as the probe weighs
+it, in luminance. A ray ends within reach on the picture or through the field, and past it on the
+world's light beyond its reach or through the field past it.
+
+| Rays | Within reach | Light, traced | Past reach | Light, traced |
+|---|---|---|---|---|
+| Bottom left, 1.30 | 42% | 0.000, 0.000 | 58% | 0.212, 0.208 |
+| Top right, 1.09 | 30% | 0.000, 0.000 | 70% | 0.167, 0.146 |
+| All six parts | 35% | 0.000, 0.000 | 65% | 0.180, 0.155 |
+
+The hits within reach meet the shaded floor and the wall itself, which hold no light at the first
+bounce, and the reference agrees at none. Of the 376 rays past reach, 364 took the world's light
+beyond their reach and 12 went through the field past it.
+
+The surplus is here too, a sixth over the whole wall where the other engine's was 2.3 times, and as
+there it rides on the rays that end past their reach, 1.16 times their traced light over the 36
+probes while every hit within reach agrees, but in the worst part those rays read 1.02 of theirs, so
+its 1.30 comes from elsewhere than its rays' light.
+
+The probes read stand on tiles of all sixteen places their rays leave their texels from, two or
+three a place. A first reading spaced its probes four tiles apart down the wall, which put all 36 on
+one row of the four tiles by four, and their sixteen ways read 1.70 times the light drawn across the
+hemisphere at the same probes where the spread ones read 1.16. Its rays past reach read 1.18 of
+their traced light, near the spread reading's, so the rays' figures hold either way, and the place
+moves only what a probe's ways see.
+
+The sheet, `2026-11-23-item-162-first-bounce-wall.webp`, outlines the six parts on the view with
+each part's two figures, rings the probes read and repeats the rays' figures. In the readings and
+the dump, sent to the owner.
+
+Shared: 3DEngine's screen probes take one of sixteen places by tile too (`BounceRoomsTests.cs`), so
+a reading of a few of its probes set at an even spacing may stand on one row of places, as the first
+reading here did, and read the places beside the light.
+
+NormTests passed, 19.
