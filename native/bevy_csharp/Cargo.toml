@@ -251,9 +251,9 @@ render = [
     "bevy/area_light_luts",
     # The table a standard material's specular term is lit from, 64 by 64 pairs of half floats, 14
     # kilobytes compressed with zstd, embedded, where a bridge without it lights the term from a
-    # fitted curve. Solari turns it on as well, so with it here a bridge built with --solari lights a
-    # standard material as one without does, and a picture taken on either is the same. It needs the
-    # image features above and adds no crate.
+    # fitted curve. Solari turns it on as well, so with it here a bridge built with --solari lights
+    # a standard material as one without does, and a picture taken on either is the same. It needs
+    # the image features above and adds no crate.
     "bevy/dfg_lut",
     # Windowing backends. Both are harmless off-platform. Winit gates its X11 and Wayland
     # dependencies to Linux and the BSDs, so on Windows and macOS these resolve to nothing and
@@ -286,12 +286,13 @@ serde_json = "1"
 # re-exports the reflect serializers but not the trait their seed implements.
 serde = "1"
 wgpu = { version = "30", default-features = false, optional = true }
-# Named directly for two things Bevy does not reach, on every platform, a window's icon, which
-# winit sets on its own window (`Icon`, `set_window_icon`) and Bevy's `Window` carries none of,
-# and on Linux and the BSDs Wayland loaded at runtime. Bevy's `wayland` feature switches on
-# winit's Wayland backend, which by default links libwayland at build time and so needs the
-# Wayland development headers present, and `wayland-dlopen` loads the library at runtime
-# instead, so the bridge builds on any machine with a C compiler alone and the one binary works
-# on both X11 and Wayland sessions. winit gates its Wayland half to those systems, so the
-# feature names nothing on Windows and macOS. The same version Bevy pins, already in the tree.
+# Named directly for what Bevy does not reach, on every platform a window's icon, which winit sets
+# on its own window (`Icon`, `set_window_icon`) and Bevy's `Window` carries none of, and the mode
+# and the monitor the system shows a window in (`window::shown`), which Bevy's `Window` holds only
+# as asked, and on Linux and the BSDs Wayland loaded at runtime. Bevy's `wayland` feature switches
+# on winit's Wayland backend, which by default links libwayland at build time and so needs the
+# Wayland development headers present, and `wayland-dlopen` loads the library at runtime instead, so
+# the bridge builds on any machine with a C compiler alone and the one binary works on both X11 and
+# Wayland sessions. winit gates its Wayland half to those systems, so the feature names nothing on
+# Windows and macOS. The same version Bevy pins, and so in the tree.
 winit = { version = "0.30", default-features = false, optional = true }

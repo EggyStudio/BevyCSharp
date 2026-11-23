@@ -164,6 +164,17 @@ A monitor's name is read separately from the rest of it, because it is text. Pla
 monitor nothing often enough that a settings screen needs the fallback shown above. A headless run
 has no window, and every call here says so rather than doing nothing.
 
+The settings panel's `window` page holds the same for the player, `window.mode` (`Windowed`,
+`Borderless` or `Fullscreen`), `window.resizable`, `window.width` and `window.height` for its size
+as a window, `window.monitor`, the screen by its number from 0 where there is more than one, and
+`window.vsync`. Each acts at once and is kept in the settings file, which the app reads for them
+before it makes its window, so the window opens as the player left it before its first frame is
+shown. Borderless covers the screen the window is on at the screen's own mode, and fullscreen takes
+the screen's mode, which Wayland gives no window and a screen listing no mode at its own size and
+rate cannot give, so a set of it there is refused in the console with the reason and the window
+keeps the mode it holds. A window covering its screen keeps its size as a window for its return, and
+a run that shows no window has the page only reading.
+
 A window made without the platform's frame (`SetStyle(decorations: false)`) has no title bar to be
 moved by and no border to be resized from, so an app drawing its own asks the platform to do both
 on its behalf:

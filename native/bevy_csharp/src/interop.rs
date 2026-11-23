@@ -259,11 +259,12 @@ pub struct BcsConfig {
     /// whether or not one is drawn so, which an app with no wireframes should not pay for.
     pub wireframes: u32,
     /// Bevy's diagnostics plugins to add, a bit each (`diagnostics::LOG`, `FRAME_TIME`,
-    /// `ENTITY_COUNT` and `RENDER`), frame times and their log being what Bevy's stress tests add to
-    /// say how fast their frames run.
+    /// `ENTITY_COUNT` and `RENDER`), frame times and their log being what Bevy's stress tests add
+    /// to say how fast their frames run.
     pub diagnostics: u32,
     /// The window's scale factor in place of the display's, or `0` for the display's. Bevy's stress
-    /// tests hold it at one, so their window is as many pixels as they say on a display that scales.
+    /// tests hold it at one, so their window is as many pixels as they say on a display that
+    /// scales.
     pub scale_factor: f32,
     /// Seconds each frame advances the clock by, in place of the machine's, or `0` for the
     /// machine's. Bevy's `TimeUpdateStrategy::ManualDuration`, so a test or a capture runs the same
@@ -292,6 +293,18 @@ pub struct BcsConfig {
     /// Bevy's dev tools to add, a bit each (`dev_tools::FPS_OVERLAY`, `INFINITE_GRID` and
     /// `PICKING_DEBUG`). Needs the `render` feature. See `dev_tools`.
     pub dev_tools: u32,
+    /// How the first window opens, 0 as a window, 1 borderless over its screen and 2 fullscreen
+    /// at the screen's own mode, by the numbers `bcs_window_set_mode` takes, which the settings
+    /// file's `window.mode` asks for, so the first frame is shown as the player left it.
+    pub mode: u32,
+    /// Non-zero to open the first window with edges that do not resize it.
+    pub fixed_size: u32,
+    /// Non-zero to open the first window on the monitor `monitor` names, centered on it as a
+    /// window, in place of the place the platform or `x` and `y` give.
+    pub has_monitor: u32,
+    /// The monitor, by its index in the order winit lists them, which `bcs_monitor_count` counts
+    /// in, when `has_monitor`.
+    pub monitor: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

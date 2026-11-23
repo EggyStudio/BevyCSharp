@@ -36,7 +36,9 @@ public unsafe struct NativeConfig
     /// <summary>UTF-8 assets directory, or null for Bevy's default.</summary>
     public byte* AssetRoot;
 
-    /// <summary>Non-zero to reload an asset when its file changes on disk, zero to watch nothing.</summary>
+    /// <summary>
+    /// Non-zero to reload an asset when its file changes on disk, zero to watch nothing.
+    /// </summary>
     public uint WatchAssets;
 
     /// <summary>Non-zero to draw Dear ImGui's pass.</summary>
@@ -45,7 +47,9 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to draw with no window, into an image a capture reads back.</summary>
     public uint Offscreen;
 
-    /// <summary>How many world units a meter is, for spatial sound. Zero keeps Bevy's own.</summary>
+    /// <summary>
+    /// How many world units a meter is, for spatial sound. Zero keeps Bevy's own.
+    /// </summary>
     public float SpatialScale;
 
     /// <summary>Meshlet clusters the GPU keeps room for, or zero for no meshlets.</summary>
@@ -60,10 +64,14 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to make the window see-through where what is drawn has no alpha.</summary>
     public uint Transparent;
 
-    /// <summary>Non-zero to have the desktop draw the title bar where it only does for X11 windows.</summary>
+    /// <summary>
+    /// Non-zero to have the desktop draw the title bar where it only does for X11 windows.
+    /// </summary>
     public uint DesktopTitleBar;
 
-    /// <summary>UTF-8 path of the player's directory, registered as Bevy's <c>user</c> asset source.</summary>
+    /// <summary>
+    /// UTF-8 path of the player's directory, registered as Bevy's <c>user</c> asset source.
+    /// </summary>
     public byte* UserRoot;
 
     /// <summary>Non-zero to open the window at <see cref="X"/> and <see cref="Y"/>.</summary>
@@ -78,13 +86,19 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to add Bevy's wireframe plugins, for 3D and 2D meshes.</summary>
     public uint Wireframes;
 
-    /// <summary>Bevy's diagnostics plugins to add, a bit each, as <c>DiagnosticPlugins</c> has them.</summary>
+    /// <summary>
+    /// Bevy's diagnostics plugins to add, a bit each, as <c>DiagnosticPlugins</c> has them.
+    /// </summary>
     public uint Diagnostics;
 
-    /// <summary>The window's scale factor in place of the display's, or zero for the display's.</summary>
+    /// <summary>
+    /// The window's scale factor in place of the display's, or zero for the display's.
+    /// </summary>
     public float ScaleFactor;
 
-    /// <summary>Seconds each frame advances the clock by, or zero for the machine's clock.</summary>
+    /// <summary>
+    /// Seconds each frame advances the clock by, or zero for the machine's clock.
+    /// </summary>
     public double FrameSeconds;
 
     /// <summary>Non-zero to add Bevy's mesh picking.</summary>
@@ -93,18 +107,40 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to play sound to the machine's device in a run with no window.</summary>
     public uint AudioWithoutWindow;
 
-    /// <summary>Non-zero to open no window of the app's own and run on with no window open.</summary>
+    /// <summary>
+    /// Non-zero to open no window of the app's own and run on with no window open.
+    /// </summary>
     public uint NoPrimaryWindow;
 
     /// <summary>Non-zero to add Bevy's interactive transform gizmo.</summary>
     public uint TransformGizmo;
 
-    /// <summary>Bevy's camera controllers to add, a bit each, as <c>Bevy.CameraControllers</c> numbers them.</summary>
+    /// <summary>
+    /// Bevy's camera controllers to add, a bit each, as <c>Bevy.CameraControllers</c> numbers them.
+    /// </summary>
     public uint CameraControllers;
 
     /// <summary>Non-zero to add Feathers, Bevy's styled widgets, with its dark theme.</summary>
     public uint Feathers;
 
-    /// <summary>Bevy's dev tools to add, a bit each, as <c>Bevy.DevTools</c> numbers them.</summary>
+    /// <summary>
+    /// Bevy's dev tools to add, a bit each, as <c>Bevy.DevTools</c> numbers them.
+    /// </summary>
     public uint DevTools;
+
+    /// <summary>How the first window opens, as <c>Bevy.WindowMode</c> numbers it.</summary>
+    public uint Mode;
+
+    /// <summary>Non-zero to open the first window with edges that do not resize it.</summary>
+    public uint FixedSize;
+
+    /// <summary>
+    /// Non-zero to open the first window on the monitor <see cref="Monitor"/> names.
+    /// </summary>
+    public uint HasMonitor;
+
+    /// <summary>
+    /// The monitor the first window opens on, by its index, when <see cref="HasMonitor"/>.
+    /// </summary>
+    public uint Monitor;
 }

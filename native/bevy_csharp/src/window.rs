@@ -19,8 +19,11 @@ use crate::interop::status;
 use crate::state::with_world;
 
 pub mod cursor;
+#[cfg(feature = "render")]
+pub mod first;
 pub mod icon;
 pub mod monitors;
+pub mod shown;
 pub mod updates;
 #[cfg(feature = "render")]
 mod alpha;

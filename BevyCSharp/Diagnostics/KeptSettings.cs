@@ -17,33 +17,22 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A run with no window, a headless one, one drawn offscreen and one with no renderer, reads no
-/// file and writes none, since a test or a tool starts those and the player's choices stay as the
-/// player left them. A file that cannot be read is left as it is, every setting starting at its
+/// file and writes none (<see cref="SettingsPath"/>). The window's settings are read from the file
+/// once before, as the app is made, so the window opens with them (<see cref="WindowSettings"/>),
+/// and found set here. A file that cannot be read is left as it is, every setting starting at its
 /// default, and a line a setting refuses or a write that fails is a warning in the console and the
 /// log. The file is a resource of the app's world, so it writes a last time as the world goes.
 /// </para>
 /// </remarks>
 internal sealed class KeptSettings : IDisposable
 {
-    /// <summary>The file's name in the player's folder.</summary>
-    internal const string FileName = "settings.txt";
-
     private readonly SettingsFile _file;
     private readonly List<Setting> _watched = [];
 
     private KeptSettings(SettingsFile file) => _file = file;
 
-    /// <summary>
-    /// The path of a run's settings file, the player's where the run shows a window and none for
-    /// the rest, which a test points at a folder of its own.
-    /// </summary>
-    internal static Func<Config, string?> PathFor { get; set; } = Shown;
-
     /// <summary>The path the file was read from.</summary>
     internal string Path => _file.Path;
-
-    private static string? Shown(Config config) =>
-        App.HasRenderer && !config.Headless && !config.Offscreen ? UserData.Resolve(FileName) : null;
 
     /// <summary>
     /// Reads the run's settings file into the registry's settings, with the world lent so each
@@ -52,7 +41,7 @@ internal sealed class KeptSettings : IDisposable
     /// </summary>
     internal static void Open(World world)
     {
-        if (PathFor(world.Resource<Config>()) is not { } path) return;
+        if (SettingsPath.For(world.Resource<Config>()) is not { } path) return;
 
         // Read once before the module's file is made, so a file that cannot be read is never
         // written over and the values it holds stay for a run that can.

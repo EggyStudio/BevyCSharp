@@ -12,11 +12,11 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class EngineSettingsTests : IDisposable
 {
-    private readonly Func<Config, string?> _pathFor = KeptSettings.PathFor;
+    private readonly Func<Config, string?> _pathFor = SettingsPath.For;
 
     public void Dispose()
     {
-        KeptSettings.PathFor = _pathFor;
+        SettingsPath.For = _pathFor;
         foreach (var action in Enum.GetValues<KeyAction>()) Debug.Keys.KeyOf(action).Reset();
     }
 
@@ -75,9 +75,9 @@ public sealed class EngineSettingsTests : IDisposable
     public void TheFileIsReadAsTheAppStartsAndWrittenAsAKeyChanges()
     {
         using var folder = new TestFolder("bcs-settings-");
-        var path = folder.File(KeptSettings.FileName);
+        var path = folder.File(SettingsPath.FileName);
         File.WriteAllText(path, "keys.overlay F7\n# a player's note\nfeature.other 3\n");
-        KeptSettings.PathFor = _ => path;
+        SettingsPath.For = _ => path;
 
         using var harness = new EngineHarness(frames: 4);
         var frame = 0;
@@ -101,8 +101,8 @@ public sealed class EngineSettingsTests : IDisposable
     [Fact]
     public void ARunWithNoWindowKeepsNoFile()
     {
-        Assert.Null(KeptSettings.PathFor(new Config { Headless = true }));
-        Assert.Null(KeptSettings.PathFor(new Config { Offscreen = true }));
+        Assert.Null(SettingsPath.For(new Config { Headless = true }));
+        Assert.Null(SettingsPath.For(new Config { Offscreen = true }));
 
         using var harness = new EngineHarness(frames: 3);
         var kept = true;

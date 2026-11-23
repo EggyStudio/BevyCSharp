@@ -42,7 +42,9 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>True once <see cref="Run"/> has been entered.</summary>
     public bool IsRunning { get; private set; }
 
-    /// <summary>The app whose loop is running, or none, one at a time as the bridge runs them.</summary>
+    /// <summary>
+    /// The app whose loop is running, or none, one at a time as the bridge runs them.
+    /// </summary>
     internal static App? Running { get; private set; }
 
     /// <summary>Raised as an app is made, before anything it does can log an error.</summary>
@@ -77,7 +79,10 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>True when the loaded native bridge has Bevy's renderer compiled in.</summary>
     public static bool HasRenderer => Native.bcs_has_render() != 0;
 
-    /// <summary>True when the loaded native bridge was built with the editor profile, which carries Bevy's reflected documentation.</summary>
+    /// <summary>
+    /// True when the loaded native bridge was built with the editor profile, which carries Bevy's
+    /// reflected documentation.
+    /// </summary>
     /// <remarks>
     /// A separate question from <see cref="HasRenderer"/>. The editor profile is a superset of the
     /// render one, which draws Dear ImGui and watches assets as well, so a game's bridge draws an
@@ -132,7 +137,9 @@ public sealed unsafe partial class App : IDisposable
     /// </summary>
     internal EngineSteps<World> AreasWork { get; } = new();
 
-    /// <summary>The states, sub-states and computed states this app added, by their enum's name.</summary>
+    /// <summary>
+    /// The states, sub-states and computed states this app added, by their enum's name.
+    /// </summary>
     /// <remarks>
     /// By name rather than by type, as the state tables find a state, so a script's enum compiled
     /// again is the state added before, and the app holds none of a generation's types.
@@ -140,7 +147,9 @@ public sealed unsafe partial class App : IDisposable
     private readonly HashSet<string> _addedStates = new(StringComparer.Ordinal);
 
     /// <summary>Creates the engine and its native Bevy app.</summary>
-    /// <param name="config">Startup configuration; <see cref="Config.Default"/> when omitted.</param>
+    /// <param name="config">
+    /// Startup configuration; <see cref="Config.Default"/> when omitted.
+    /// </param>
     /// <exception cref="BevyNativeException">The native app could not be created.</exception>
     public App(Config? config = null)
     {
@@ -170,8 +179,8 @@ public sealed unsafe partial class App : IDisposable
         // to from before Bevy starts, which is when a scene or a technique begins taking it.
         MemoryGuard.Watch(MemoryGuard.CapFor(Config));
 
-        // A clock set from outside, as a script capturing a game it did not write sets it, where the
-        // game's own config left the machine's.
+        // A clock set from outside, as a script capturing a game it did not write sets it, where
+        // the game's own config left the machine's.
         if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)
             Config.FrameSeconds = Config.FrameSecondsAsked;
 
@@ -233,8 +242,10 @@ public sealed unsafe partial class App : IDisposable
         var fixedHz = Config.FixedHz > 0 ? Config.FixedHz : Project.FixedHz;
         var titleBytes = Encoding.UTF8.GetBytes(TitleFor(Config, Project) + "\0");
 
-        // Where the window was left, read before it opens, so it opens there.
+        // Where the window was left, read before it opens, so it opens there, and the mode, the
+        // size, the monitor and the vsync the player set on the settings' window page over it.
         var opening = WindowMemory.Open(Config);
+        var start = WindowSettings.Open(Config, opening);
 
         fixed (byte* title = titleBytes)
         fixed (byte* assetRoot = assetRootBytes)
@@ -243,9 +254,9 @@ public sealed unsafe partial class App : IDisposable
             var native = new NativeConfig
             {
                 Title = title,
-                Width = opening.Width,
-                Height = opening.Height,
-                Vsync = Config.Vsync ? 1u : 0u,
+                Width = start.Width,
+                Height = start.Height,
+                Vsync = start.Vsync ? 1u : 0u,
                 Headless = Config.Headless ? 1u : 0u,
                 HeadlessFps = Config.HeadlessFps,
                 HeadlessFrames = Config.HeadlessFrames,
@@ -276,6 +287,10 @@ public sealed unsafe partial class App : IDisposable
                 CameraControllers = (uint)Config.CameraControllers,
                 Feathers = Config.Feathers ? 1u : 0u,
                 DevTools = (uint)Config.DevTools,
+                Mode = (uint)start.Mode,
+                FixedSize = start.Resizable ? 0u : 1u,
+                HasMonitor = start.Monitor is null ? 0u : 1u,
+                Monitor = (uint)(start.Monitor ?? 0),
             };
             _handle = Native.bcs_app_create(&native);
         }
@@ -283,9 +298,9 @@ public sealed unsafe partial class App : IDisposable
         if (_handle == IntPtr.Zero) throw CreationFailed();
 
         // Said where the program left watching alone and its build or the environment turned it on,
-        // so a game reading its folder again says why it does, and which folder it reads. Where that
-        // is the project's own, the line names the folder its shaders are cached in too, since a
-        // person looking in the assets folder finds no cache there.
+        // so a game reading its folder again says why it does, and which folder it reads. Where
+        // that is the project's own, the line names the folder its shaders are cached in too, since
+        // a person looking in the assets folder finds no cache there.
         var shaders = projectAssets is not null && HasRenderer ? $", its compiled shaders cached in {BuildDefaults.ShaderCache}" : "";
         if (Config.WatchAssets && !Config.WatchAssetsSetByProgram)
             Log.Info($"Watching {Streaming.AssetRoot} for changes, turned on by {Config.WatchAssetsSource}{shaders}. Config.WatchAssets = false leaves it out.");
@@ -413,6 +428,7 @@ public sealed unsafe partial class App : IDisposable
             world.Resource<Input>().SyncHold();
 
             WindowMemory.Tick();
+            WindowSettings.Tick();
 
             // What Bevy logged as an error since the last frame, heard while the run goes on
             // rather than only once it ends.
@@ -517,7 +533,9 @@ public sealed unsafe partial class App : IDisposable
     }
 
     /// <summary>Moves what the platform's input method said onto the message bus.</summary>
-    /// <remarks>The same drain and read by index as the dropped files, since each carries text.</remarks>
+    /// <remarks>
+    /// The same drain and read by index as the dropped files, since each carries text.
+    /// </remarks>
     private static void PostIme(MessageBus bus)
     {
         var count = NativeCore.bcs_ime_drain();

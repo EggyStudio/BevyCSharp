@@ -109,7 +109,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             use bevy::prelude::*;
             use bevy::render::settings::RenderCreation;
             use bevy::render::RenderPlugin;
-            use bevy::window::{ExitCondition, PresentMode, Window, WindowPlugin};
+            use bevy::window::{ExitCondition, WindowPlugin};
             use bevy::winit::WinitPlugin;
 
             // Drawing into an image instead of onto a screen. Everything else about the app is
@@ -122,12 +122,6 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 crate::title_bar::prefer_desktop_title_bar();
             }
 
-            let present_mode = if config.vsync != 0 {
-                PresentMode::AutoVsync
-            } else {
-                PresentMode::AutoNoVsync
-            };
-
             // The backend the config names, or wgpu's own choice, remembered so a renderer made
             // again after an error is made the same way.
             let backends = crate::render::render_errors::backends_named(config.backend);
@@ -138,34 +132,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     primary_window: if offscreen || config.no_primary_window != 0 {
                         None
                     } else {
-                        Some(Window {
-                            title: title.clone().unwrap_or_else(|| "BevyCSharp".to_string()),
-                            resolution: if config.scale_factor > 0.0 {
-                                bevy::window::WindowResolution::new(config.width, config.height)
-                                    .with_scale_factor_override(config.scale_factor)
-                            } else {
-                                (config.width, config.height).into()
-                            },
-                            // Where it was last closed, when the game asks for that, so it does
-                            // not open where the platform chooses and then jump.
-                            position: if config.has_position != 0 {
-                                bevy::window::WindowPosition::At(bevy::math::IVec2::new(config.x, config.y))
-                            } else {
-                                bevy::window::WindowPosition::Automatic
-                            },
-                            present_mode,
-                            // Composited with alpha, where asked for, which the platform has to
-                            // know before the window exists. Premultiplied, since a camera and the
-                            // interface write that. Where the surface cannot, the window
-                            // module falls back before the surface is made.
-                            transparent: config.transparent != 0,
-                            composite_alpha_mode: if config.transparent != 0 {
-                                bevy::window::CompositeAlphaMode::PreMultiplied
-                            } else {
-                                bevy::window::CompositeAlphaMode::Auto
-                            },
-                            ..default()
-                        })
+                        Some(crate::window::first::primary(config, title.clone()))
                     },
 
                     // A windowless run, or one with no window of its own, has no first window to
@@ -377,9 +344,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
             // Bevy's interactive transform gizmo, the arrows, rings and handles that move, turn and
             // scale the entity carrying `TransformGizmoFocus`, seen through the camera carrying
-            // `TransformGizmoCamera` or through the only one, where the app asks for it. Bevy leaves
-            // it out of its defaults, and once its settings exist Bevy's gizmo render plugin spawns
-            // the handles and a camera drawing them over the scene as the app starts.
+            // `TransformGizmoCamera` or through the only one, where the app asks for it. Bevy
+            // leaves it out of its defaults, and once its settings exist Bevy's gizmo render plugin
+            // spawns the handles and a camera drawing them over the scene as the app starts.
             if config.transform_gizmo != 0 {
                 app.add_plugins(bevy::gizmos::transform_gizmo::TransformGizmoPlugin);
             }
@@ -478,9 +445,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         init_asset_once::<bevy::pbr::StandardMaterial>(&mut app);
 
         // The component a standard material is attached by, registered for reflection, which
-        // `PbrPlugin` does on the windowed path. It is generic over the material, and a generic type
-        // is not one the automatic registration covers, so without this an entity's material could
-        // be set here and not read back through reflection.
+        // `PbrPlugin` does on the windowed path. It is generic over the material, and a generic
+        // type is not one the automatic registration covers, so without this an entity's material
+        // could be set here and not read back through reflection.
         #[cfg(feature = "render")]
         app.register_type::<bevy::pbr::MeshMaterial3d<bevy::pbr::StandardMaterial>>();
 

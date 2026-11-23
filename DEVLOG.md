@@ -6,6 +6,14 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-23
+
+![](.github/assets/readings/2026-11-23-item-160-window-page.webp)
+The window's settings on the feature test as an X11 window on a headless mutter's virtual screen of
+1920 by 1080, the settings panel's window page read from the window, then the window as a window,
+borderless and fullscreen against the screen, and the refusal Xvfb answers for fullscreen and the
+size given back on the return to a window.
+
 ## 2026-11-22
 
 ![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)

@@ -443,6 +443,12 @@ settings panel draws them on a page for each first word of their names.
 | `sky.cloud_quality` | The quality the clouds are marched at, `Off`, `Low`, `Medium` or `High` | Off | |
 | `sky.cloud_cover` | How much of the sky the clouds cover, 0 to 1 | 0.45 | |
 | `sky.forecast` | Whether the forecast writes the engine's weather | off | |
+| `window.mode` | How the window covers its screen, `Windowed`, `Borderless` or `Fullscreen` | Windowed | |
+| `window.resizable` | Whether the window's edges resize it | on | |
+| `window.width` | The width of the window as a window | 1280 | |
+| `window.height` | The height of the window as a window | 720 | |
+| `window.monitor` | The screen the window is on, by its number from 0 | 0 | |
+| `window.vsync` | Whether a frame waits for the display | on | |
 | `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
 | `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
 | `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |
@@ -458,8 +464,10 @@ the program runs. The others set the running app, and the commands that set them
 `field.set`, `sky.fog`, `sky.froxels`, `sky.clouds` and `sky.weather`. The `sky` settings read the
 first camera drawing their part and set every camera its command sets, and refuse where no camera
 draws it, save `sky.fog_visibility` and `sky.cloud_quality`, which start their part where the
-command would and take it off at 0 and `Off`. A variable the environment holds overrides its setting for the whole run, and a set is
-then kept for the settings file alone.
+command would and take it off at 0 and `Off`. The `window` settings set the first window and only
+read in a run that shows none, and a mode the system cannot give is refused with the reason, the
+window keeping its own (see the window guide). A variable the environment holds overrides its
+setting for the whole run, and a set is then kept for the settings file alone.
 
 ### The settings file
 
@@ -467,7 +475,9 @@ A run that shows a window reads `settings.txt` from the player's folder (`user:/
 `UserData`) as it starts, and writes it as a saved setting changes and as the app ends. It holds
 what the player set that differs from its default, the keys among them, and every line of a name the
 run does not know as it stood, so a setting of a part of the game that did not load is kept for the
-run that loads it. The engine's settings above are the run's and are never saved. A run with no
+run that loads it. The engine's settings above are the run's and are never saved, save the `window`
+ones, which the app reads from the file before it makes its window, so the window opens as the
+player left it before its first frame is shown. A run with no
 window, headless or offscreen, reads no file and writes none, so a test or a tool leaves the
 player's choices as they were. A game's own setting is saved there once it is in the registry, and
 the game reads it as it runs:

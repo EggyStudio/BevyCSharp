@@ -674,158 +674,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-The public listing (N 2.4). The six types above leave it. `ConsoleHost` gains `Run`, `Submit` and
-`Answered`, each giving the module's `Answer`, `Commands` as the module's `Registry`, and `Unwrap`,
-which was `ConsoleCommands`'. `ConsoleLog.All()` gives an `IReadOnlyList<ConsoleLine>` in place of a
-`LogLine[]`, `Written` is a `long` in place of an `int`, `Write` takes a `ConsoleLevel` in place of
-a `LogLevel`, and it gains `Model`, the module's `ConsoleModel`. `ConsoleView.Lines()` and
-`ConsoleView.Written(line)` give and take the module's `ConsoleLine` in place of a `LogLine`.
-
-Held. The Modeling module's commands are hosted through its list of commands once the engine binds
-that module's edit mesh, item 154, after 138. Until then `ConsoleModelCommands` stays, its `model.*`
-commands added to the module's registry by the generator as every other command is.
-
-The name. The engine's class `Bevy.Diagnostics` is `Bevy.DiagnosticsStore`, Bevy's own name for the
-store, since a module's namespace is its name alone and the module's `Diagnostics` hid the class in
-code outside the namespace `Bevy`. The examples, the tests and the tools guide name it
-`DiagnosticsStore` plainly, and its file is `DiagnosticsStore.cs`. In the public listing `static
-class Bevy.Diagnostics` becomes `static class Bevy.DiagnosticsStore`, its members as they were (N
-2.4). The comment on `ConsoleHost.Answered`'s parameter that ran to 105 columns takes three lines.
-
-The whole suite passed from one tree with the rename, 2,195 passed, 0 failed and 5 skipped, 2,200 in
-all where the listing is 2,189, the solution built from nothing with warnings as errors, in 15 parts
-and the rest, a part at a time through the GPU's gate. N 6.4 opens the newest package in
-`build/package`, and the newest there was packed before the module came, so it read a package packed
-from this tree, `0.0.0-diag2`, which carries `3DEngine.Diagnostics.dll` and its documentation in its
-lib folder, and the tools guide and the ray tracing guide build their 19 blocks on it. The
-cheatsheet lists `DiagnosticsStore` among the tools, as it listed the class before.
-
-Shared: the generator's registration of every `[Command]` into the module's registry, and a console
-host that runs a line through that registry and keeps its lines in the module's console, are offered
-to 3DEngine's binding of the module.
-
-Next in this session's order, item 155's step 2, the console, the overlay and the keys.
-
-NormTests passed, 19.
-
-155, step 2, the console, the overlay and the keys, in the commit carrying this, the module at
-`4f3cf53`.
-
-What went. `ConsoleView` and `ImGuiConsole` whole, `ConsoleHost.Unwrap`, whose place the module's
-`CommandLine.Text` takes for a command that reads its line whole, the overlay's own sections and
-frame times, the key statics, the chord of F3 with F4, and the calls that waited for a late answer
-in `Submit`, in the console's drawing and in the editor's field.
-
-What holds them. The console's model and its ImGui drawing are the module's, `Debug.Draw` writing
-any late answers into the console and, with the world lent, drawing the module's console and its
-settings panel, each while it is open. The keys are the module's actions in `Debug.Keys`, F1 hides
-the interface, F2 takes a screenshot, F3 shows the overlay, F4 the settings panel and F5 the
-console, each a setting a player rebinds on the panel's keys page and taken on its release, with no
-chord. Each app takes fresh keys as it is built, bound as the last app's were, since a key held as
-one app ended stayed held in the next and made every F3 a chord in the first whole run. The overlay
-is the module's `OverlayModel` in `Debug.Overlay`, which heads it with its own frame line, the rate,
-the frame time, the average and the 1% low, and the engine fills its sections, `engine` with the
-version, the bridge's profile, the ABI and the frame count, `gpu.time` with the frame's GPU time as
-the sum of the outer passes, `scene` with the camera and the world's counts, `machine` with the
-system, the GPU, the display and the renderer, and `passes` with the profiler's passes, slowest
-first, shown with Shift and F3. A line however entered goes through the module's `LineRun`, which
-`ConsoleHost.Ran` hears, keeping a late answer and writing a thrown command's stack to the run's log
-alone, the console showing its message, and what the panel moves or runs is answered in the console
-the same way. The tests new or recast are `SettingsPanelTests`, a throwing command's stack in
-`CrashLogTests`, and in `DebugOverlayTests` the overlay's sections and a key held as one app ended
-making no chord in the next.
-
-The public listing (N 2.4). `ConsoleView` and `ImGuiConsole` leave it with every member.
-`ConsoleHost` loses `Unwrap` and gains `AnswerLater(World)`, which was `ConsoleView`'s. `Debug`
-loses `OverlayKey`, `OverlayShown`, `ProfilerShown`, `AddOverlaySection` and `RemoveOverlaySection`
-and gains `Keys`, the module's `DiagnosticKeys`, `Overlay`, its `OverlayModel`, `Panel`, its
-`PanelModel`, and `Draw(BehaviorContext)`. `Capture.ScreenshotKey` and `Ui.HiddenKey` leave it.
-
-The pictures. The feature test offscreen on the module at `4f3cf53` with its console on F5, `help
-keys.console` answered above the candidates of `keys.` joined to the field and the ghost of the
-first, the settings panel on F4, and its keys page with the five keys as settings, in the neutral
-gray look the module draws, each sent on as it was taken. The log's lines show faintly through the
-backing of the candidates, which is the module's look to weigh.
-
-Held. Blockout and Courtyard save on F5, which also opens the console in them, so a player saving
-there opens the console as well. Which of the two moves is the review's to weigh. In the feature
-test the admin panel is reached from the settings panel's row or the pad's Start, the view's mode is
-on V, and the editor unbinds F1 and F5, which open its menu and play the scene.
-
-The whole suite passed from one tree with item 156's first part, 2,192 passed, 0 failed and 5
-skipped, 2,197 in all where the listing is 2,186, the solution built with warnings as errors, in 14
-parts and the rest, a part at a time through the GPU's gate. N 6.4 read a package packed from this
-tree, `0.0.0-diag4`, which carries the module's ImGui assembly beside `3DEngine.Diagnostics.dll`,
-and the five guides this commit touches build their 69 blocks on it.
-
-Shared: the engine's keys as the module's actions and settings, made fresh for each app, its overlay
-as sections it fills in the module's model, and a single subscriber to `LineRun` for late answers
-and thrown stacks, are offered to 3DEngine's binding of the module.
-
-Next in this session's order, item 156's second part, the Atmosphere module, then item 155's step 3,
-the settings.
-
-NormTests passed, 19.
-
-156, part one, the marker of Bevy's atmosphere, in the commit carrying this.
-
-The marker `Bevy.Atmosphere` is `Bevy.PlanetAtmosphere`, in `PlanetAtmosphere.cs`, its native name
-`Atmosphere` and its id `NativeComponents.Atmosphere` as they were, and the two tests that count or
-find the planet name it so. The components guide lists it as Bevy's `Atmosphere`, and the sky guide
-says the module's `Atmosphere` is the air as data and the engine's `PlanetAtmosphere` marks the
-planet, where it named the one meant in full. In the public listing `readonly struct
-Bevy.Atmosphere` becomes `readonly struct Bevy.PlanetAtmosphere` (N 2.4). The whole suite is step
-2's above, which ran with it.
-
-NormTests passed, 19.
-
-155, step 2's picture and the save key, in the commit carrying this, the Diagnostics module at
-`918de6e`.
-
-The picture. A sheet on a white ground under `.github/assets/readings`,
-`2026-11-22-item-155-console-and-panel.webp`, of the feature test offscreen with the module's
-console on F5, `help keys.console` answered and the candidates of `keys.` opening below the field,
-and its settings panel on F4, with its line in the readings' captions. At `918de6e` the console
-wraps its lines at the window's width and has no horizontal scrollbar, its candidates open below the
-field on an opaque ground with a row kept over the field for the answer line, the panel draws no
-marks round a value that only reads, and the settings file writes once more as it is disposed and
-nothing after.
-
-One panel at a time. The module keeps one of the overlay, the settings panel and the console open at
-a time through `Debug.Keys.Panels`, and the feature test's admin panel joins it as `admin` as the
-app starts, so the settings panel's Feature test row and the pad's Start open the admin panel
-through it and the line that closed the settings panel for it goes. Turning the overlay on from the
-admin panel's Debug page closes the admin panel, as the rule has it.
-
-The save key. Blockout and Courtyard save on F6, so F5 is the console alone in them, in their
-scripts, the comments at the head of their programs, the keys their banners name, the plays
-continuous integration runs, and the guides for making a game and for modeling.
-
-The checks. The solution built with warnings as errors on the module at `918de6e`, and N 6.4 read a
-package packed from this tree, `0.0.0-diag6`. The test classes the module's console, panel and keys
-reach, with the CLI's envelope, the screenshot key, the hidden scope, the scripts and the project's
-settings, passed 114 with NormTests among them. Blockout and Courtyard were built and played to
-their end, Blockout saving its level on F6, Courtyard saving on F6 and loading on F9. The public
-listing does not move.
-
-NormTests passed, 19.
-
-158, Escape goes to what is open first, in the commit carrying this, the Diagnostics module at
-`a9c9ff4`.
-
-The hold. While the console or the settings panel is open, or an ImGui field has the caret, a press
-of Escape is theirs, and the program reads it neither in `Input`, its logical key with it, nor as a
-`KeyboardInput`, from the frame it goes down to the frame it comes up. The press's message decides,
-since it comes a frame before the key's state, and the state and the release keep to that, so a
-settings panel the press closes does not hand the release to the program. ImGui reads the key as it
-is, so the settings panel goes back a page on it and closes from its first. The overlay takes no key
-and holds none, and a panel a game joins to `Debug.Keys.Panels`, as the feature test's admin panel
-is, reads Escape as the program does. With none of them open Escape is the program's, so
-`monitor_info` still closes the focused window on it, and no game or template ends on a key it did
-not set. The editor quits on Escape as it did, past a field, a menu and a tab. Bevy's own text
-fields take their keys from the focus in the bridge, and Escape is not held from the program while
-one of them has it.
-
 The keys. At `a9c9ff4` the console opens on F4 and the settings panel on F5, the settings panel
 stands on the console popup's opaque black, and the console's field runs the window's whole width.
 `Debug`, the guides for the tools, input, the interface and running a game, the feature test's
@@ -1112,5 +960,81 @@ The public listing and the cheatsheet are unchanged.
 
 Shared: 3DEngine's settings hold `sky.hours` on the same page, and these names are offered for its
 fog, froxels and clouds where it draws them from the module.
+
+NormTests passed, 19.
+
+160, the window's settings in the panel, in the commit carrying this.
+
+The page. `window.mode` (Windowed, Borderless and Fullscreen), `window.resizable`, `window.width`,
+`window.height`, `window.monitor` and `window.vsync` are settings of the Diagnostics module's
+registry, made in Core (`WindowSettings`), so the panel draws them as its `window` page. Each is
+saved, their names, choices and summaries are the sibling's, and no command holds a name of theirs,
+`window.list` and `window.shot` standing beside them. Each acts at once on Bevy's window, so none
+says "at the next start".
+
+The start. An app being made reads the settings file's lines of the page before it makes its window,
+the same file the module reads whole as the app starts (`SettingsPath`, which the kept settings take
+their path from too), and gives them to the bridge through four new fields of `BcsConfig`, the mode,
+the screen and whether the edges resize the window, with the size and vsync it gave before. The
+bridge makes the window in that mode, on that screen, before its first frame is shown. The ABI is at
+329 on both sides, and the five new entry points run under the guard. The first window is made in a
+module of its own, `window::first`, out of `build_app`, which holds app.rs to 767 lines (N 1.3).
+
+The refusal. Fullscreen is asked of the bridge before it is set, which refuses it on Wayland, whose
+winit gives no window a mode of the screen's, where the system names no screen under the window, and
+where the screen lists no mode at its own size and rate, where winit would leave the window as it
+was and Bevy would cover the screen borderless, each saying so in the log alone. The console answers
+REFUSED with the reason, and the window keeps the mode it holds. A compositor that refuses a mode
+after taking the request is not watched for, since the three checks find what it would refuse before
+the set and no test could reach it. Borderless covers the screen at its own mode and is not refused.
+
+The size. Leaving the window's mode keeps its size as a window, and `window.width` and
+`window.height` set it while the window covers its screen, given back on the return. A window
+manager answers the return a few frames on with a size of its own, which mutter gives an Xwayland
+window 37 pixels shorter than the one it had, so the size given back is held for 30 frames, set
+again in each that differs, from the engine's frame sync beside the window's memory.
+
+The screen and the reading. `window.monitor` reads where there is one screen and moves the window to
+the screen's middle where there are more, and a window on Wayland stays where the system put it,
+with the set saying so. A run that shows no window, a headless one, one drawn offscreen, one opening
+no window of its own and one on the headless bridge, has the page reading only with the reason,
+through the module's `Setting.Lock` at c8c2694, whose pointer moves in this commit. The file's lines
+of the page stay as they stand for a run that shows one.
+
+The tests. `WindowSettingsTests` holds the page in the registry, its settings saved and reading only
+in a headless run, and a start from a file giving the window each line in the file's order, a
+refused one leaving the line before it standing, with a run that shows no window taking its config
+alone. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` opens a window
+from a file of the page's lines, sets and reads each setting on it, takes Xvfb's refusal of
+fullscreen with its reason, whose modes carry no rate, holds the size given back over a size of the
+system's set a frame after the return, and opens the next start from the file the run wrote. With
+the hold taken out of the frame sync the window reads 1000 by 300 after the return and the test
+fails (N 3.1). The workflow's storm step looks for three passed tests. Xvfb runs no window manager,
+so the storm reads the modes the window holds and not the size it covers, which the sheet shows.
+
+The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
+through Xwayland, its window page and the three modes, with the refusal and the return, in the
+readings and the dump, sent to the owner.
+
+The guides. The tools guide's table gains the six rows and says the window's settings are saved and
+read before the window is made, and the window guide gains a paragraph on the page.
+
+The public listing gains four fields of `NativeConfig`, `Mode`, `FixedSize`, `HasMonitor` and
+`Monitor`, and loses nothing. The comments of the files touched are rewrapped to 100 columns (N
+4.12).
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 231 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
+failed and 6 skipped, 2,215 in all where the listing is 2,204, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The sixth skip is the new storm test, which runs with
+the storm's two others under Xvfb and passed there, 3 of 3. The cheatsheet is unchanged. A comment
+of the storm test and two of the bridge's manifest were reworded or rewrapped after it, the code as
+it was.
+
+Shared: the names, choices and summaries are 3DEngine's (`EngineSettings.Window.cs`), its start
+ordering the size, the screen and the mode as SDL takes them where Bevy's winit makes the window
+with all of them at once, and its vsync starting off where this one's starts at the config's.
 
 NormTests passed, 19.

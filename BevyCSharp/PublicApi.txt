@@ -3066,8 +3066,10 @@ struct Bevy.Interop.NativeConfig
   uint DevTools
   uint Diagnostics
   uint Feathers
+  uint FixedSize
   uint GpuTimings
   uint Gui
+  uint HasMonitor
   uint HasPosition
   uint Headless
   uint HeadlessFps
@@ -3075,6 +3077,8 @@ struct Bevy.Interop.NativeConfig
   uint Height
   uint MeshPicking
   uint MeshletClusters
+  uint Mode
+  uint Monitor
   uint NoPrimaryWindow
   uint Offscreen
   uint RayTracedLighting

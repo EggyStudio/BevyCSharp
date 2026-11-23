@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 328;
+    internal const int ExpectedAbiVersion = 329;
 
     static Native() => NativeLoader.Initialize(typeof(Native).Assembly);
 
@@ -47,7 +47,10 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_is_main_thread();
 
-    /// <summary>Reports whether the documentation of Bevy's reflected types is compiled in, the editor profile.</summary>
+    /// <summary>
+    /// Reports whether the documentation of Bevy's reflected types is compiled in, the editor
+    /// profile.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_has_editor();
@@ -84,12 +87,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_request_exit();
 
-    /// <summary>Asks the running app to shut down after the current frame, ending the run with a code.</summary>
+    /// <summary>
+    /// Asks the running app to shut down after the current frame, ending the run with a code.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_request_exit_code(int code);
 
-    /// <summary>Registers a C# system callback into a Bevy schedule, under the name Bevy reports it by.</summary>
+    /// <summary>
+    /// Registers a C# system callback into a Bevy schedule, under the name Bevy reports it by.
+    /// </summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_add_system(
@@ -99,7 +106,9 @@ internal static unsafe partial class Native
         delegate* unmanaged[Cdecl]<IntPtr, void> callback,
         IntPtr user);
 
-    /// <summary>Orders one C# system of a stage before another, by the numbers registration gave them.</summary>
+    /// <summary>
+    /// Orders one C# system of a stage before another, by the numbers registration gave them.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_order_systems(IntPtr handle, int stage, int first, int then);
@@ -109,7 +118,9 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_place_schedule(IntPtr app, string schedule, int after, uint singleThreaded);
 
-    /// <summary>Registers a C# system in a schedule of the game's own, by the schedule's name.</summary>
+    /// <summary>
+    /// Registers a C# system in a schedule of the game's own, by the schedule's name.
+    /// </summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_app_add_schedule_system(
@@ -121,7 +132,9 @@ internal static unsafe partial class Native
 
     // -- The log and the panics
 
-    /// <summary>Writes a line into Bevy's log at a level, from trace at zero to error at four.</summary>
+    /// <summary>
+    /// Writes a line into Bevy's log at a level, from trace at zero to error at four.
+    /// </summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_log_write(int level, string message);
@@ -200,7 +213,9 @@ internal static unsafe partial class Native
     /// faster than it is read, and is an error rather than a reader that never returns.
     /// </para>
     /// </remarks>
-    /// <exception cref="InvalidOperationException">The text was longer at each of the eight asks after the first.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The text was longer at each of the eight asks after the first.
+    /// </exception>
     internal static string ReadText(TextWriter write, string operation)
     {
         const int Probe = 256;

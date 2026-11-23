@@ -57,12 +57,16 @@ internal static unsafe partial class NativeCore
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_cursor_image(ulong window, int image, uint x, uint y);
 
-    /// <summary>Asks for a window to be shown by an image as its icon, put on once both have arrived.</summary>
+    /// <summary>
+    /// Asks for a window to be shown by an image as its icon, put on once both have arrived.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_icon(ulong window, int image);
 
-    /// <summary>Cuts the pointer's image to one frame of an atlas, with that frame's hotspot.</summary>
+    /// <summary>
+    /// Cuts the pointer's image to one frame of an atlas, with that frame's hotspot.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_cursor_atlas(ulong window, int layout, uint index, uint x, uint y);
@@ -103,6 +107,36 @@ internal static unsafe partial class NativeCore
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_place(ulong window, NativeWindowPlace* place);
+
+    /// <summary>
+    /// Writes the mode the system shows the window in, the monitor it is on or -1, whether its
+    /// edges resize it and whether a frame waits for the display.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_shown(ulong window, int* mode, int* monitor, int* resizable, int* vsync);
+
+    /// <summary>
+    /// Writes why the system would refuse the window a mode, or zero where it takes it.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_mode_refusal(ulong window, int mode, int* reason);
+
+    /// <summary>Moves the window to a monitor, by its index, in the mode it holds.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_monitor(ulong window, int index);
+
+    /// <summary>Makes the window's edges resize it, or not.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_resizable(ulong window, int resizable);
+
+    /// <summary>Makes a frame wait for the display, or not.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_vsync(ulong window, int vsync);
 
     /// <summary>Hands the window to the platform to be moved by the pointer.</summary>
     [LibraryImport(Library)]
@@ -173,7 +207,9 @@ internal static unsafe partial class NativeCore
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_file_drops_drain();
 
-    /// <summary>Collects what the input method said since the last call, and reports how many.</summary>
+    /// <summary>
+    /// Collects what the input method said since the last call, and reports how many.
+    /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ime_drain();

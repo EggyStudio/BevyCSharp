@@ -1,0 +1,99 @@
+using Bevy;
+using Diagnostics;
+using Xunit;
+
+namespace Bevy.Tests;
+
+/// <summary>
+/// Covers the window's settings in the Diagnostics module's registry on the panel's window page,
+/// each saved and only reading in a run whose window is not shown, and a start giving the window
+/// the settings file's line of each before the window is made. The sets on a shown window, the
+/// refusals and the file written by them are the window storm's (<see cref="WindowStormTests"/>),
+/// since a process makes one window.
+/// </summary>
+[Collection("engine")]
+public sealed class WindowSettingsTests : IDisposable
+{
+    private readonly Func<Config, string?> _pathFor = SettingsPath.For;
+    private readonly TestFolder _folder = new("bcs-window-settings-");
+
+    public void Dispose()
+    {
+        SettingsPath.For = _pathFor;
+        Forget(_folder);
+        _folder.Dispose();
+    }
+
+    [Fact]
+    public void EverySettingIsTheRegistrysOnTheWindowPageSavedAndOnlyReadsWhereNoWindowIsShown()
+    {
+        Assert.Equal(["window.mode", "window.resizable", "window.width", "window.height", "window.monitor", "window.vsync"], WindowSettings.All.Select(s => s.Name));
+        foreach (var setting in WindowSettings.All)
+        {
+            Assert.Same(setting, Registry.Process.FindSetting(setting.Name));
+            Assert.True(setting.Saved, setting.Name);
+            Assert.False(setting.AtNextStart, setting.Name);
+        }
+        Assert.Equal(["Windowed", "Borderless", "Fullscreen"], Registry.Process.FindSetting("window.mode")!.Choices);
+
+        using var harness = new EngineHarness(frames: 3);
+        var seen = new List<string>();
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (seen.Count > 0) return;
+            foreach (var line in new[] { "window.mode borderless", "window.resizable off", "window.width 900", "window.height 500", "window.monitor 1", "window.vsync off" })
+            {
+                var answer = ConsoleHost.Submit(line, ctx.World);
+                seen.Add($"{line}: {answer.Code}{(answer.Text.Contains("headless", StringComparison.Ordinal) ? " in a headless run" : "")}");
+            }
+        });
+        harness.Run();
+
+        Assert.Equal(6, seen.Count);
+        Assert.All(seen, line => Assert.EndsWith($": {Answer.NotSettable} in a headless run", line));
+    }
+
+    [SkippableFact]
+    public void AStartGivesTheWindowTheFilesLinesInOrderAndARunWithNoWindowItsConfig()
+    {
+        Needs.Renderer();
+        var path = _folder.File(SettingsPath.FileName);
+        File.WriteAllText(path, string.Join('\n',
+            "window.mode Borderless", "window.resizable off", "window.width 1000", "window.height 600", "# a player's note",
+            "window.width 900", "window.monitor 1", "window.vsync off", "window.height -4", "keys.panel F8", ""));
+        SettingsPath.For = _ => path;
+        var place = new WindowPlace(false, 0, 0, 640, 400, false);
+
+        var start = WindowSettings.Open(Config.Windowed("Start", 640, 400), place);
+        var unshown = WindowSettings.Open(new Config { Offscreen = true, Width = 320, Height = 200, Vsync = true }, place with { Width = 320, Height = 200 });
+
+        // The refused height below the range leaves the one before it standing, as the read of the
+        // whole file leaves it as the app starts.
+        Assert.Equal((WindowSettings.Mode.Borderless, false, 900u, 600u, (int?)1, false), (start.Mode, start.Resizable, start.Width, start.Height, start.Monitor, start.Vsync));
+        Assert.Equal((WindowSettings.Mode.Windowed, true, 320u, 200u, (int?)null, true), (unshown.Mode, unshown.Resizable, unshown.Width, unshown.Height, unshown.Monitor, unshown.Vsync));
+        // A line of another page waits for the read of the whole file as the app starts.
+        Assert.Equal("F5", Registry.Process.FindSetting("keys.panel")!.Text);
+    }
+
+    /// <summary>
+    /// Gives the window's settings back their defaults, as a start of a file holding them gives
+    /// them, since a set of a setting stays in the process's registry and the settings file of the
+    /// next test would keep it.
+    /// </summary>
+    internal static void Forget(TestFolder folder)
+    {
+        if (!App.HasRenderer) return;
+        var path = folder.File("defaults.txt");
+        File.WriteAllLines(path, WindowSettings.All.Select(s => $"{s.Name} {CommandLine.Quote(s.DefaultText)}"));
+        var was = SettingsPath.For;
+        SettingsPath.For = _ => path;
+        try
+        {
+            WindowSettings.Open(Config.Windowed("Defaults", 640, 400), new WindowPlace(false, 0, 0, 640, 400, false));
+        }
+        finally
+        {
+            SettingsPath.For = was;
+        }
+    }
+}
