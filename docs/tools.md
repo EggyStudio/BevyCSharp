@@ -443,12 +443,13 @@ settings panel draws them on a page for each first word of their names.
 | `sky.cloud_quality` | The quality the clouds are marched at, `Off`, `Low`, `Medium` or `High` | Off | |
 | `sky.cloud_cover` | How much of the sky the clouds cover, 0 to 1 | 0.45 | |
 | `sky.forecast` | Whether the forecast writes the engine's weather | off | |
-| `window.mode` | How the window covers its screen, `Windowed`, `Borderless` or `Fullscreen` | Windowed | |
+| `window.mode` | How the window covers its screen, `Windowed`, `Borderless`, `BorderlessFullscreen` or `Fullscreen` | Windowed | |
 | `window.resizable` | Whether the window's edges resize it | on | |
-| `window.width` | The width of the window as a window | 1280 | |
-| `window.height` | The height of the window as a window | 720 | |
+| `window.width` | The width of the window, and of the picture in borderless fullscreen | 1280 | |
+| `window.height` | The height of the window, and of the picture in borderless fullscreen | 720 | |
 | `window.monitor` | The screen the window is on, by its number from 0 | 0 | |
 | `window.vsync` | Whether a frame waits for the display | on | |
+| `window.scaling` | How borderless fullscreen brings its picture to the screen, `Linear`, `Nearest` or `Integer` | Linear | |
 | `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
 | `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
 | `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |

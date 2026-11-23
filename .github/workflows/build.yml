@@ -1,9 +1,9 @@
 # A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
 # test job builds (test), the tests that need a renderer on Linux's render bridge under lavapipe
-# (render-bridge, renderer), and puts every page on one (digest). The pack workflow calls
-# this one with `pack` (pack.yml), which adds the render bridge built for all six platforms (native)
-# and, on the Linux one, Courtyard, Swarm and Blockout played from a package of this commit with
-# the games soaked and Courtyard published native (games), the feature test run through its course (drive),
+# (render-bridge, renderer), and puts every page on one (digest). The pack workflow calls this one
+# with `pack` (pack.yml), which adds the render bridge built for all six platforms (native) and, on
+# the Linux one, Courtyard, Swarm and Blockout played from a package of this commit with the games
+# soaked and Courtyard published native (games), the feature test run through its course (drive),
 # every example captured (captures), the six drawn with meshlets, Solari and clustered decals
 # captured in Fedora (captures-fedora), a window stormed (storm) and the README walked in a
 # container (readme), and the pack run packs only once every job here passed.
@@ -208,9 +208,10 @@ jobs:
           echo "BCS_GCDUMP=$RUNNER_TEMP/gcdump/dotnet-gcdump" >> "$GITHUB_ENV"
 
       # The suite covers the library; this covers everything else in the solution. Neither the
-      # feature test nor the editor is reached by `dotnet test`, so without it a runnable project can
-      # stop compiling without CI noticing. A warning anywhere in it fails the step (NORM.md, N 6.1),
-      # and one that is right to keep is turned off where it arises, with its reason beside it.
+      # feature test nor the editor is reached by `dotnet test`, so without it a runnable project
+      # can stop compiling without CI noticing. A warning anywhere in it fails the step
+      # (NORM.md, N 6.1), and one that is right to keep is turned off where it arises, with its
+      # reason beside it.
       - name: Build the solution
         run: dotnet build BevyCSharp.slnx -c Release -warnaserror
 
@@ -517,7 +518,8 @@ jobs:
         run: mkdir -p "$SHOTS" && games/Courtyard/play.sh
 
       # A game in behaviors alone with creatures in their hundreds, played into its third wave, with
-      # the frame profiled while the most of them are alive, which the run keeps beside the captures.
+      # the frame profiled while the most of them are alive, which the run keeps beside the
+      # captures.
       - name: Play Swarm
         env:
           SHOTS: ${{ runner.temp }}/swarm
@@ -784,10 +786,10 @@ jobs:
 
   # The six examples the runner's Mesa cannot draw, captured in Fedora 44 on Fedora's own Mesa with
   # the Linux bridge built with meshlets and Solari, and compared with their pictures:
-  # clustered_decals, which Mesa 25.2's lavapipe ends with a fault in its rasterizer, the three drawn
-  # with meshlets and the two with Solari. The four shards above capture them as words compared with
-  # nothing, and capture the rest on the runner's own Mesa, which draws some scenes two to seven
-  # times faster than Fedora's (BUILDING.md).
+  # clustered_decals, which Mesa 25.2's lavapipe ends with a fault in its rasterizer, the three
+  # drawn with meshlets and the two with Solari. The four shards above capture them as words
+  # compared with nothing, and capture the rest on the runner's own Mesa, which draws some scenes
+  # two to seven times faster than Fedora's (BUILDING.md).
   captures-fedora:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
@@ -909,8 +911,8 @@ jobs:
             echo "::error title=The window storm failed::dotnet test ended with $tested. What it printed, then the test host's standard error:%0A${said//$'\n'/%0A}"
             exit 1
           fi
-          if ! grep -Eq "Passed: +3, Skipped: +0" "$out"; then
-            echo "::error::The window storm, the monitors' test and the window page's test did not all run, so a window, a monitor or a setting of the window went unchecked. The tests skip where they are not asked for or have no X11 display."
+          if ! grep -Eq "Passed: +4, Skipped: +0" "$out"; then
+            echo "::error::The window storm, the monitors' test, the window page's test and the scaled picture's test did not all run, so a window, a monitor, a setting of the window or its scaling went unchecked. The tests skip where they are not asked for or have no X11 display."
             exit 1
           fi
 

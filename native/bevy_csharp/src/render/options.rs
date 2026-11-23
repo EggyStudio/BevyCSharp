@@ -70,9 +70,11 @@ pub(crate) fn install(
         crate::window::install(app);
     }
 
-    // A window's icon, which only a run with a window has one to show on.
+    // A window's icon, which only a run with a window has one to show on, and the picture of a
+    // window covering its screen drawn at a size of its own and scaled to the screen.
     if !offscreen {
         crate::window::icon::install(app);
+        crate::window::scaled::install(app);
     }
 
     // Auto exposure is the one post-processing effect `DefaultPlugins` leaves out, since

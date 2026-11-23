@@ -220,6 +220,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                 // opens its window rather than panicking that it is not the main thread. macOS
                 // keeps the rule whatever is asked.
                 app.add_plugins(plugins.set(WinitPlugin { run_on_any_thread: true }));
+                crate::window::first::scale(&mut app, config);
             }
 
             // What the app asks for of drawing beyond the default plugins.

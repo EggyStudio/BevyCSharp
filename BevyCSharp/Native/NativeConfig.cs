@@ -143,4 +143,22 @@ public unsafe struct NativeConfig
     /// The monitor the first window opens on, by its index, when <see cref="HasMonitor"/>.
     /// </summary>
     public uint Monitor;
+
+    /// <summary>
+    /// Non-zero to open the first window without the platform's frame, in the middle of its
+    /// monitor.
+    /// </summary>
+    public uint Frameless;
+
+    /// <summary>
+    /// Non-zero to draw the first window's picture at its width by its height while it covers its
+    /// screen borderless, brought to the screen as <see cref="Scaling"/> says.
+    /// </summary>
+    public uint Scaled;
+
+    /// <summary>
+    /// How a scaled picture is brought to the screen, 0 filtered, 1 from the nearest picture pixel
+    /// and 2 by the largest whole number that fits, when <see cref="Scaled"/>.
+    /// </summary>
+    public uint Scaling;
 }

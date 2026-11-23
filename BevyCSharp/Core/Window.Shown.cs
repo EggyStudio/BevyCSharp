@@ -13,9 +13,10 @@ public static unsafe partial class Window
     /// </summary>
     internal static WindowShown? Shown()
     {
-        int mode, monitor, resizable, vsync;
-        if (NativeCore.bcs_window_shown(NativeCore.PrimaryWindow, &mode, &monitor, &resizable, &vsync) != NativeStatus.Ok) return null;
-        return new WindowShown((WindowMode)mode, monitor, resizable != 0, vsync != 0);
+        int mode, monitor, resizable, vsync, decorated, scaled;
+        if (NativeCore.bcs_window_shown(NativeCore.PrimaryWindow, &mode, &monitor, &resizable, &vsync, &decorated, &scaled) != NativeStatus.Ok)
+            return null;
+        return new WindowShown((WindowMode)mode, monitor, resizable != 0, vsync != 0, decorated != 0, scaled != 0);
     }
 
     /// <summary>
@@ -52,6 +53,28 @@ public static unsafe partial class Window
     /// </exception>
     internal static void SetVsync(bool vsync) =>
         Native.Check(NativeCore.bcs_window_set_vsync(NativeCore.PrimaryWindow, vsync ? 1 : 0), "Window.SetVsync");
+
+    /// <summary>
+    /// Gives the primary window the platform's frame, or takes it away, leaving its edges and its
+    /// level as they are.
+    /// </summary>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
+    internal static void SetDecorations(bool decorations) =>
+        Native.Check(NativeCore.bcs_window_set_decorations(NativeCore.PrimaryWindow, decorations ? 1 : 0), "Window.SetDecorations");
+
+    /// <summary>
+    /// Draws the primary window's picture at a size in its logical pixels while it covers its
+    /// screen borderless, brought to the screen by the filter, or at its own size again for none.
+    /// </summary>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
+    internal static void SetScaling((uint Width, uint Height)? size, WindowScaling filter) =>
+        Native.Check(
+            NativeCore.bcs_window_set_scaling(NativeCore.PrimaryWindow, size?.Width ?? 0, size?.Height ?? 0, (uint)filter),
+            "Window.SetScaling");
 }
 
 /// <summary>What the system shows of a window, as <see cref="Window.Shown"/> reads it.</summary>
@@ -61,7 +84,31 @@ public static unsafe partial class Window
 /// </param>
 /// <param name="Resizable">Whether its edges resize it.</param>
 /// <param name="Vsync">Whether a frame waits for the display.</param>
-internal readonly record struct WindowShown(WindowMode Mode, int Monitor, bool Resizable, bool Vsync);
+/// <param name="Decorated">Whether it has the platform's frame.</param>
+/// <param name="Scaled">
+/// Whether its picture is drawn at a size of its own while it covers its screen borderless.
+/// </param>
+internal readonly record struct WindowShown(WindowMode Mode, int Monitor, bool Resizable, bool Vsync, bool Decorated, bool Scaled);
+
+/// <summary>
+/// How a window's picture drawn at a size of its own is brought to its screen, the choices of
+/// <c>window.scaling</c>, by the numbers the bridge takes.
+/// </summary>
+internal enum WindowScaling
+{
+    /// <summary>Filtered, each screen pixel a blend of the picture pixels round it, soft.</summary>
+    Linear = 0,
+
+    /// <summary>
+    /// Each screen pixel from the picture pixel under it, sharp, and even only at a whole ratio.
+    /// </summary>
+    Nearest = 1,
+
+    /// <summary>
+    /// Enlarged by the largest whole number that fits, in the screen's middle with black round it.
+    /// </summary>
+    Integer = 2,
+}
 
 /// <summary>Why the system would refuse a window a mode, as the bridge numbers it.</summary>
 internal enum WindowRefusal

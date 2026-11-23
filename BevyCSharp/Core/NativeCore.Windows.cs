@@ -110,11 +110,12 @@ internal static unsafe partial class NativeCore
 
     /// <summary>
     /// Writes the mode the system shows the window in, the monitor it is on or -1, whether its
-    /// edges resize it and whether a frame waits for the display.
+    /// edges resize it, whether a frame waits for the display, whether it has the platform's frame
+    /// and whether its picture is drawn at a size of its own.
     /// </summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_window_shown(ulong window, int* mode, int* monitor, int* resizable, int* vsync);
+    internal static partial int bcs_window_shown(ulong window, int* mode, int* monitor, int* resizable, int* vsync, int* decorated, int* scaled);
 
     /// <summary>
     /// Writes why the system would refuse the window a mode, or zero where it takes it.
@@ -137,6 +138,19 @@ internal static unsafe partial class NativeCore
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_window_set_vsync(ulong window, int vsync);
+
+    /// <summary>Gives the window the platform's frame, or takes it away.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_decorations(ulong window, int decorations);
+
+    /// <summary>
+    /// Draws the window's picture at a size of its own while it covers its screen borderless, or
+    /// at its own size again where the width or the height is 0.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_window_set_scaling(ulong window, uint width, uint height, uint filter);
 
     /// <summary>Hands the window to the platform to be moved by the pointer.</summary>
     [LibraryImport(Library)]

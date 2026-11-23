@@ -3067,6 +3067,7 @@ struct Bevy.Interop.NativeConfig
   uint Diagnostics
   uint Feathers
   uint FixedSize
+  uint Frameless
   uint GpuTimings
   uint Gui
   uint HasMonitor
@@ -3082,6 +3083,8 @@ struct Bevy.Interop.NativeConfig
   uint NoPrimaryWindow
   uint Offscreen
   uint RayTracedLighting
+  uint Scaled
+  uint Scaling
   uint TransformGizmo
   uint Transparent
   uint Vsync

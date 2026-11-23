@@ -17098,3 +17098,132 @@ is, reads Escape as the program does. With none of them open Escape is the progr
 not set. The editor quits on Escape as it did, past a field, a menu and a tab. Bevy's own text
 fields take their keys from the focus in the bridge, and Escape is not held from the program while
 one of them has it.
+
+The keys. At `a9c9ff4` the console opens on F4 and the settings panel on F5, the settings panel
+stands on the console popup's opaque black, and the console's field runs the window's whole width.
+`Debug`, the guides for the tools, input, the interface and running a game, the feature test's
+program, interface, admin panel and README, the console's tests and the cheatsheet say so. The
+editor unbinds the console's key, since its console tab stands for it, and gives the settings panel
+F4, since F5 plays the scene, so its keys are as they were. The soak presses F6 for Courtyard's
+save, which the change of save key had left on F5.
+
+The tests. `EscapeTests` taps Escape with the console, the settings panel, the overlay and nothing
+open, and counts the program's reads of the key, its logical key and its messages, none for the
+first two and each once for the others. With the diagnostics area's answer to
+`Input.InterfaceTakesEscape` taken out, the console's and the settings panel's cases read the press
+and fail (N 3.1). The run of the feature test's course gains a station after the hub's shot, F5
+opening the settings panel, Enter a page, Escape going back to its first and Escape again closing
+it, then the admin panel through `feature.panel` the same way, the program answering after, each
+read through a new command, `panels`, which says the panel open and the settings panel's page. The
+course passed on this machine as far as that station.
+
+The picture. The sheet of the console and the settings panel under `.github/assets/readings` is
+retaken at `a9c9ff4`, the console on F4 with its field across the window's width and the settings
+panel on F5 on the popup's black, with its caption and the devlog's entry.
+
+The checks. The solution built with warnings as errors, and the test classes of input and its
+messages, the console, the overlay, the settings panel, the keys, the editor, the hidden scope, the
+camera controller and editable text passed 161 with NormTests among them, and the cheatsheet's, the
+listing's and the examples' catalog's passed 23. N 6.4 read `0.0.0-diag7`, packed from this tree,
+and the four guides this touches build their 47 blocks on it. The public listing does not move. The
+whole suite runs once 156's second part lands on this, a suite at a time on the card.
+
+Shared: Escape held from the program while the module's console or settings panel or a field is
+open, decided by the press's message, is offered to 3DEngine's binding of the module.
+
+NormTests passed, 19.
+
+156, part two, the Atmosphere module, in the commit carrying this.
+
+The module. `modules/Sky` at fbc385e gives way to `modules/Atmosphere` at 8891e10, the repository
+3DEngine.Atmosphere, whose assembly `3DEngine.Atmosphere` the package carries in its place, in the
+area's projects, the build's targets and N 6.4's list. Each `using Sky;` is `using Atmosphere;`, the
+script host's references with them, and the sky guide names the module's `Air` as the air as data
+beside the engine's `PlanetAtmosphere`. The guides, the rendering notes and the cheatsheet take the
+name, the README holds no table of modules and the solution named none.
+
+The figures. Of what the engine takes from the module, `LookSettings`, `LookCycle`, `LookCurve`,
+`SkyClock` and the weather's types, one member changed between the pins,
+`WeatherConditions.CloudDensity`, a multiplier of 1 unless set, which is `CloudOpticalDepth`, the
+deck's optical depth straight through it, 100 unless set. Each preset's depth is its old density
+times 0.04 a meter times its deck's thickness, rain's 1.6 by 0.04 by 1,600 m being 102.4, so the
+extinction a meter the binding gives the clouds is the old one to the digit. No test's figure moved
+and no bound widened. `SkyWeatherTests.ARainyDeckCoversTheSkyThickensTheFogAndRains` gains one
+assertion, the clouds' density equal to the rain's optical depth over its deck's thickness, 0.064 to
+five places, since that is the one number the binding works out from the module's. The thirteen
+classes the commit touches passed 108 of 108.
+
+The strike. The module's `Atmosphere.LightningStrike` meets the engine's record of that name in a
+file naming both namespaces, so the engine's is `ThunderStrike`, in `ThunderStrike.cs`, in its nine
+places. Under N 2.4, the listing's `readonly struct Bevy.LightningStrike :
+IEquatable<LightningStrike>` is `readonly struct Bevy.ThunderStrike : IEquatable<ThunderStrike>`
+with its thirteen lines, `RenderSky.StrikeLightning` answers `ThunderStrike?` and `RenderSky.Struck`
+takes `Action<ThunderStrike>?`.
+
+Later work. The engine's thunder can take the module's `Thunderstorm` and drop its own
+`ThunderStrike`, since the two records carry the same facts, an item for the reviewer to place after
+this and 155's step 3.
+
+For the owner. AGENTS.md's `BevyCSharp/Sky` row reads "over the Sky module" and waits for the
+owner's word to read "over the Atmosphere module".
+
+The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-156-sky-pins.webp`, of the
+feature test's noon, sunset and night at the old pin and the new from one view at one fixed
+exposure, each pair with its difference sixteen times over, black, since below the frame counter no
+pixel moves past 1 of 255 but two at the red block's foot at sunset and three on one star at night,
+with its line in the readings' captions.
+
+The checks. The whole suite on this commit's tree ran 2201, the 2190 listed and 11, with 2192
+passed, 7 skipped and 2 failed, neither this commit's.
+`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` fails at 284819d0 alone and is mended in
+the next commit. `GlobalIlluminationTests`' slab under High at 5.5 read 0.18 against at least 0.2 in
+a part that ran 364 s against its 201 on a shared card, and alone it read 0.26 twice on this tree
+and once at 284819d0, every earlier suite's figure. The solution builds with warnings as errors, the
+cheatsheet and the listing come out of their generators unchanged, and a package of this tree,
+`0.0.0-diag9`, which holds the next commit's settings beside this one's files, carries the
+Atmosphere assembly N 6.4 names, with the 52 blocks of the three guides this commit touches and the
+tools guide building on it. The module holds a nested `modules/Tools` that the workflow's checkout
+leaves out, and the library builds without it.
+
+Shared: the engine reads the Atmosphere module at 8891e10, its clouds from the optical depth it
+gives, offered to SHARED.md's row of the module.
+
+NormTests passed, 19.
+
+155, step 3, the settings, in the commit carrying this.
+
+The settings. Every value of the engine's a console command or an environment variable sets is a
+setting of the module's registry, in `EngineSettings` in the diagnostics area, added as its assembly
+loads as its commands are, each with its default, its range or its choices, whether it only reads
+and the variable that overrides it. The `time` page holds `time.frame` (`BCS_FRAME_TIME`),
+`time.hold` (`BCS_HOLD_CLOCK`), `time.speed` and `time.paused`, the `gi` page `gi.quality`,
+`gi.screen_probes` and `gi.held_bounces`, the `field` page the five values `field.set` takes,
+`field.cascades`, `field.cell`, `field.budget`, `field.far` and `field.triangles`, and
+`scenes.folder` takes `BCS_SCENE_PACKS`. The `run` page says how the run was started and only reads,
+`run.offscreen`, `run.frames`, `run.serve`, `run.watch`, `run.memory_cap`, `run.sessions`,
+`run.slangc` and `run.shuffle`, each naming its variable, since no start reads a value set while the
+program runs, so no setting waits for the next start. A setting of the running app refuses a set
+where none runs, with the reason. The commands that set them stand beside them for the scripts and
+guides that name them. Left out are the commands that set an entity, a state, a camera's look or an
+input, which hold no value of the engine's, `BEVY_ASSET_PATH`, which a build of the bridge reads and
+a run does not, and `BCS_MEMORY_CAP_SAID`, which the memory guard writes for itself. The `sky.*`
+commands become settings in a commit of their own on the Atmosphere module, which the commit before
+this brings, and the feature test's `feature-test.json` stays its own until its later item.
+
+The file. `KeptSettings` reads `settings.txt` from the player's folder, `user://settings.txt` beside
+a game's saves, as the app starts with the world lent, writes it as a saved setting changes and once
+more as the world goes, since the file is a resource of the world. It holds the keys and a game's
+own settings that differ from their defaults, with every line of a name the run does not know as it
+stood. A run with no window, headless, offscreen or with no renderer, reads none and writes none, so
+a test, a tool and every run of this session's leave the player's file as it was. A file that cannot
+be read is left alone, every setting starting at its default, and a refused line or a failed write
+is a warning in the console. The engine's player folder is `UserData`'s, `~/.local/share` on Linux
+and `%APPDATA%` on Windows, where the module's `SettingsFile.For` names the system's application
+data, `~/.config` on Linux, so the engine names the path itself. The editor gives its settings panel
+F4 and unbinds the console's key as a set, so the editor's own file holds those two once it writes.
+
+The panel draws the settings by the first word of their names, `field`, `gi`, `keys`, `run`,
+`scenes` and `time`, with the feature test's row after them. The tools guide gains a Settings
+section, a table of every setting with its default and variable and how the file is kept, with a
+block of a game's own setting built on the package, its keys paragraph says a rebound key is kept,
+and the feature test's README names `settings.txt` beside its own file.

@@ -1,6 +1,6 @@
 //! The first window of a drawing app as the config C# filled asks for it, given to Bevy's window
 //! plugin, which winit makes it from before it is shown, so its size, place, mode, screen, edges,
-//! vsync and alpha are its own from its first frame.
+//! frame, vsync, alpha and the size its picture is drawn at are its own from its first frame.
 
 use bevy::window::{
     CompositeAlphaMode, MonitorSelection, PresentMode, VideoModeSelection, Window, WindowMode, WindowPosition,
@@ -26,9 +26,10 @@ pub fn primary(config: &BcsConfig, title: Option<String>) -> Window {
         } else {
             (config.width, config.height).into()
         },
-        // On the monitor the settings name, or where it was last closed when the game asks for
-        // that, so it does not open where the platform chooses and then jump.
-        position: if config.has_monitor != 0 {
+        // On the monitor the settings name, in its middle without a frame where the settings ask
+        // for borderless, or where it was last closed when the game asks for that, so it does not
+        // open where the platform chooses and then jump.
+        position: if config.has_monitor != 0 || config.frameless != 0 {
             WindowPosition::Centered(start_monitor)
         } else if config.has_position != 0 {
             WindowPosition::At(bevy::math::IVec2::new(config.x, config.y))
@@ -43,6 +44,7 @@ pub fn primary(config: &BcsConfig, title: Option<String>) -> Window {
             _ => WindowMode::Windowed,
         },
         resizable: config.fixed_size == 0,
+        decorations: config.frameless == 0,
         present_mode: if config.vsync != 0 {
             PresentMode::AutoVsync
         } else {
@@ -59,4 +61,23 @@ pub fn primary(config: &BcsConfig, title: Option<String>) -> Window {
         },
         ..Default::default()
     }
+}
+
+/// Gives the first window the size its picture is drawn at while it covers its screen, where the
+/// config asks for that, before its first frame is drawn (see [`super::scaled`]).
+pub fn scale(app: &mut bevy::app::App, config: &BcsConfig) {
+    use bevy::ecs::query::With;
+    use bevy::window::PrimaryWindow;
+
+    if config.scaled == 0 {
+        return;
+    }
+    let world = app.world_mut();
+    let Some(window) = world.query_filtered::<bevy::ecs::entity::Entity, With<PrimaryWindow>>().iter(world).next() else {
+        return;
+    };
+    world.entity_mut(window).insert(super::scaled::WindowScaling {
+        size: bevy::math::UVec2::new(config.width.max(1), config.height.max(1)),
+        filter: config.scaling.min(super::scaled::filter::INTEGER),
+    });
 }

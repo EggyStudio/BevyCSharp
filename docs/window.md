@@ -165,15 +165,32 @@ monitor nothing often enough that a settings screen needs the fallback shown abo
 has no window, and every call here says so rather than doing nothing.
 
 The settings panel's `window` page holds the same for the player, `window.mode` (`Windowed`,
-`Borderless` or `Fullscreen`), `window.resizable`, `window.width` and `window.height` for its size
-as a window, `window.monitor`, the screen by its number from 0 where there is more than one, and
-`window.vsync`. Each acts at once and is kept in the settings file, which the app reads for them
-before it makes its window, so the window opens as the player left it before its first frame is
-shown. Borderless covers the screen the window is on at the screen's own mode, and fullscreen takes
-the screen's mode, which Wayland gives no window and a screen listing no mode at its own size and
-rate cannot give, so a set of it there is refused in the console with the reason and the window
-keeps the mode it holds. A window covering its screen keeps its size as a window for its return, and
-a run that shows no window has the page only reading.
+`Borderless`, `BorderlessFullscreen` or `Fullscreen`, read in any case), `window.resizable`,
+`window.width` and `window.height` for its size, `window.monitor`, the screen by its number from 0
+where there is more than one, `window.vsync` and `window.scaling`. Each acts at once and is kept in
+the settings file, which the app reads for them before it makes its window, so the window opens as
+the player left it before its first frame is shown.
+
+The four modes share the size. Windowed is a window with the platform's frame, where it was left.
+Borderless is a window without the frame at the size set, in the middle of its screen with the
+desktop round it and drawn pixel for pixel, and a size as large as the screen's covers the screen,
+which is the only way it covers. Borderless fullscreen always covers the screen at the screen's own
+mode, and draws the picture at the size set and scales it to the screen, softer at a smaller size
+and at less cost. Fullscreen takes the screen's mode, which Wayland gives no window and a screen
+listing no mode at its own size and rate cannot give, so a set of it there is refused in the
+console with the reason and the window keeps the mode it holds. A window that leaves windowed keeps
+its size and place for its return, and a run that shows no window has the page only reading.
+
+`window.scaling` says how borderless fullscreen brings its picture to the screen. `Linear`, the
+default, filters it and is soft. `Nearest` takes each screen pixel from the picture pixel under it
+and is sharp, which is even where the screen is a whole number of times the picture, as 1920 by
+1080 is on a screen of 3840 by 2160, and uneven at any other ratio, where some picture pixels come
+out a screen pixel wider than others. `Integer` enlarges the picture by the largest whole number
+that fits, in the screen's middle with black round it, every picture pixel a square block. A
+picture as wide as the screen or as tall is drawn at the screen's size. The cameras keep the
+window's size in logical pixels, so the pointer, picking and a camera's viewport read as they do
+unscaled, and the interface ImGui draws is drawn after the scaling at the screen's own size, while
+Bevy's interface is drawn into the picture and scaled with it.
 
 A window made without the platform's frame (`SetStyle(decorations: false)`) has no title bar to be
 moved by and no border to be resized from, so an app drawing its own asks the platform to do both

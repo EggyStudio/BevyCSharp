@@ -56,17 +56,18 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
 
     /// <summary>
     /// The window opens at the size and the vsync of the settings file's lines, each of the page's
-    /// settings sets the window it reads, a mode the system cannot give is refused with the reason
-    /// and the window keeps its own, the size as a window is kept while the window covers its
-    /// screen and given back over a size of the system's as it leaves it, and the file written
-    /// holds what the player set, which the next start gives the window.
+    /// settings sets the window it reads, a borderless window stands without its frame at the size
+    /// set in the middle of its screen and covers the screen at the screen's size, a mode the
+    /// system cannot give is refused with the reason and the window keeps its own, the size and
+    /// the place as a window are given back over a size of the system's as it returns to one, and
+    /// the file written holds what the player set, which the next start gives the window.
     /// </summary>
     /// <remarks>
-    /// xvfb-run's screen is one monitor, so the monitor only reads. Its modes carry no rate, so the
-    /// screen lists no mode at its own size and rate and fullscreen is refused, as it would be on a
-    /// screen whose driver names no rate. It runs no window manager, which on X11 sizes a window
-    /// covering its screen, so the run reads the modes the window holds and the size kept for its
-    /// return rather than the size it covers.
+    /// xvfb-run's screen is one monitor of 1920 by 1080, so the monitor only reads. Its modes carry
+    /// no rate, so the screen lists no mode at its own size and rate and fullscreen is refused, as
+    /// it would be on a screen whose driver names no rate. It runs no window manager, which on X11
+    /// sizes a window covering its screen, so the run reads the mode the window holds for the
+    /// cover rather than the size it covers.
     /// </remarks>
     [SkippableFact]
     public void TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext()
@@ -79,15 +80,40 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
         Assert.Equal(
             [
                 "window.mode borderless: done", "window.mode reads Borderless", "window.width reads 800", "window.width 1000: done",
-                $"window.mode fullscreen: {Answer.Refused}, The screen lists no mode at its own size and rate for a fullscreen window to take, so the window stays borderless. Borderless covers the screen at its own mode.",
-                "window.mode reads Borderless",
-                "window.mode windowed: done", "window.mode reads Windowed", "windowed at 1000 by 450", "window.resizable off: done",
+                $"window.mode fullscreen: {Answer.Refused}, The screen lists no mode at its own size and rate for a fullscreen window to take, so the window stays borderless. Borderless fullscreen covers the screen at its own mode.",
+                "borderless at 1000 by 450, at 460 315, no frame", "window.width 1920: done", "window.height 1080: done",
+                "covering its screen, not scaled", "window.mode reads Borderless", "window.height 450: done", "window.width 1000: done",
+                "borderless at 1000 by 450, at 460 315, no frame", "window.mode borderlessfullscreen: done", "window.scaling integer: done",
+                "window.width 300: done", "window.height 200: done",
+                "window.mode reads BorderlessFullscreen", "window.scaling reads Integer", "window.width reads 300",
+                "window.mode windowed: done", "window.mode reads Windowed", "windowed at 300 by 200, at 40 40, framed", "window.resizable off: done",
                 "window.resizable reads off", "window.resizable on: done", "window.vsync on: done", "window.vsync reads on", "window.monitor reads 0",
                 $"window.monitor 0: {Answer.NotSettable}", $"window.monitor 1: {Answer.NotSettable}",
             ],
             run.Page);
-        Assert.Equal(["window.height 420", "window.width 1000"], run.Kept);
-        Assert.Equal("Windowed, resizable, 1000 by 420, no monitor, vsync", run.Next);
+        Assert.Equal(["window.height 200", "window.scaling Integer", "window.width 300"], run.Kept);
+        Assert.Equal("Windowed, resizable, 300 by 200, no monitor, vsync, Integer", run.Next);
+    }
+
+    /// <summary>
+    /// Borderless fullscreen draws its picture at the size set, and the integer scaling brings it
+    /// to the window by the largest whole number that fits, in the window's middle with black
+    /// round it.
+    /// </summary>
+    /// <remarks>
+    /// With no window manager the window covering its screen keeps the size it had, 1000 by 450,
+    /// which the picture of 300 by 200 fits twice in, so it is drawn at 600 by 400 from 200 across
+    /// and 24 down. The run reads the green of the camera's clear along the window's middle row
+    /// and column, and the black at its corners.
+    /// </remarks>
+    [SkippableFact]
+    public void BorderlessFullscreenScalesItsPictureByTheLargestWholeNumberThatFits()
+    {
+        Needs.WindowStorm();
+
+        var run = storm.Run;
+        Assert.Equal(0, run.Exit);
+        Assert.Equal("green from 200 to 800 across and from 24 to 424 down of 1000 by 450, black corners", run.Scaled);
     }
 
     /// <summary>
@@ -96,7 +122,7 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
     /// </summary>
     public sealed record Result(
         int Exit, string Picture, int Monitors, MonitorInfo First, string? Name, VideoMode[] Modes, List<string> Refused,
-        string Opened, List<string> Page, string[] Kept, string Next);
+        string Opened, List<string> Page, string[] Kept, string Next, string Scaled);
 
     /// <summary>
     /// The window stormed, made once for the tests that read it, when the first of them that is
@@ -143,10 +169,11 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
 
         private static Result Stormed(string picture, (uint Width, uint Height)[] sizes, string settings)
         {
-            var (frame, shot) = (0, -1);
+            var frame = 0;
             var (monitors, first, name, modes) = (0, default(MonitorInfo), (string?)null, Array.Empty<VideoMode>());
             var refused = new List<string>();
             var (opened, page) = ("", new List<string>());
+            var (capture, scaled) = (default(Capture?), "no picture was read");
 
             // A line as the console or the panel gives it, with the reason of a refusal, and a
             // setting's value as its row reads it.
@@ -157,6 +184,8 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
             }
             void Read(string name) => page.Add($"{name} reads {Registry.Process.FindSetting(name)!.Text}");
             string Sized(string what) => Window.Size() is var (width, height) ? $"{what} {width} by {height}" : what;
+            string Placed(string what) =>
+                $"{Sized($"{what} at")}, at {Window.Place().X} {Window.Place().Y}, {(Window.Shown()?.Decorated == true ? "framed" : "no frame")}";
 
             // Disposed before the file is read, since the settings file writes a last time as the
             // app's world goes.
@@ -204,11 +233,7 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
 
                         // Captured once the size has had time to reach the surface, and the run
                         // ended once the picture has had time to be written.
-                        if (frame == 150)
-                        {
-                            Render.Screenshot(picture);
-                            shot = frame;
-                        }
+                        if (frame == 150) Render.Screenshot(picture);
 
                         // The window's page once the picture is written, a set of each setting as
                         // the console or the panel makes it and a read of each a few frames on,
@@ -221,29 +246,65 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
                             Line(world, "window.width 1000");
                             Line(world, "window.mode fullscreen");
                         }
+
+                        // Borderless at a size under the screen's stands in its middle without a
+                        // frame, and covers it at the screen's size, then stands in the middle
+                        // again at a size under it.
+                        if (frame == 176)
+                        {
+                            page.Add(Placed("borderless"));
+                            Line(world, "window.width 1920");
+                            Line(world, "window.height 1080");
+                        }
                         if (frame == 180)
                         {
+                            if (Window.Shown() is { Mode: WindowMode.BorderlessFullscreen, Scaled: var drawnScaled })
+                                page.Add($"covering its screen, {(drawnScaled ? "scaled" : "not scaled")}");
                             Read("window.mode");
-                            Line(world, "window.mode windowed");
+                            Line(world, "window.height 450");
+                            Line(world, "window.width 1000");
                         }
+                        if (frame == 184)
+                        {
+                            page.Add(Placed("borderless"));
+                            Line(world, "window.mode borderlessfullscreen");
+                            Line(world, "window.scaling integer");
+                            Line(world, "window.width 300");
+                            Line(world, "window.height 200");
+                        }
+
+                        // The scaled picture read back once it has reached the window.
+                        if (frame == 190)
+                        {
+                            Read("window.mode");
+                            Read("window.scaling");
+                            Read("window.width");
+                            capture = Render.BeginCapture();
+                        }
+                        if (capture is { } asked && Render.TryReadCapture(asked, out var read))
+                        {
+                            scaled = Described(read!);
+                            capture = null;
+                        }
+                        if (frame == 210) Line(world, "window.mode windowed");
 
                         // A size of the system's own a frame on, as a window manager restores the
                         // one it saved as the window leaves its screen, which the size given back
                         // is set over.
-                        if (frame == 182) Window.SetSize(1000, 300);
-                        if (frame == 188)
+                        if (frame == 212) Window.SetSize(1000, 300);
+                        if (frame == 218)
                         {
                             Read("window.mode");
-                            page.Add(Sized("windowed at"));
+                            page.Add(Placed("windowed"));
                             Line(world, "window.resizable off");
                         }
-                        if (frame == 192)
+                        if (frame == 222)
                         {
                             Read("window.resizable");
                             Line(world, "window.resizable on");
                             Line(world, "window.vsync on");
                         }
-                        if (frame == 196)
+                        if (frame == 226)
                         {
                             Read("window.vsync");
                             Read("window.monitor");
@@ -251,7 +312,7 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
                             Line(world, $"window.monitor {monitors}");
                         }
 
-                        if (shot > 0 && frame == shot + 60) App.RequestExit();
+                        if (frame == 290) App.RequestExit();
                     },
                     "Test.Storm"));
 
@@ -266,8 +327,26 @@ public sealed class WindowStormTests(WindowStormTests.Storm storm) : IClassFixtu
             var kept = File.ReadAllLines(settings);
             var next = WindowSettings.Open(Config.Windowed("Storm", 640, 400), new WindowPlace(false, 0, 0, 640, 400, false));
             var said = $"{next.Mode}, {(next.Resizable ? "resizable" : "fixed")}, {next.Width} by {next.Height}, "
-                + $"{(next.Monitor is { } monitor ? $"monitor {monitor}" : "no monitor")}, {(next.Vsync ? "vsync" : "no vsync")}";
-            return new Result(exit, picture, monitors, first, name, modes, refused, opened, page, kept, said);
+                + $"{(next.Monitor is { } monitor ? $"monitor {monitor}" : "no monitor")}, {(next.Vsync ? "vsync" : "no vsync")}, {next.Scaling}";
+            return new Result(exit, picture, monitors, first, name, modes, refused, opened, page, kept, said, scaled);
+        }
+
+        // Where the picture's green lies along the window's middle row and column, and whether
+        // the corners are black.
+        private static string Described(CapturedImage window)
+        {
+            static bool Green((byte R, byte G, byte B, byte A) pixel) => pixel.G > 100 && pixel.G > pixel.R + 40;
+            static bool Black((byte R, byte G, byte B, byte A) pixel) => pixel.R < 8 && pixel.G < 8 && pixel.B < 8;
+
+            var (row, column) = (window.Height / 2, window.Width / 2);
+            var across = Enumerable.Range(0, (int)window.Width).Where(x => Green(window.At((uint)x, row))).ToArray();
+            var down = Enumerable.Range(0, (int)window.Height).Where(y => Green(window.At(column, (uint)y))).ToArray();
+            if (across.Length == 0 || down.Length == 0) return $"no green in {window.Width} by {window.Height}";
+
+            uint[] xs = [0, window.Width - 1];
+            uint[] ys = [0, window.Height - 1];
+            var corners = xs.All(x => ys.All(y => Black(window.At(x, y)))) ? "black corners" : "corners not black";
+            return $"green from {across[0]} to {across[^1] + 1} across and from {down[0]} to {down[^1] + 1} down of {window.Width} by {window.Height}, {corners}";
         }
     }
 

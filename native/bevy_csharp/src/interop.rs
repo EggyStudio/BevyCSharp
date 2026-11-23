@@ -305,6 +305,16 @@ pub struct BcsConfig {
     /// The monitor, by its index in the order winit lists them, which `bcs_monitor_count` counts
     /// in, when `has_monitor`.
     pub monitor: u32,
+    /// Non-zero to open the first window as a window without the platform's frame, in the middle
+    /// of its monitor, which the settings' borderless asks for.
+    pub frameless: u32,
+    /// Non-zero to draw the first window's picture at `width` by `height` while it covers its
+    /// screen borderless, and bring it to the screen as `scaling` says, which the settings'
+    /// borderless fullscreen asks for.
+    pub scaled: u32,
+    /// How a scaled picture is brought to the screen, by the numbers `bcs_window_set_scaling`
+    /// takes, when `scaled`.
+    pub scaling: u32,
 }
 
 /// Where the window is and how large, as `bcs_window_place` reads it back.

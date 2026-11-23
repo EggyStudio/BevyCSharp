@@ -23,6 +23,8 @@ pub mod cursor;
 pub mod first;
 pub mod icon;
 pub mod monitors;
+#[cfg(feature = "render")]
+pub mod scaled;
 pub mod shown;
 pub mod updates;
 #[cfg(feature = "render")]

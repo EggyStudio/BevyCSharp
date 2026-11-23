@@ -346,6 +346,34 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     both engines. Tests hold each setting's round through the file and the refusal, a sheet shows
     the page and the three modes, and the guides say it. It comes after item 159.
 
+161. **A borderless window takes the size set, in the screen's middle.** Borderless today covers the
+whole screen whatever `window.width` and `window.height` say. A player on a large screen sets a
+smaller resolution and expects a window without a frame at exactly that size, sharp and one pixel to
+one pixel, standing in the middle of the screen with the desktop round it, and not a stretched
+picture. So `window.mode` borderless makes a frameless window of `window.width` by `window.height`
+in the middle of the screen `window.monitor` names. A size as large as the screen or larger covers
+the screen as borderless does today, and that is how a player gets the covering kind. Setting the
+width or the height while borderless resizes the frameless window at once and keeps it in the
+middle. Windowed keeps its frame and its place, fullscreen takes the screen's mode as before. The
+picture is drawn at the window's own size and never scaled to the screen. A test holds the size, the
+place and the missing frame at a size under the screen's and the cover at the screen's size, and the
+sheet shows a borderless window at a smaller size on a larger screen beside the covering one. The
+guides and the cheatsheet say it. The mode has four choices, windowed, borderless, borderless
+fullscreen and fullscreen. Borderless is the frameless window at the size set, as above, and a size
+as large as the screen is the only way it covers. Borderless fullscreen is a frameless window that
+always covers the screen, and it draws the picture at `window.width` by `window.height` and scales
+it to the screen, so a smaller size set gives a softer picture at less cost, which some players
+choose. The scaling is one filtered copy at the frame's end, with the interface drawn after it at
+the screen's size where the engine has that split and with it otherwise, the Reply saying which.
+This part replaces the sentence above that lets the size decide the cover between two kinds, and the
+sheet shows all four. A setting `window.scaling` chooses how borderless fullscreen brings the
+picture to the screen, with three choices. Linear is the filtered copy, soft. Nearest takes each
+screen pixel from the one picture pixel under it, sharp, even at a whole ratio such as 1920 by 1080
+on 3840 by 2160 and uneven at any other, which its help line says. Integer scales by the largest
+whole number that fits and stands the picture in the screen's middle with black round it, every
+picture pixel a square block of screen pixels. The default is Linear. The sheet shows the three on
+one crop at a whole ratio and at a ratio of one and a half.
+
 ## Verdicts
 
 Verdict 94 is settled at 23:11 on 2026-11-22, the build on `8089a06e` green with the scripted run's
@@ -674,135 +702,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-The keys. At `a9c9ff4` the console opens on F4 and the settings panel on F5, the settings panel
-stands on the console popup's opaque black, and the console's field runs the window's whole width.
-`Debug`, the guides for the tools, input, the interface and running a game, the feature test's
-program, interface, admin panel and README, the console's tests and the cheatsheet say so. The
-editor unbinds the console's key, since its console tab stands for it, and gives the settings panel
-F4, since F5 plays the scene, so its keys are as they were. The soak presses F6 for Courtyard's
-save, which the change of save key had left on F5.
-
-The tests. `EscapeTests` taps Escape with the console, the settings panel, the overlay and nothing
-open, and counts the program's reads of the key, its logical key and its messages, none for the
-first two and each once for the others. With the diagnostics area's answer to
-`Input.InterfaceTakesEscape` taken out, the console's and the settings panel's cases read the press
-and fail (N 3.1). The run of the feature test's course gains a station after the hub's shot, F5
-opening the settings panel, Enter a page, Escape going back to its first and Escape again closing
-it, then the admin panel through `feature.panel` the same way, the program answering after, each
-read through a new command, `panels`, which says the panel open and the settings panel's page. The
-course passed on this machine as far as that station.
-
-The picture. The sheet of the console and the settings panel under `.github/assets/readings` is
-retaken at `a9c9ff4`, the console on F4 with its field across the window's width and the settings
-panel on F5 on the popup's black, with its caption and the devlog's entry.
-
-The checks. The solution built with warnings as errors, and the test classes of input and its
-messages, the console, the overlay, the settings panel, the keys, the editor, the hidden scope, the
-camera controller and editable text passed 161 with NormTests among them, and the cheatsheet's, the
-listing's and the examples' catalog's passed 23. N 6.4 read `0.0.0-diag7`, packed from this tree,
-and the four guides this touches build their 47 blocks on it. The public listing does not move. The
-whole suite runs once 156's second part lands on this, a suite at a time on the card.
-
-Shared: Escape held from the program while the module's console or settings panel or a field is
-open, decided by the press's message, is offered to 3DEngine's binding of the module.
-
-NormTests passed, 19.
-
-156, part two, the Atmosphere module, in the commit carrying this.
-
-The module. `modules/Sky` at fbc385e gives way to `modules/Atmosphere` at 8891e10, the repository
-3DEngine.Atmosphere, whose assembly `3DEngine.Atmosphere` the package carries in its place, in the
-area's projects, the build's targets and N 6.4's list. Each `using Sky;` is `using Atmosphere;`, the
-script host's references with them, and the sky guide names the module's `Air` as the air as data
-beside the engine's `PlanetAtmosphere`. The guides, the rendering notes and the cheatsheet take the
-name, the README holds no table of modules and the solution named none.
-
-The figures. Of what the engine takes from the module, `LookSettings`, `LookCycle`, `LookCurve`,
-`SkyClock` and the weather's types, one member changed between the pins,
-`WeatherConditions.CloudDensity`, a multiplier of 1 unless set, which is `CloudOpticalDepth`, the
-deck's optical depth straight through it, 100 unless set. Each preset's depth is its old density
-times 0.04 a meter times its deck's thickness, rain's 1.6 by 0.04 by 1,600 m being 102.4, so the
-extinction a meter the binding gives the clouds is the old one to the digit. No test's figure moved
-and no bound widened. `SkyWeatherTests.ARainyDeckCoversTheSkyThickensTheFogAndRains` gains one
-assertion, the clouds' density equal to the rain's optical depth over its deck's thickness, 0.064 to
-five places, since that is the one number the binding works out from the module's. The thirteen
-classes the commit touches passed 108 of 108.
-
-The strike. The module's `Atmosphere.LightningStrike` meets the engine's record of that name in a
-file naming both namespaces, so the engine's is `ThunderStrike`, in `ThunderStrike.cs`, in its nine
-places. Under N 2.4, the listing's `readonly struct Bevy.LightningStrike :
-IEquatable<LightningStrike>` is `readonly struct Bevy.ThunderStrike : IEquatable<ThunderStrike>`
-with its thirteen lines, `RenderSky.StrikeLightning` answers `ThunderStrike?` and `RenderSky.Struck`
-takes `Action<ThunderStrike>?`.
-
-Later work. The engine's thunder can take the module's `Thunderstorm` and drop its own
-`ThunderStrike`, since the two records carry the same facts, an item for the reviewer to place after
-this and 155's step 3.
-
-For the owner. AGENTS.md's `BevyCSharp/Sky` row reads "over the Sky module" and waits for the
-owner's word to read "over the Atmosphere module".
-
-The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-156-sky-pins.webp`, of the
-feature test's noon, sunset and night at the old pin and the new from one view at one fixed
-exposure, each pair with its difference sixteen times over, black, since below the frame counter no
-pixel moves past 1 of 255 but two at the red block's foot at sunset and three on one star at night,
-with its line in the readings' captions.
-
-The checks. The whole suite on this commit's tree ran 2201, the 2190 listed and 11, with 2192
-passed, 7 skipped and 2 failed, neither this commit's.
-`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` fails at 284819d0 alone and is mended in
-the next commit. `GlobalIlluminationTests`' slab under High at 5.5 read 0.18 against at least 0.2 in
-a part that ran 364 s against its 201 on a shared card, and alone it read 0.26 twice on this tree
-and once at 284819d0, every earlier suite's figure. The solution builds with warnings as errors, the
-cheatsheet and the listing come out of their generators unchanged, and a package of this tree,
-`0.0.0-diag9`, which holds the next commit's settings beside this one's files, carries the
-Atmosphere assembly N 6.4 names, with the 52 blocks of the three guides this commit touches and the
-tools guide building on it. The module holds a nested `modules/Tools` that the workflow's checkout
-leaves out, and the library builds without it.
-
-Shared: the engine reads the Atmosphere module at 8891e10, its clouds from the optical depth it
-gives, offered to SHARED.md's row of the module.
-
-NormTests passed, 19.
-
-155, step 3, the settings, in the commit carrying this.
-
-The settings. Every value of the engine's a console command or an environment variable sets is a
-setting of the module's registry, in `EngineSettings` in the diagnostics area, added as its assembly
-loads as its commands are, each with its default, its range or its choices, whether it only reads
-and the variable that overrides it. The `time` page holds `time.frame` (`BCS_FRAME_TIME`),
-`time.hold` (`BCS_HOLD_CLOCK`), `time.speed` and `time.paused`, the `gi` page `gi.quality`,
-`gi.screen_probes` and `gi.held_bounces`, the `field` page the five values `field.set` takes,
-`field.cascades`, `field.cell`, `field.budget`, `field.far` and `field.triangles`, and
-`scenes.folder` takes `BCS_SCENE_PACKS`. The `run` page says how the run was started and only reads,
-`run.offscreen`, `run.frames`, `run.serve`, `run.watch`, `run.memory_cap`, `run.sessions`,
-`run.slangc` and `run.shuffle`, each naming its variable, since no start reads a value set while the
-program runs, so no setting waits for the next start. A setting of the running app refuses a set
-where none runs, with the reason. The commands that set them stand beside them for the scripts and
-guides that name them. Left out are the commands that set an entity, a state, a camera's look or an
-input, which hold no value of the engine's, `BEVY_ASSET_PATH`, which a build of the bridge reads and
-a run does not, and `BCS_MEMORY_CAP_SAID`, which the memory guard writes for itself. The `sky.*`
-commands become settings in a commit of their own on the Atmosphere module, which the commit before
-this brings, and the feature test's `feature-test.json` stays its own until its later item.
-
-The file. `KeptSettings` reads `settings.txt` from the player's folder, `user://settings.txt` beside
-a game's saves, as the app starts with the world lent, writes it as a saved setting changes and once
-more as the world goes, since the file is a resource of the world. It holds the keys and a game's
-own settings that differ from their defaults, with every line of a name the run does not know as it
-stood. A run with no window, headless, offscreen or with no renderer, reads none and writes none, so
-a test, a tool and every run of this session's leave the player's file as it was. A file that cannot
-be read is left alone, every setting starting at its default, and a refused line or a failed write
-is a warning in the console. The engine's player folder is `UserData`'s, `~/.local/share` on Linux
-and `%APPDATA%` on Windows, where the module's `SettingsFile.For` names the system's application
-data, `~/.config` on Linux, so the engine names the path itself. The editor gives its settings panel
-F4 and unbinds the console's key as a set, so the editor's own file holds those two once it writes.
-
-The panel draws the settings by the first word of their names, `field`, `gi`, `keys`, `run`,
-`scenes` and `time`, with the feature test's row after them. The tools guide gains a Settings
-section, a table of every setting with its default and variable and how the file is kept, with a
-block of a game's own setting built on the package, its keys paragraph says a rebound key is kept,
-and the feature test's README names `settings.txt` beside its own file.
-
 The tests. `EngineSettingsTests` holds every setting in the registry on the page of its first word,
 a run setting refusing a set and a clock setting refused with no app, the clock's and the field's
 settings set through console lines in a running app, the file read as the app starts and written as
@@ -1036,5 +935,87 @@ it was.
 Shared: the names, choices and summaries are 3DEngine's (`EngineSettings.Window.cs`), its start
 ordering the size, the screen and the mode as SDL takes them where Bevy's winit makes the window
 with all of them at once, and its vsync starting off where this one's starts at the config's.
+
+NormTests passed, 19.
+
+161. Done. `window.mode` reads Windowed, Borderless, BorderlessFullscreen and Fullscreen in any
+case, and `window.scaling` reads Linear, Nearest and Integer, Linear by default, as 3DEngine names
+them.
+
+Borderless. A window without the platform's frame at window.width by window.height, placed in the
+middle of the screen window.monitor names from the screen's rectangle in physical pixels, drawn
+pixel for pixel. A size reaching the screen's in both directions makes it Bevy's borderless
+fullscreen, which is the only way it covers, and a width or height set while borderless resizes it,
+centers it again, or covers or uncovers the screen at once. The size and place are held for 30
+frames against a window manager's own, as a return to a window was. The window opens without its
+frame in the middle of the screen Bevy finds for it, and the first frame the screens are listed
+places it on the screen set or makes it cover, since winit lists the screens only after it has made
+the window. A window a game made without its frame, as the editor's is, reads Windowed, and the
+settings give back only a frame they took. On Wayland the compositor places a borderless window, as
+it places every window.
+
+Borderless fullscreen. The window covers its screen at the screen's mode, and the picture is drawn
+at window.width by window.height and brought to the screen in one copy at the frame's end
+(`native/bevy_csharp/src/window/scaled.rs`). Each camera on the window is told the picture's size
+and a scale factor divided by the ratio, so its logical size stays the window's and the pointer,
+picking and a viewport read as they do unscaled. A copy system in the core 2D and 3D graphs, after
+the effects and before Bevy's own copy, draws the camera's picture over the part of the screen it
+spans and sets the camera's output mode to skip, so Bevy's copy leaves it out. Linear samples it
+filtered, Nearest from the nearest picture pixel, and Integer enlarges by the largest whole number
+that fits, the picture in the middle with black round it, its cameras' viewports set to the picture
+inside a target of the screen's size over the whole number. A picture as wide as the screen or as
+tall is drawn at the screen's size. The interface ImGui draws is drawn after the copy at the
+screen's size, its camera being left out of the scaling, and Bevy's interface is drawn on the game's
+cameras into the picture and scaled with it, since this engine has no split between them. The copy's
+shader converts an sRGB or Oklab picture to linear by an entry point of each, since the bridge hands
+WGSL to wgpu with no preprocessor between, which the first storm run found as a parse error at its
+first `#ifdef`. A unit test validates the shader and its three entry points.
+
+Windowed keeps its frame and its place, the place kept on leaving it and given back on the return
+with the size. Fullscreen takes the screen's mode as before, its refusal naming borderless
+fullscreen as the way to cover.
+
+The tests. `WindowStormTests.TheWindowPageSetsTheWindowAndTheFileItWritesOpensTheNext` reads a
+borderless window at 1000 by 450 standing at 460 by 315 on Xvfb's screen of 1920 by 1080 without its
+frame, its cover at 1920 by 1080, its return to the middle at 1000 by 450, borderless fullscreen
+with the integer scaling, and the return to a window at the size set there with its place and frame
+given back. `BorderlessFullscreenScalesItsPictureByTheLargestWholeNumberThatFits` reads the window's
+picture of 300 by 200 in a window of 1000 by 450, drawn green from 200 to 800 across and 24 to 424
+down with black corners. With the size of the window read in the frame of the mode the picture was
+the window's size and the test failed (N 3.1). The workflow's storm step looks for four passed
+tests. The bridge's tests add the plans of the three scalings and the copy's shader.
+
+The sheet. The feature test as an X11 window on a headless mutter's virtual screen of 1920 by 1080
+through Xwayland, each whole screen taken through mutter's screencast on a PipeWire and WirePlumber
+of the run's own with WirePlumber's devices off, so the desktop round a borderless window shows. It
+holds the four modes, borderless at 1280 by 720 in the screen's middle beside borderless at the
+screen's size covering it, and the three scalings on one crop at 960 by 540 and at 1280 by 720,
+where the integer scaling draws pixel for pixel with black round it and ImGui's overlay stays in the
+screen's corner. In the readings and the dump, sent to the owner.
+
+The guides. The window guide says the four modes, the scaling and where the interface is drawn, and
+the tools guide's table gains `window.scaling` and the four modes. The cheatsheet's `Window.SetMode`
+line says the settings' borderless and borderless fullscreen, and five lines of `Render`'s global
+illumination move above its sky as the build lists them.
+
+ABI 330. The public listing gains three fields of `NativeConfig`, `Frameless`, `Scaled` and
+`Scaling`, and loses nothing. `bcs_window_shown` writes whether the window has its frame and whether
+its picture is scaled, and `bcs_window_set_decorations` and `bcs_window_set_scaling` are new.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature and 237 with
+render, and native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,209 passed, 0
+failed and 7 skipped, 2,216 in all where the listing is 2,205, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The seventh skip is the new storm test of the scaled
+picture, which runs with the storm's three others under Xvfb and passed there, 4 of 4, beside the
+window settings' two. The comments of the files touched are rewrapped to 100 columns (N 4.12), the
+workflow's after the suite, and a comment of the window's settings and one of the copy are reworded
+after it, the code as it was.
+
+Shared: the names and choices are 3DEngine's (`EngineSettings.Window.cs`). Its surface source
+carries the scaling to its own presenter, where here the cameras draw at the picture's size and one
+copy takes the place of Bevy's last, and SDL centers a window by its own flag where winit is given
+the middle worked out from the screen's rectangle.
 
 NormTests passed, 19.

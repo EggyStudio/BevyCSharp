@@ -14,6 +14,14 @@ The window's settings on the feature test as an X11 window on a headless mutter'
 borderless and fullscreen against the screen, and the refusal Xvfb answers for fullscreen and the
 size given back on the return to a window.
 
+![](.github/assets/readings/2026-11-23-item-161-window-modes.webp)
+The window's four modes on the feature test as an X11 window on a headless mutter's virtual screen
+of 1920 by 1080, each whole screen from mutter's screencast, windowed with its frame, borderless
+without one in the screen's middle, borderless fullscreen and fullscreen covering it, borderless at
+1280 by 720 beside borderless at the screen's size covering it, and borderless fullscreen's linear,
+nearest and integer scaling on one crop at 960 by 540 and at 1280 by 720, the integer at 1.5 drawn
+pixel for pixel with black round it and ImGui's overlay in the screen's corner.
+
 ## 2026-11-22
 
 ![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)

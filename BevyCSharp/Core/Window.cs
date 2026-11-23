@@ -88,7 +88,16 @@ public static unsafe partial class Window
         return scale <= 0f ? 1f : scale;
     }
 
-    /// <summary>Sets how the window fills the screen.</summary>
+    /// <summary>
+    /// Sets how the window fills the screen, as the player's <c>window.mode</c> does, whose
+    /// borderless is a frameless window at the size set and whose borderless fullscreen draws at
+    /// the size set and scales the picture to the screen.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="WindowMode.BorderlessFullscreen"/> set here covers the screen and draws at the
+    /// screen's size. The settings' four modes, and <c>window.scaling</c> for the picture drawn at
+    /// a size of its own, are in the guide's page on the window.
+    /// </remarks>
     public static void SetMode(WindowMode mode) =>
         Native.Check(NativeCore.bcs_window_set_mode(NativeCore.PrimaryWindow, (int)mode), "Window.SetMode");
 
@@ -105,17 +114,19 @@ public static unsafe partial class Window
     /// <remarks>
     /// <para>
     /// An input method (IME) is how Japanese, Chinese or Korean is typed, by composing a candidate
-    /// and choosing it. With it on, <see cref="ImeComposing"/> and <see cref="ImeCommit"/> arrive on
-    /// the message bus, and the keys it takes stop reaching the game, so it is turned on when a text
-    /// field takes the focus and off when it lets go. <see cref="Input.Text"/> covers typing that
-    /// needs no composing, dead keys included.
+    /// and choosing it. With it on, <see cref="ImeComposing"/> and <see cref="ImeCommit"/> arrive
+    /// on the message bus, and the keys it takes stop reaching the game, so it is turned on when a
+    /// text field takes the focus and off when it lets go. <see cref="Input.Text"/> covers typing
+    /// that needs no composing, dead keys included.
     /// </para>
     /// <para>
     /// The position, in logical pixels from the window's top left, is where the platform shows its
     /// candidate list, which belongs beside the field's caret rather than in a corner.
     /// </para>
     /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void SetIme(bool enabled, float x = 0f, float y = 0f) =>
         Native.Check(NativeCore.bcs_window_set_ime(NativeCore.PrimaryWindow, enabled ? 1 : 0, x, y), "Window.SetIme");
 
@@ -139,7 +150,9 @@ public static unsafe partial class Window
     /// of the interface's that asks for another.
     /// </remarks>
     /// <param name="shape">Which shape.</param>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void SetCursorShape(CursorShape shape) =>
         Native.Check(NativeCore.bcs_window_set_cursor_shape(NativeCore.PrimaryWindow, (int)shape), "Window.SetCursorShape");
 
@@ -150,38 +163,47 @@ public static unsafe partial class Window
     /// <remarks>
     /// The image is shown at the size it is, so a pointer is drawn at the size it should appear,
     /// and needs eight bits a channel of color and alpha, as a PNG gives. Nothing changes until it
-    /// has loaded. <see cref="SetCursorShape(CursorShape)"/> gives the platform's own shapes back, and the
-    /// interface sets those as the pointer crosses what it draws.
+    /// has loaded. <see cref="SetCursorShape(CursorShape)"/> gives the platform's own shapes back,
+    /// and the interface sets those as the pointer crosses what it draws.
     /// </remarks>
     /// <param name="image">The picture, loaded or made.</param>
     /// <param name="hotspotX">How far across the hotspot is.</param>
     /// <param name="hotspotY">How far down.</param>
-    /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, the handle names no image, or this build has none.
+    /// </exception>
     public static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0) =>
         Native.Check(NativeCore.bcs_window_set_cursor_image(NativeCore.PrimaryWindow, image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
 
-    /// <summary>Shows the window by an image, as the platform's icon for it in its title bar and task switcher.</summary>
+    /// <summary>
+    /// Shows the window by an image, as the platform's icon for it in its title bar and task
+    /// switcher.
+    /// </summary>
     /// <remarks>
     /// Put on once the image has loaded and the window has opened, so it can be asked for at
-    /// startup. Windows and X11 show it. Wayland takes an app's icon from its desktop file and macOS
-    /// from its bundle, so there it changes nothing. A project's <see cref="ProjectSettings.Icon"/>
-    /// is put on the window this way as an app starts.
+    /// startup. Windows and X11 show it. Wayland takes an app's icon from its desktop file and
+    /// macOS from its bundle, so there it changes nothing. A project's
+    /// <see cref="ProjectSettings.Icon"/> is put on the window this way as an app starts.
     /// </remarks>
-    /// <param name="image">The picture, loaded or made, eight bits a channel as a PNG gives.</param>
-    /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
+    /// <param name="image">
+    /// The picture, loaded or made, eight bits a channel as a PNG gives.
+    /// </param>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, the handle names no image, or this build has none.
+    /// </exception>
     public static void SetIcon(AssetHandle image) =>
         Native.Check(NativeCore.bcs_window_set_icon(NativeCore.PrimaryWindow, image.Key), "Window.SetIcon");
 
     /// <summary>
-    /// Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the
-    /// frame's top left corner, or shows the whole image again with no layout.
+    /// Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from
+    /// the frame's top left corner, or shows the whole image again with no layout.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The pointer is the image <see cref="SetCursorImage(AssetHandle, uint, uint)"/> set, a sheet of frames the layout cuts,
-    /// as <c>Render2d.CreateAtlas</c> makes one, so a pointer can be animated as Bevy's
-    /// custom_cursor_image animates its crosshairs. The hotspot is set here beside the frame because
-    /// a frame's tip is where the frame has it.
+    /// The pointer is the image <see cref="SetCursorImage(AssetHandle, uint, uint)"/> set, a sheet
+    /// of frames the layout cuts, as <c>Render2d.CreateAtlas</c> makes one, so a pointer can be
+    /// animated as Bevy's custom_cursor_image animates its crosshairs. The hotspot is set here
+    /// beside the frame because a frame's tip is where the frame has it.
     /// </para>
     /// <para>
     /// Another frame, the image flipped either way and a rectangle of it are written through the
@@ -189,7 +211,9 @@ public static unsafe partial class Window
     /// frame there keeps the layout set here.
     /// </para>
     /// </remarks>
-    /// <param name="layout">The atlas's layout, or <see langword="null"/> for the whole image.</param>
+    /// <param name="layout">
+    /// The atlas's layout, or <see langword="null"/> for the whole image.
+    /// </param>
     /// <param name="index">Which frame of the layout.</param>
     /// <param name="hotspotX">How far across the frame the hotspot is.</param>
     /// <param name="hotspotY">How far down.</param>
@@ -219,7 +243,9 @@ public static unsafe partial class Window
     /// </para>
     /// </remarks>
     /// <param name="settings">The two modes, focused and not, or one of Bevy's presets.</param>
-    /// <exception cref="ArgumentOutOfRangeException">A reactive mode waits less than nothing.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// A reactive mode waits less than nothing.
+    /// </exception>
     /// <exception cref="BevyNativeException">This build has no windows.</exception>
     public static void SetUpdateSettings(UpdateSettings settings)
     {
@@ -255,33 +281,38 @@ public static unsafe partial class Window
     /// </summary>
     /// <remarks>
     /// The event an app's own work sends where it finishes outside the updates, from the thread it
-    /// ran on, which has no world, and which wakes a reactive mode reacting to the app's own events.
-    /// The bridge keeps winit's proxy for it as the app is made. A run with no window never waits,
-    /// so this does nothing there.
+    /// ran on, which has no world, and which wakes a reactive mode reacting to the app's own
+    /// events. The bridge keeps winit's proxy for it as the app is made. A run with no window never
+    /// waits, so this does nothing there.
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no windows.</exception>
     public static void WakeUp() => Native.Check(NativeCore.bcs_window_wake_up(), "Window.WakeUp");
 
     /// <summary>Minimizes the window to the taskbar or dock.</summary>
     /// <remarks>
-    /// A window made without the platform's title bar (<see cref="SetStyle(bool, bool, bool)"/> with
-    /// <c>decorations</c> off) has no button of its own for this, so an app that draws its own
+    /// A window made without the platform's title bar (<see cref="SetStyle(bool, bool, bool)"/>
+    /// with <c>decorations</c> off) has no button of its own for this, so an app that draws its own
     /// title bar calls this from one.
     /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void Minimize() =>
         Native.Check(NativeCore.bcs_window_minimize(NativeCore.PrimaryWindow), "Window.Minimize");
 
     /// <summary>
-    /// Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had.
+    /// Maximizes the window to fill the screen less the taskbar, or puts it back to the size it
+    /// had.
     /// </summary>
     /// <remarks>
-    /// Apart from <see cref="WindowMode.BorderlessFullscreen"/>, which covers the taskbar too and is
-    /// a mode rather than a size. The platform remembers the size to go back to, and
+    /// Apart from <see cref="WindowMode.BorderlessFullscreen"/>, which covers the taskbar too and
+    /// is a mode rather than a size. The platform remembers the size to go back to, and
     /// <see cref="Place()"/> says whether the window is maximized now.
     /// </remarks>
     /// <param name="maximized">Whether to maximize, or put it back.</param>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void SetMaximized(bool maximized) =>
         Native.Check(NativeCore.bcs_window_set_maximized(NativeCore.PrimaryWindow, maximized ? 1 : 0), "Window.SetMaximized");
 
@@ -291,7 +322,9 @@ public static unsafe partial class Window
     /// reports none, and missing everywhere until the window has been moved or placed once.
     /// Whether the window is maximized is read from the platform, since Bevy keeps no record of it.
     /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static WindowPlace Place()
     {
         NativeWindowPlace place;
@@ -314,7 +347,9 @@ public static unsafe partial class Window
     /// to hand over and ignores it.
     /// </para>
     /// </remarks>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void StartDragMove() =>
         Native.Check(NativeCore.bcs_window_start_drag_move(NativeCore.PrimaryWindow), "Window.StartDragMove");
 
@@ -328,7 +363,9 @@ public static unsafe partial class Window
     /// the press, like <see cref="StartDragMove()"/>.
     /// </remarks>
     /// <param name="edge">Which edge or corner moves.</param>
-    /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
+    /// <exception cref="BevyNativeException">
+    /// There is no window, or this build has none.
+    /// </exception>
     public static void StartDragResize(WindowEdge edge) =>
         Native.Check(NativeCore.bcs_window_start_drag_resize(NativeCore.PrimaryWindow, (int)edge), "Window.StartDragResize");
 
@@ -457,9 +494,9 @@ public static unsafe partial class Window
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <see cref="SetMode(WindowMode)"/> with <see cref="WindowMode.Fullscreen"/> takes the mode the monitor is
-    /// already in, which avoids a switch the compositor has to undo on every alt-tab. This is the
-    /// other case, where a game runs at a resolution the desktop is not in.
+    /// <see cref="SetMode(WindowMode)"/> with <see cref="WindowMode.Fullscreen"/> takes the mode
+    /// the monitor is already in, which avoids a switch the compositor has to undo on every
+    /// alt-tab. This is the other case, where a game runs at a resolution the desktop is not in.
     /// </para>
     /// <para>
     /// The mode is named by its place in <see cref="MonitorModes"/> rather than by numbers, because

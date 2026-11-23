@@ -1,6 +1,7 @@
 //! What the system shows of a window, the mode it holds, the monitor it is on, whether its edges
-//! resize it and whether it waits for the display, with the sets the window's settings make of
-//! them and a check of a mode before it is asked for.
+//! resize it, whether it waits for the display, whether it has the platform's frame and whether its
+//! picture is drawn at a size of its own, with the sets the window's settings make of them and a
+//! check of a mode before it is asked for.
 //!
 //! Bevy's `Window` holds what a program asked for and keeps it where the system did otherwise, as
 //! where Bevy finds no mode of the screen's for a fullscreen window and asks for a borderless one
@@ -31,16 +32,19 @@ pub mod refusal {
 /// Writes the mode the system shows the window in, 0 windowed, 1 borderless over its screen and 2
 /// fullscreen at a mode of the screen's, the monitor it is on, by the index
 /// [`super::monitors::bcs_monitor_count`] counts up to, or -1 where the system names none, whether
-/// its edges resize it and whether it waits for the display.
+/// its edges resize it, whether it waits for the display, whether it has the platform's frame, and
+/// whether its picture is drawn at a size of its own while it covers its screen borderless
+/// ([`bcs_window_set_scaling`]).
 ///
 /// Wayland's winit names every window that covers its screen borderless, since Wayland has no mode
 /// of a screen's to take, and answers as the compositor last configured the window, a frame or two
 /// after it was asked. X11's answers with the mode last asked for. A monitor is matched to Bevy's
 /// by its place and size, which both read from winit. Waiting for the display is the present mode
-/// Bevy holds, since the surface takes it as it is made again.
+/// Bevy holds, since the surface takes it as it is made again. The frame is winit's, as the
+/// platform shows it, and the scaling is the one the window holds whatever its mode.
 ///
 /// # Safety
-/// `mode`, `monitor`, `resizable` and `vsync` must be writable.
+/// `mode`, `monitor`, `resizable`, `vsync`, `decorated` and `scaled` must be writable.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_window_shown(
     window: u64,
@@ -48,9 +52,11 @@ pub unsafe extern "C" fn bcs_window_shown(
     monitor: *mut i32,
     resizable: *mut i32,
     vsync: *mut i32,
+    decorated: *mut i32,
+    scaled: *mut i32,
 ) -> i32 {
     crate::interop::guard(|| {
-        if mode.is_null() || monitor.is_null() || resizable.is_null() || vsync.is_null() {
+        if mode.is_null() || monitor.is_null() || resizable.is_null() || vsync.is_null() || decorated.is_null() || scaled.is_null() {
             return status::NULL_ARG;
         }
 
@@ -77,6 +83,7 @@ pub unsafe extern "C" fn bcs_window_shown(
                     world.get::<Window>(entity).map(|w| w.present_mode),
                     Some(PresentMode::AutoVsync | PresentMode::Fifo | PresentMode::FifoRelaxed)
                 );
+                let drawn_scaled = world.get::<super::scaled::WindowScaling>(entity).is_some();
 
                 let shown = bevy::winit::WINIT_WINDOWS.with_borrow(|windows| {
                     let shown = windows.get_window(entity)?;
@@ -89,11 +96,11 @@ pub unsafe extern "C" fn bcs_window_shown(
                         let (at, size) = (on.position(), on.size());
                         monitors.iter().position(|&m| m == (at.x, at.y, size.width, size.height))
                     });
-                    Some((held, on.map_or(-1, |index| index as i32), shown.is_resizable()))
+                    Some((held, on.map_or(-1, |index| index as i32), shown.is_resizable(), shown.is_decorated()))
                 });
 
                 // A window winit has not made yet, in the frame it is spawned, shows nothing.
-                let Some((held, on, edges)) = shown else {
+                let Some((held, on, edges, framed)) = shown else {
                     return status::NOT_PRESENT;
                 };
                 unsafe {
@@ -101,6 +108,8 @@ pub unsafe extern "C" fn bcs_window_shown(
                     monitor.write(on);
                     resizable.write(i32::from(edges));
                     vsync.write(i32::from(waits));
+                    decorated.write(i32::from(framed));
+                    scaled.write(i32::from(drawn_scaled));
                 }
                 status::OK
             })
@@ -246,6 +255,67 @@ pub extern "C" fn bcs_window_set_vsync(window: u64, vsync: i32) -> i32 {
         {
             super::with_window(window, |window, _| {
                 window.present_mode = if vsync != 0 { PresentMode::AutoVsync } else { PresentMode::AutoNoVsync };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Gives the window the platform's frame, or takes it away, leaving its edges and its level as
+/// they are, which the settings' borderless asks for with the window's size and place.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_decorations(window: u64, decorations: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (window, decorations);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            super::with_window(window, |window, _| {
+                window.decorations = decorations != 0;
+                status::OK
+            })
+        }
+    })
+}
+
+/// Draws the window's picture at `width` by `height` in its logical pixels while it covers its
+/// screen borderless, brought to the screen by `filter`, 0 filtered, 1 from the nearest picture
+/// pixel and 2 enlarged by the largest whole number that fits with black round it, or at the
+/// window's own size again where `width` or `height` is 0.
+///
+/// The window keeps the size in any mode and draws at it only while it covers its screen
+/// borderless, at a size under the screen's (see [`super::scaled`]). The interface ImGui draws is
+/// drawn after the picture at the screen's size, and Bevy's is drawn with it.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_window_set_scaling(window: u64, width: u32, height: u32, filter: u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (window, width, height, filter);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use super::scaled::{WindowScaling, filter::INTEGER};
+
+            if filter > INTEGER {
+                return status::NULL_ARG;
+            }
+            with_world(|world| {
+                let Some(entity) = super::window_entity(world, window) else {
+                    return status::NOT_PRESENT;
+                };
+                let mut found = world.entity_mut(entity);
+                if width == 0 || height == 0 {
+                    found.remove::<WindowScaling>();
+                } else {
+                    found.insert(WindowScaling { size: bevy::math::UVec2::new(width, height), filter });
+                }
                 status::OK
             })
         }

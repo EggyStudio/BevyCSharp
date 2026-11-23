@@ -287,10 +287,13 @@ public sealed unsafe partial class App : IDisposable
                 CameraControllers = (uint)Config.CameraControllers,
                 Feathers = Config.Feathers ? 1u : 0u,
                 DevTools = (uint)Config.DevTools,
-                Mode = (uint)start.Mode,
+                Mode = (uint)start.WindowMode,
                 FixedSize = start.Resizable ? 0u : 1u,
                 HasMonitor = start.Monitor is null ? 0u : 1u,
                 Monitor = (uint)(start.Monitor ?? 0),
+                Frameless = start.Mode == WindowSettings.Mode.Borderless ? 1u : 0u,
+                Scaled = start.Mode == WindowSettings.Mode.BorderlessFullscreen ? 1u : 0u,
+                Scaling = (uint)start.Scaling,
             };
             _handle = Native.bcs_app_create(&native);
         }
