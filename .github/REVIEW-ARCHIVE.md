@@ -4660,6 +4660,19 @@ the port is offered upstream (Decision 18).
     with snapping, undo and saving; the clip tool, vertex editing kept convex and face texturing;
     entities, their properties and item 66's connections panel.
 
+162. **The first bounce read against its own reference, and where a screen ray's light comes from.**
+    In the other engine a wall's first bounce read 2.3 times its traced light, and one reading laid
+    all of it on rays that end past their short reach and take the cascades' light there, level ways
+    being lent a sunlit floor's light where in truth they meet unlit faces, while every term of a
+    hit within reach agreed. A claim about the shared way of reading needs this engine's figures
+    too. A reading and no mend. In the target scene, in a view with a wall beside a sunlit floor,
+    with the light past the first bounce held at zero, give the wall's light in six parts over a
+    reference traced at one bounce, and settled over the reference of every bounce. Then for the
+    screen rays of the worst part and of a good part, give the share that ends on a hit within reach
+    and the share that ends past it, and the mean light of each kind beside the same rays traced
+    against the triangles. The Reply holds two small tables and one sentence on whether the surplus
+    is here too. Done at `cddaad33`.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

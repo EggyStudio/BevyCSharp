@@ -100,7 +100,9 @@ Replies (N 7.7), and the archive when an item, a verdict or a decision named her
 
 By the project's direction the work does not stop. A batch that ends is followed by the next item in
 the order under the head with no wait for a reply; global illumination is fixed first (Decision 74),
-the meadow at 8:00 the one target (Decision 81).
+the meadow at 8:00 the one target (Decision 81). By the direction of 2026-11-25 the cascades' items
+alone run until the cascades work, 162, then 150, then 157 when the module's gather step lands; 151,
+153 to 156 and 158 to 164 wait.
 
 1. **What the next page says.** Each push's run and each pack run is read by the reviewing session
     from GitHub's API, and a failure it names is a verdict here and comes first. The runs' record
@@ -373,19 +375,6 @@ on 3840 by 2160 and uneven at any other, which its help line says. Integer scale
 whole number that fits and stands the picture in the screen's middle with black round it, every
 picture pixel a square block of screen pixels. The default is Linear. The sheet shows the three on
 one crop at a whole ratio and at a ratio of one and a half.
-
-162. **The first bounce read against its own reference, and where a screen ray's light comes from.**
-    In the other engine a wall's first bounce read 2.3 times its traced light, and one reading laid
-    all of it on rays that end past their short reach and take the cascades' light there, level ways
-    being lent a sunlit floor's light where in truth they meet unlit faces, while every term of a
-    hit within reach agreed. A claim about the shared way of reading needs this engine's figures
-    too. A reading and no mend. In the target scene, in a view with a wall beside a sunlit floor,
-    with the light past the first bounce held at zero, give the wall's light in six parts over a
-    reference traced at one bounce, and settled over the reference of every bounce. Then for the
-    screen rays of the worst part and of a good part, give the share that ends on a hit within reach
-    and the share that ends past it, and the mean light of each kind beside the same rays traced
-    against the triangles. The Reply holds two small tables and one sentence on whether the surplus
-    is here too.
 
 163. **The third scaling fills the screen and holds still.** `window.scaling` Integer draws the
     picture at the largest whole multiple with black round it, so at a ratio of one and a half it
@@ -778,6 +767,13 @@ in full under Decisions in REVIEW-ARCHIVE.md.
     overlay's model, the keys F1 to F5 and a registry of settings with a paged panel come from the
     module in both engines, the engine's own copies deleted as each step lands.
 
+97. **The radiance cascades before everything else, until they work.** The direction of 2026-11-25,
+    given after the machine's restart. The bridge's order is 162, the first bounce against its own
+    reference, then 150, then 157 when the module's gather step lands; the sweep 151, the module
+    takes 154 to 156 and the window and resolution items 158 to 164 wait, as does every item outside
+    the cascades. The engine runs 313, 304, 316 and 311; the module proposes the gather's shared
+    step; the other modules and the game stay idle until the cascades work.
+
 ## Replies
 
 Shared: the names and choices are 3DEngine's (`EngineSettings.Window.cs`). Its surface source
@@ -1017,5 +1013,44 @@ Shared: Bevy keeps one depth texture and one picture for the cameras on a target
 camera's size, so a camera drawn at a size unlike its window's needs both of its own beside a camera
 at the window's. A renderer whose scene and interface leave one pass for two meets the same choice
 of which size each texture takes.
+
+NormTests passed, 19.
+
+150. The second part done. A pack's fitting names the field global illumination is traced through
+and the quality its probes are traced at, `PackLight` in the feature test's `Packs.cs`, and while
+the scene stands with global illumination on, `Applied.cs` asks for that quality and `Field.cs` for
+that field, once each time the scene or the probes change, so a `field.set` typed between holds.
+Sponza takes four cascades of 0.125 m cells, a far cascade of 100 m and High, as the sibling's
+Sponza does. The Bistro takes High and a far cascade of 240 m with cells of 0.25 m rather than the
+0.125 the item names, as the sibling's Bistro holds them, since at 0.125 m the fourth cascade
+reaches 64 m of a street longer than that. Taking the scene away puts back the feature test's own
+field, four cascades of 0.25 m and none far, and the quality chosen on the panel.
+
+`gi.state` on the feature test offscreen read High, five cascades with the far one of 2 m cells and
+the finest of 0.125 m while Sponza stood, and Medium, four cascades of 0.25 m and none far, once
+`scene.unload` had taken it away. The Bistro read High, five cascades with the far one of 4.5 m
+cells and the finest of 0.25 m while it stood, and Medium again after.
+
+The sheet is `.github/assets/readings/2026-11-25-item-150-atrium-fitting.webp`, Sponza's atrium from
+the sibling's view at 12:17 at latitude -4.25 under the feature test's lens, since the camera in
+physical numbers is the third part. With the cascades on, the picture's mean is 30.4 of 255 under
+the feature test's own field and 31.0 under the fitting, 10% of it lighter by more than four levels
+and 8% darker. The lighter part is the arch and the door at the nave's far end, and the darker is
+scattered over the faces of the columns and the walls. With the cascades off both read 116.8, Bevy's
+ambient light on every surface unshadowed, so the fitting closes little of the gap between the two,
+which the third to fifth parts take up.
+
+No public API changed (N 2.4). The whole suite passed on an editor bridge with meshlets and Solari,
+2,213 passed, 0 failed and 10 skipped, 2,223 in all where the listing is 2,212, the solution built
+with no warning, in 14 parts and the rest. Seven of the skips are the storm's, and the window tests
+passed under Xvfb, 13 of 13. The comments of the files touched lie within 100 columns (N 4.12).
+
+157 follows 150's parts, its first half binding the module's `gatherSurface` at e042398 in place of
+`gi_light.slang`'s choice and fade of the finest cascade, and `field_stamp.slang`'s call of
+`stampCell` mended on the same move of the pointer.
+
+Shared: a scene's fitting names its field's cells, its far cascade and its quality, Sponza 0.125 m,
+100 m and High and the Bistro 0.25 m, 240 m and High, as the sibling's do, and here they hold only
+while the scene stands, the player's own coming back as it goes.
 
 NormTests passed, 19.

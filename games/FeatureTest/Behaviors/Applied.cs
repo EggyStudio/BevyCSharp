@@ -111,7 +111,8 @@ public partial struct Applied
         if (!drawn) return;
 
         if (!ctx.Res<Config>().Offscreen) Window.SetMode(settings.Window);
-        Render.SetGlobalIllumination(Probed ? settings.GlobalIllumination : GlobalIllumination.Off);
+        Render.SetGlobalIllumination(Probed ? Packs.Light?.Quality ?? settings.GlobalIllumination : GlobalIllumination.Off);
+        Field.Follow();
         if (Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera)) Camera(camera, settings);
         Scene.Light(ctx.Ecs, settings.Shadows);
         if (!settings.Wireframe) Wire(ctx.Ecs, false);

@@ -58,6 +58,7 @@ public partial struct Packs
 
     /// <summary>What the zone makes of each scene it knows, by its pack's name.</summary>
     /// <remarks>
+    /// <para>
     /// Sponza's names say what each piece is, its outer walls named exterior among them. Every
     /// piece of the Bistro's exterior carries the scene's name, exterior and all, so its street,
     /// sidewalks and buildings are taken by their own words. The Bistro is larger than the scenes
@@ -67,13 +68,27 @@ public partial struct Packs
     /// moonlit ground's lens of the night shows three stops over, so at a night hour the camera
     /// there holds a lamp-lit street's, f/2.8 at a sixtieth of a second and ISO 3200. A scene the
     /// zone does not know is drawn with no piece solid and its attribution over its middle.
+    /// </para>
+    /// <para>
+    /// While a scene stands and global illumination is on, the field its probes are traced through
+    /// and their quality are the scene's own. A building 36 meters long, 20 wide and 18 high takes
+    /// four cascades of cells of an eighth of a meter, reaching 8, 16, 32 and 64 meters across
+    /// about the eye, and a far cascade of 100 meters holds the whole building from anywhere in it,
+    /// the sky through its main door among it, which the counted cascades leave past their reach
+    /// from its far end. A street longer than that keeps its cells a quarter of a meter, reaching
+    /// 128 meters in the fourth, and a far cascade of 240 holds the whole street. Both are traced
+    /// at <see cref="GlobalIllumination.High"/>, the most directions a probe sends. The feature
+    /// test's own field, four cascades of a quarter meter with none far, comes back as the scene is
+    /// taken away, and the quality the player chose with it.
+    /// </para>
     /// </remarks>
     private static readonly Dictionary<string, Fitting> Fittings = new(StringComparer.Ordinal)
     {
-        ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f, Covers: true),
+        ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f, Covers: true,
+            Light: new PackLight(0.125f, 100f, GlobalIllumination.High)),
         ["bistro-exterior"] = new(Words("street|sidewalk|building"), new Vec3(26f, 3.2f, 20f), -3f * MathF.PI / 4f,
             Alone: new Vec3(0f, Scene.GroundHeight, -3000f), Start: new Vec3(15f, 0.5f, 15f), Toward: new Vec3(0f, 1f, 0f),
-            NightLens: new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 60f, Sensitivity: 3200f)),
+            NightLens: new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 60f, Sensitivity: 3200f), Light: new PackLight(0.25f, 240f, GlobalIllumination.High)),
     };
 
     /// <summary>
@@ -113,6 +128,12 @@ public partial struct Packs
     private static bool _onGpu;
 
     private static ScenePack? _shown;
+
+    /// <summary>
+    /// The field and the quality the scene standing names for global illumination, none where no
+    /// scene stands or it names none.
+    /// </summary>
+    internal static PackLight? Light => _shown is { } pack && _root != Entity.None ? FittingOf(pack).Light : null;
     private static AssetHandle _scene = AssetHandle.None;
     private static Entity _root = Entity.None;
     private static bool _fitted;
@@ -267,6 +288,7 @@ public partial struct Packs
             _root = ecs.SpawnScene(_scene);
             ecs.Add(_root, new Transform(site.At, site.Facing, Vec3.One));
             ecs.SetName(_root, pack.Title);
+            Applied.Due();
             if (alone is null && FittingOf(pack).Covers) SceneFloor.Show(ecs, shown: false);
             Console.WriteLine($"[Packs] {pack.Title} stands {(alone is null ? "in the scenes zone" : "alone, far from the level's rooms")}. {pack.Attribution}");
             return;
@@ -576,6 +598,7 @@ public partial struct Packs
         _scene = AssetHandle.None;
         _shown = null;
         _carried = false;
+        Applied.Due();
         Solids.Clear();
         Heaviest.Clear();
         Cut.Clear();
@@ -619,12 +642,20 @@ public partial struct Packs
 /// How the zone fits a scene, the pieces the player stands on or is stopped by, by their names,
 /// where the attribution is written in the scene's own frame, turned about its Y to face the way it
 /// is read from, and, for a scene that stands alone, where it stands, where in it the player is put
-/// and looks, in its own frame, and the lens the camera holds there at a night hour, and for a
-/// scene at the yard's site, whether its ground covers the yard's floor under the site, which
-/// stands hidden while it stands (<see cref="SceneFloor"/>).
+/// and looks, in its own frame, and the lens the camera holds there at a night hour, for a scene at
+/// the yard's site, whether its ground covers the yard's floor under the site, which stands hidden
+/// while it stands (<see cref="SceneFloor"/>), and the field and quality global illumination is
+/// traced at while it stands.
 /// </summary>
 internal readonly record struct Fitting(Regex Solid, Vec3 Credit, float Turn, Vec3? Alone = null, Vec3 Start = default, Vec3 Toward = default,
-    PhysicalLens? NightLens = null, bool Covers = false);
+    PhysicalLens? NightLens = null, bool Covers = false, PackLight? Light = null);
+
+/// <summary>
+/// The field a scene's global illumination is traced through, four cascades with cells of
+/// <paramref name="Cell"/> meters and a far cascade reaching <paramref name="Far"/> meters ahead,
+/// and the quality its probes are traced at.
+/// </summary>
+internal readonly record struct PackLight(float Cell, float Far, GlobalIllumination Quality);
 
 /// <summary>The time with plain meshes and with meshlets, as each was last measured.</summary>
 internal sealed record TimingRow() : Row("Time")
