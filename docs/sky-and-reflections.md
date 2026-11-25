@@ -31,7 +31,9 @@ a screen-space trace, and fades them out again past 0.55. `FadeInRoughness` and 
 move both ends, `Thickness` is how deep a surface in the depth buffer is taken to be, which decides
 whether a ray passing behind it hit it, and `Steps` and `RefineSteps` trade the cost of the march
 against how finely a hit is found. `null` takes reflections off, and deferred rendering stays on
-until it is asked off, since other cameras may be reading it.
+until it is asked off, since other cameras may be reading it. Asked off while a camera still reads
+the G-buffer, as global illumination's does, it stays on until none does, since materials drawn
+forward would leave that G-buffer empty.
 
 ### The sky
 

@@ -637,7 +637,11 @@ public static unsafe partial class Render
     /// While it is on, every 3D camera drawing a prepass of depth, normals or motion is given the
     /// G-buffer too and drawn once a pixel, and its multisampling is given back once it is off,
     /// since Bevy queues each deferred material into the deferred phase of every camera drawing a
-    /// prepass, and a camera with none ended the app the frame materials went deferred.
+    /// prepass, and a camera with none ended the app the frame materials went deferred. Turned off
+    /// while a camera reads the G-buffer, having asked for it
+    /// (<see cref="Shaders.SetPrepass"/>'s <c>deferred</c>) or drawing screen-space reflections,
+    /// as global illumination's camera does, materials stay deferred and go forward the frame none
+    /// does, since materials drawn forward leave a G-buffer empty and what reads it reads nothing.
     /// </remarks>
     public static void SetDeferredRendering(bool on) =>
         Native.Check(NativeRendering.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");

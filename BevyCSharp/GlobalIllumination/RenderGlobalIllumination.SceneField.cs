@@ -95,13 +95,14 @@ public static partial class RenderGlobalIllumination
         /// edges; everywhere, the two darken a surface together.
         /// </para>
         /// <para>
-        /// Bevy's lighting takes no share of a light from outside, so the light Bevy gave a surface is
-        /// worked out again from the camera's G-buffer as Bevy works it out, and taken back over the
-        /// camera's lit picture before anything transparent is drawn over it. That needs the
+        /// Bevy's lighting takes no share of a light from outside, so the light Bevy gave a surface
+        /// is worked out again from the camera's G-buffer as Bevy works it out, and taken back over
+        /// the camera's lit picture before anything transparent is drawn over it. That needs the
         /// G-buffer, so the camera the field lies around draws Bevy's materials deferred while the
-        /// shadows are on, which turns on <see cref="Render.SetDeferredRendering"/> for every camera with a
-        /// prepass. A material's clearcoat and anisotropy, Bevy's atmosphere and a light texture are not
-        /// worked out again, so where a surface has them the light taken back differs by as much.
+        /// shadows are on, which turns on <see cref="Render.SetDeferredRendering"/> for every
+        /// camera with a prepass and holds it on whatever it is asked meanwhile. A material's
+        /// clearcoat and anisotropy, Bevy's atmosphere and a light texture are not worked out
+        /// again, so where a surface has them the light taken back differs by as much.
         /// </para>
         /// </remarks>
         /// <param name="shadows">Where the field darkens a directional light.</param>

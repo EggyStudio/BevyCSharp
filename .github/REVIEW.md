@@ -243,7 +243,17 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     2026-11-25-item-150-physical-day.webp. Ruled, the plain curve with the lens held stays, as the
     reference recipe has it, the day's look off for the packs; the shade's darkness is the cascades'
     to close, not the lens's. The fourth part next, the probes under deferred off and the ambient
-    occlusion.
+    occlusion. Fourth part `8892a31c`, a read, pushed at 20:31 on 2026-11-25, its run awaited. The
+    third part's fill was misread, the shade with cascades off being Bevy's own light under the sky
+    at an ambient of 80. Two faults seen. After the reflections go on and off the materials draw
+    forward and the G-buffer goes unwritten, so the pass draws nothing and cascades on reads as off,
+    66.2 against 11.6 before; and with Bevy's ambient occlusion on the take-back ignores it, the
+    shade going below zero and the probes' light not occluded at all, 7.5 against 11.6 with 78%
+    black against 31%. The sheet 2026-11-25-item-150-forward-and-occlusion.webp. Ruled, both mends
+    before the fifth part, a commit each, the bridge keeping materials deferred while any engine
+    prepass asks for the G-buffer with SetDeferredRendering(false) taking effect once none asks, and
+    the light pass binding Bevy's occlusion texture, taking back what Bevy gave under it and
+    darkening the probes' light by it, each read on the atrium before and after.
 
 151. **The day's sweep against the norm.** A read of the tree against NORM.md found these, each to
     mend in place with no change of behavior. Comments that liken to another product or carry a cost
@@ -1141,5 +1151,35 @@ into the arcades. That is the fifth part's and 157's to read.
 No public API changes, the members being the feature test's own. Comment lines kept to 100 columns
 (N 4.12). The whole suite after the last change, 2,213 passed, 0 failed and 10 skipped, 2,223 in all
 against a listing of 2,212, no run aborted.
+
+NormTests passed, 19.
+
+150. The first of the two mends the fourth part offered, the wider one as ruled. The bridge keeps
+what was last asked of Bevy's materials beside how they are drawn, and while a 3D camera reads the
+G-buffer, having asked for it in its prepass or drawing screen-space reflections,
+`Render.SetDeferredRendering(false)` leaves them deferred, and they go forward the frame none does
+(`keep_deferred_phases` in `lighting.rs`). The camera global illumination lies around asks for the
+G-buffer for its light pass, so the feature test turning deferred off as its reflections go leaves
+the probes' light in place. A G-buffer asked for still turns deferred on and leaves it on after, as
+before.
+
+The sheet is 2026-11-25-item-150-deferred-held.webp, the atrium under the physical day and AgX.
+After the reflections are turned on and off, the picture with the cascades on reads 11.6 with 31% of
+it black, as it does when the scene starts, against 66.2 with none black before the mend, which was
+the picture with them off. The picture after the toggle and the one as the scene starts differ
+nowhere past the frame counter.
+
+`DeferredHoldTests` holds it, with a camera asking for the G-buffer and a second one with a prepass
+of depth alone, which is given the G-buffer while materials are deferred and has it taken once they
+are forward. The second keeps it after forward is asked while the first asks, and loses it once the
+first stops asking.
+
+No public API changes, the remarks of `Render.SetDeferredRendering`, the `deferred` parameter of
+`Shaders.SetPrepass` and the remarks of `Render.SetSceneFieldShadows` saying the hold, with a line
+in the guide's page of the sky and reflections. The bridge was rebuilt with the editor, meshlet and
+Solari, the render profile checked in the build's container and headless on the host, and the
+bridge's own tests passed, 126. Comment lines kept to 100 columns (N 4.12). The whole suite after
+the last change, 2,214 passed, 0 failed and 10 skipped, 2,224 in all against a listing of 2,213, no
+run aborted.
 
 NormTests passed, 19.

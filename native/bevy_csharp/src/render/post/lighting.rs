@@ -17,7 +17,8 @@ use crate::state::with_world;
 /// needs a camera drawn once a pixel, and it applies to Bevy's own materials only, since a material
 /// a Slang program draws is always forward, since it writes its color rather than a surface
 /// description. Every Bevy material is prepared again, which moves one already drawn to the other
-/// method.
+/// method. Forward waits while a camera reads the G-buffer, having asked for it in its prepass or
+/// reflecting the screen, and is taken the frame none does (`keep_deferred_phases`).
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
     crate::interop::guard(|| {
@@ -37,33 +38,61 @@ pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
     })
 }
 
-/// Whether Bevy's own materials are drawn deferred, as last asked.
+/// Whether Bevy's own materials are drawn deferred, and whether they were last asked to be.
+///
+/// The two differ while forward was asked and a camera still reads the G-buffer, whose pixels
+/// Bevy's materials would leave empty if they went forward under it. Global illumination's light
+/// pass reads the G-buffer its camera asks for, so a program turning deferred off as its
+/// reflections go would leave the probes' light out with nothing said.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource)]
-pub struct Deferred(bool);
+pub struct Deferred {
+    /// Whether the materials are drawn deferred.
+    drawn: bool,
+    /// Whether they were last asked to be, by the program or by a camera asking for the G-buffer.
+    asked: bool,
+}
 
 /// Whether Bevy's materials are drawn deferred in this app, because a camera asked for the G-buffer
 /// or because Solari, which draws every material that way, is running.
 #[cfg(feature = "render")]
 pub fn materials_deferred(world: &bevy::ecs::world::World) -> bool {
-    world.get_resource::<Deferred>().is_some_and(|deferred| deferred.0) || crate::render::solari::running()
+    world.get_resource::<Deferred>().is_some_and(|deferred| deferred.drawn) || crate::render::solari::running()
 }
 
-/// Switches Bevy's own materials to deferred or forward, preparing every one of them again.
+/// Whether a 3D camera reads Bevy's G-buffer, having asked for it in its prepass or reflecting the
+/// screen, which holds materials deferred while forward is asked.
+#[cfg(feature = "render")]
+fn gbuffer_read(world: &mut bevy::ecs::world::World) -> bool {
+    let mut cameras = world.query_filtered::<
+        (Option<&RequestedPrepass>, bevy::ecs::query::Has<bevy::pbr::ScreenSpaceReflections>),
+        bevy::ecs::query::With<bevy::camera::Camera3d>,
+    >();
+
+    cameras.iter(world).any(|(asked, reflecting)| asked.is_some_and(|asked| asked.0 & 8 != 0) || reflecting)
+}
+
+/// Asks for Bevy's own materials deferred or forward, preparing every one of them again where that
+/// changes how they are drawn, and holding them deferred while a camera reads the G-buffer.
 #[cfg(feature = "render")]
 pub(super) fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
     use bevy::pbr::{DefaultOpaqueRendererMethod, StandardMaterial};
 
     // Kept beside Bevy's resource, whose value cannot be read back, and forward until asked
-    // otherwise, which is Bevy's own default.
-    if world.get_resource::<Deferred>().is_some_and(|deferred| deferred.0 == on)
-        || (!on && world.get_resource::<Deferred>().is_none())
-    {
+    // otherwise, which is Bevy's own default, so an app that never asks has no resource.
+    if !on && world.get_resource::<Deferred>().is_none() {
         return;
     }
 
-    world.insert_resource(Deferred(on));
-    world.insert_resource(if on {
+    let was = world.get_resource::<Deferred>().is_some_and(|deferred| deferred.drawn);
+    let drawn = on || gbuffer_read(world);
+    world.insert_resource(Deferred { drawn, asked: on });
+
+    if drawn == was {
+        return;
+    }
+
+    world.insert_resource(if drawn {
         DefaultOpaqueRendererMethod::deferred()
     } else {
         DefaultOpaqueRendererMethod::forward()
@@ -129,11 +158,28 @@ pub fn keep_deferred_phases(
         bevy::ecs::query::Has<bevy::pbr::ScreenSpaceReflections>,
         bevy::ecs::query::Has<bevy::pbr::ScreenSpaceAmbientOcclusion>,
     )>,
+    reading: bevy::ecs::system::Query<
+        (Option<&RequestedPrepass>, bevy::ecs::query::Has<bevy::pbr::ScreenSpaceReflections>),
+        bevy::ecs::query::With<bevy::camera::Camera3d>,
+    >,
 ) {
     use bevy::core_pipeline::prepass::{DeferredPrepass, DepthPrepass};
     use bevy::render::view::Msaa;
 
-    let deferred = world_deferred.is_some_and(|deferred| deferred.0) || crate::render::solari::running();
+    // Forward asked while a camera read the G-buffer is taken once none does, the frame after it
+    // stopped asking or went, prepared through the world since it reaches every material.
+    if world_deferred.as_ref().is_some_and(|deferred| deferred.drawn && !deferred.asked)
+        && !reading.iter().any(|(asked, reflecting)| asked.is_some_and(|asked| asked.0 & 8 != 0) || reflecting)
+    {
+        // Asked for again by something run after this system and before the queue is, it stays.
+        commands.queue(|world: &mut bevy::ecs::world::World| {
+            if world.get_resource::<Deferred>().is_some_and(|deferred| !deferred.asked) {
+                set_deferred(world, false);
+            }
+        });
+    }
+
+    let deferred = world_deferred.is_some_and(|deferred| deferred.drawn) || crate::render::solari::running();
 
     if deferred {
         for (camera, has_depth, msaa) in &needing {
