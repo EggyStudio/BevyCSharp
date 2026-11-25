@@ -234,7 +234,16 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     m, the Bistro at High with 0.25 m and 240, the feature test's own back on unload; the atrium's
     mean with cascades on 30.4 to 31.0 where 116.8 without, the far arch and door lighter, so the
     gap stays for the third to fifth parts; the sheet 2026-11-25-item-150-atrium-fitting.webp; 2,213
-    passed. The third part next, the day in physical numbers.
+    passed. The third part next, the day in physical numbers. Third part `57124175`, pushed at 19:19
+    on 2026-11-25, its run awaited. Where a pack stands and the eye is within 500 m the sun is
+    120,000 lux above the air and the camera ISO 200, 1/200 s and f/16, the moon, ambient and night
+    sky raised with it through the lens scale; the atrium's means with cascades on and off, the
+    day's own numbers under AgX 31.0 and 116.7, the physical day under AgX 11.6 and 66.2, under the
+    day's look 14.4 and 63.2, the shade the probes light near black under the sunny lens; the sheet
+    2026-11-25-item-150-physical-day.webp. Ruled, the plain curve with the lens held stays, as the
+    reference recipe has it, the day's look off for the packs; the shade's darkness is the cascades'
+    to close, not the lens's. The fourth part next, the probes under deferred off and the ambient
+    occlusion.
 
 151. **The day's sweep against the norm.** A read of the tree against NORM.md found these, each to
     mend in place with no change of behavior. Comments that liken to another product or carry a cost
@@ -1082,6 +1091,52 @@ the probes light reads near black, as the sibling's comment says of its own atri
 metered for that reason and holds these values on a key. Which stays, the day's look or the plain
 curve, and the lens held or metered, is the review's after the sheet, and the panel's look is
 unchanged until then.
+
+No public API changes, the members being the feature test's own. Comment lines kept to 100 columns
+(N 4.12). The whole suite after the last change, 2,213 passed, 0 failed and 10 skipped, 2,223 in all
+against a listing of 2,212, no run aborted.
+
+NormTests passed, 19.
+
+150. The fourth part, a read, with the third part's ruling put in place. Where a scene pack stands,
+`Applied.cs` gives the camera AgX's plain curve with no look and holds the exposure at the place's
+lens with no metering, whatever the panel's tonemapper, look and auto exposure hold, and
+`DayNight.cs` leaves the day's look off the camera there. The panel's settings are left as they are,
+so the rest of the map keeps them.
+
+The third part's Reply said the fill of 1,000 lights the shade with the cascades off, and it does
+not. `gi.set` is the engine's command and leaves the feature test's settings as they are, so
+`Applied.Probed` stays true and the ambient light stays the sky's 80 in the day's terms. With the
+cascades off the shade is lit by that and by Bevy's light from the atmosphere's sky, both of which
+the light pass takes back while the cascades are on, so the sheets' off pictures are Bevy's own
+light under the sky.
+
+The sheet is 2026-11-25-item-150-forward-and-occlusion.webp, the atrium under the physical day and
+AgX. After the reflections are turned on and off, `Applied.cs` turns deferred rendering off, Bevy's
+materials are drawn forward, and the camera keeps the G-buffer the field asked for with nothing
+written into it. The probes are traced as before, `gi.state` reading High with five cascades built,
+and the light pass reads nothing, takes nothing back and adds nothing, so the picture with the
+cascades on reads 66.2, as with them off, against 11.6 as the scene starts. The probes' light does
+not survive the toggle. A mend, offered for the review's word, keeps Bevy's materials deferred in
+the bridge while any camera's engine prepass asks for the G-buffer,
+`Render.SetDeferredRendering(false)` taking them forward once none asks, as the field's remarks
+promise for the camera it lies around. The narrower one is `Applied.cs` leaving deferred on while
+`Probed`.
+
+With Bevy's ambient occlusion on and the cascades on, the atrium reads 7.5 against 11.6, 78% of it
+black under 2 levels of 255 against 31%, and 37% darker by over 4 levels. The light pass takes back
+Bevy's ambient and environment light times the material's own occlusion alone (`gi_light.slang` line
+656, `bcs_pass_deferred.slang` line 23), while Bevy gave it times the lesser of that and its
+screen-space occlusion (`deferred_lighting.wesl` lines 65 to 69 in bevy_pbr 0.20). Where the
+screen-space occlusion darkens, more is taken back than was given and the shade goes below nothing,
+and the probes' light is not darkened by it at all. Off by default, the occlusion stays off until
+the pass reads it. A mend, offered for the review's word, binds Bevy's occlusion texture to the
+light pass, takes back what Bevy gave under it and darkens the probes' light by the same, as the
+sibling's circular occluders darken its own.
+
+As the scene starts, with the materials deferred, the shade the probes light reads near black, 31%
+of the atrium under 2 levels, so the probes bring little of the sky's light through the open roof
+into the arcades. That is the fifth part's and 157's to read.
 
 No public API changes, the members being the feature test's own. Comment lines kept to 100 columns
 (N 4.12). The whole suite after the last change, 2,213 passed, 0 failed and 10 skipped, 2,223 in all

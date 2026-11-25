@@ -52,7 +52,11 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// day's, f/16 at a two-hundredth of a second and ISO 200, about EV 14.64. The sun, the moon, the
 /// ambient light and the night sky are raised from the day's terms by as much as the sun is, 9.6
 /// times, so they keep their measure to it, and the lens takes the picture down by some 31 times,
-/// so the sunlit stone there reads about a third as light as under the day's own lens.
+/// so the sunlit stone there reads about a third as light as under the day's own lens. The picture
+/// there is AgX's plain curve under the place's lens held, by day and by night, with no look, no
+/// other tonemapper and no metering, whatever the panel holds for the rest of the map, so a scene's
+/// light reads as the lens records it and the shade shows how much light global illumination brings
+/// into it.
 /// </para>
 /// <para>
 /// Where the weather runs, the day hands it the sun and the moon, marked as its own, and its clock,
@@ -284,7 +288,7 @@ public partial struct DayNight
         }
 
         // The look follows the sun's height, its numbers alone changing on the camera.
-        if (settings.Look == Look.Day && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
+        if (settings.Look == Look.Day && !Packs.InPlace && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
             Render.SetLook(camera, Cycle.At(Sky.SunAltitude));
     }
 

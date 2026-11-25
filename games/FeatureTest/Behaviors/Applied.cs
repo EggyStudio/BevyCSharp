@@ -157,7 +157,7 @@ public partial struct Applied
     private static void Camera(Entity camera, FeatureSettings settings)
     {
         Render.SetPostProcessing(camera, Picture(settings));
-        Render.SetLook(camera, settings.Look switch
+        Render.SetLook(camera, Packs.InPlace ? null : settings.Look switch
         {
             Look.Engine => new LookSettings(),
             Look.Vivid => LookSettings.Vivid(),
@@ -284,11 +284,14 @@ public partial struct Applied
     /// </summary>
     internal static bool AtmosphereDrawn => _backdrop == Backdrop.Atmosphere;
 
-    /// <summary>What the camera does with the picture, from the settings.</summary>
+    /// <summary>
+    /// What the camera does with the picture, from the settings, under AgX's plain curve where a
+    /// scene pack stands (<see cref="Packs.InPlace"/>).
+    /// </summary>
     internal static PostSettings Picture(FeatureSettings settings) => new()
     {
         Hdr = true,
-        Tonemapper = settings.Tonemapper,
+        Tonemapper = Packs.InPlace ? Tonemapper.AgX : settings.Tonemapper,
         Bloom = settings.Bloom,
         BloomIntensity = 0.3f,
         Sharpen = settings.Sharpen,
@@ -306,7 +309,8 @@ public partial struct Applied
     /// <remarks>
     /// No depth of field focuses at a fixed distance over a map this size, which would blur every
     /// zone but one, so it follows <see cref="Focus"/>. A shutter open half a frame smears as
-    /// film does at 24 frames a second.
+    /// film does at 24 frames a second. Where a scene pack stands the exposure is held at the
+    /// place's lens and never follows the view.
     /// </remarks>
     internal static EffectSettings Lens(FeatureSettings settings) => new()
     {
@@ -319,7 +323,7 @@ public partial struct Applied
         AberrationSamples = settings.Aberration ? 8u : 0u,
         Vignette = settings.Vignette ? 0.45f : 0f,
         VignetteRadius = 0.7f,
-        AutoExposure = settings.AutoExposure,
+        AutoExposure = settings.AutoExposure && !Packs.InPlace,
     };
 
     /// <summary>Draws every mesh as its edges, or stops, the ones spawned since included.</summary>
