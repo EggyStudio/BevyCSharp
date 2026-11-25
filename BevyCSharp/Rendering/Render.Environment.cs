@@ -600,9 +600,11 @@ public static unsafe partial class Render
     /// <para>
     /// Occlusion darkens the ambient and environment light Bevy's own materials receive where a
     /// surface is hemmed in, in corners, creases and under things, rather than darkening the
-    /// finished picture, which would take direct light with it. It needs depth and normals, which it
-    /// asks for itself, and a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one);
-    /// on a multisampled camera Bevy leaves it off with a warning.
+    /// finished picture, which would take direct light with it. On a camera with global
+    /// illumination as well, the light global illumination adds is darkened by it as Bevy's is. It
+    /// needs depth and normals, which it asks for itself, and a camera drawn once a pixel
+    /// (<see cref="PostSettings.Msaa"/> of one), and on a multisampled camera Bevy leaves it off
+    /// with a warning.
     /// </para>
     /// <para>
     /// It is also the way in for occlusion of your own. While it is on, a compute shader on the

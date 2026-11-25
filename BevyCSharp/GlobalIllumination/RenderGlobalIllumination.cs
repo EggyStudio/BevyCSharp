@@ -59,27 +59,31 @@ public static partial class RenderGlobalIllumination
         /// after.
         /// </para>
         /// <para>
-        /// Bevy's lighting takes no indirect light from outside, so the probes' light is added to the
-        /// picture of the camera the field lies around by a pass of the library's own after its opaque
-        /// surfaces are lit, which takes back the diffuse share of the light from all around Bevy's
-        /// lighting gave each surface and adds in its place the surface's diffuse color times the light
-        /// the probes around it hold, times its material's occlusion. Past the probes' last cascade,
-        /// faded in across its outer band, the light from all around is a sky over a ground, the ambient
-        /// light from above and below the horizon the light the ground sends back, its color taken as the
-        /// surface's own, with each directional light's share of the ground's light through its shadow
-        /// map, so the field's edge shows as no line. The pass reads the camera's G-buffer and draws its
-        /// picture in floats while it is on, as the field's contact shadows do. The ambient light is
-        /// taken as what Bevy's lighting returns from a white surface under it, so an open floor reads as
-        /// it does without global illumination. The diffuse light an environment map gave each surface is
-        /// taken back as the ambient light's is, so a closed room under a bright sky is dark inside where
-        /// Bevy's lighting lights it through the walls. A glossy surface's reflection of the light from
-        /// all around is given again, traced through the picture's depth and the field below a roughness
-        /// of a half, using the frame before's picture, and Bevy's own reflection above it times the
-        /// share of the sky the probes see along the mirror way, so a room sealed from the sky reflects
-        /// none of it. Bevy's screen-space ambient occlusion is left as Bevy gives it. A surface drawn
-        /// forward, which the G-buffer does not hold, keeps Bevy's own light, but for a tree's leaves and
-        /// the grass, whose material reads the probes itself as the pass reads them for the G-buffer's
-        /// surfaces.
+        /// Bevy's lighting takes no indirect light from outside, so the probes' light is added to
+        /// the picture of the camera the field lies around by a pass of the library's own after its
+        /// opaque surfaces are lit, which takes back the diffuse share of the light from all around
+        /// Bevy's lighting gave each surface and adds in its place the surface's diffuse color
+        /// times the light the probes around it hold, times its material's occlusion and, where the
+        /// camera has it on, Bevy's screen-space ambient occlusion as Bevy's lighting weighs it.
+        /// Past the probes' last cascade, faded in across its outer band, the light from all around
+        /// is a sky over a ground, the ambient light from above and below the horizon the light the
+        /// ground sends back, its color taken as the surface's own, with each directional light's
+        /// share of the ground's light through its shadow map, so the field's edge shows as no
+        /// line. The pass reads the camera's G-buffer and draws its picture in floats while it is
+        /// on, as the field's contact shadows do. The ambient light is taken as what Bevy's
+        /// lighting returns from a white surface under it, so an open floor reads as it does
+        /// without global illumination. The diffuse light an environment map gave each surface is
+        /// taken back as the ambient light's is, so a closed room under a bright sky is dark inside
+        /// where Bevy's lighting lights it through the walls. A glossy surface's reflection of the
+        /// light from all around is given again, traced through the picture's depth and the field
+        /// below a roughness of a half, using the frame before's picture, and Bevy's own reflection
+        /// above it times the share of the sky the probes see along the mirror way, so a room
+        /// sealed from the sky reflects none of it. Where the camera has Bevy's screen-space
+        /// ambient occlusion, the light taken back is darkened by it as Bevy darkened it, so a
+        /// crease it darkens has no more taken back than Bevy gave it, and the probes' reflections
+        /// are darkened as Bevy's are. A surface drawn forward, which the G-buffer does not hold,
+        /// keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads the
+        /// probes itself as the pass reads them for the G-buffer's surfaces.
         /// </para>
         /// <para>
         /// Beside the world's probes stands a probe for every few pixels of the picture, every 16 at

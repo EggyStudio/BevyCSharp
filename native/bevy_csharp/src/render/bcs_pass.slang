@@ -687,6 +687,23 @@ public float2 passF_AB(float perceptual_roughness, float NdotV)
     return max(float2(-1.04, 1.04) * a004 + r.zw, float2(0.00005));
 }
 
+/// The occlusion Bevy's deferred lighting gives a surface's light from all around under the
+/// screen's `visibility`, where the camera has Bevy's screen-space ambient occlusion, so a shader
+/// taking that light back takes back what Bevy gave. The diffuse light's is the lesser of the
+/// material's `diffuse_occlusion` and the screen's carried over the light's bounces between the
+/// surfaces hemming the surface in, the lighter its `base_color` the more it gives back, and the
+/// reflection's, put in `specular`, is the share the screen's leaves a surface of that gloss facing
+/// the eye at `NdotV`, after Lagarde and de Rousiers, as bevy_pbr 0.20 works both out. A visibility
+/// of one leaves the material's occlusion as it is and the reflection whole.
+public float3 passAmbientOcclusion(float visibility, float diffuse_occlusion, float3 base_color, float perceptual_roughness, float NdotV, out float specular)
+{
+    float3 a = 2.0404 * base_color - 0.3324, b = -4.7951 * base_color + 0.6417, c = 2.7552 * base_color + 0.6903;
+    float3 x = float3(visibility);
+    float roughness = clamp(perceptual_roughness, 0.089, 1.0);
+    specular = saturate(pow(NdotV + visibility, exp2(-16.0 * roughness * roughness - 1.0)) - 1.0 + visibility);
+    return min(float3(diffuse_occlusion), max(x, ((x * a + b) * x + c) * x));
+}
+
 /// Whether the camera is under one of Bevy's atmospheres, which `Render.SetAtmosphere` gives it.
 public bool passHasAtmosphere()
 {

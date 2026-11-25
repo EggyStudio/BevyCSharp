@@ -1183,3 +1183,34 @@ the last change, 2,214 passed, 0 failed and 10 skipped, 2,224 in all against a l
 run aborted.
 
 NormTests passed, 19.
+
+150. The second of the two mends the fourth part offered. The light pass reads Bevy's screen-space
+ambient occlusion under the name the bridge gives it, where Bevy's lighting reads it, and takes back
+the light from all around as Bevy's deferred lighting darkened it, the diffuse light under the
+lesser of the material's occlusion and the screen's carried over its bounces and the environment
+map's reflection under the share the screen's leaves a surface of its gloss. The probes' light added
+and reflected is darkened by the same. Bevy's weighting is `passAmbientOcclusion` in the bridge's
+`bcs_pass.slang`, beside `passF_AB`, which keeps `gi_light.slang` within 800 lines (N 1.3). A camera
+without the occlusion reads the white stand-in, a single texel, so the read is held to the texture's
+size, and the material's occlusion is left as before.
+
+The sheet is 2026-11-25-item-150-occlusion-taken.webp, the atrium under the physical day and AgX
+with the cascades on. With the occlusion on the picture read 7.5 with 78% of it black before the
+mend and reads 10.6 with 38% black after, against 11.6 with 31% black with the occlusion off, which
+is unchanged. The occlusion darkens 3% of the picture past 4 levels where it darkened 37%. The
+pictures with the cascades off read 66.2 and 59.4, with the occlusion off and on, as before, and the
+picture after the reflections' toggle reads 11.6 with 31% black, as the first mend left it.
+
+`AClosedRoomWithBevysAmbientOcclusionReadsNoLightBelowNothing` holds it, a closed room under the
+ambient light alone with the occlusion on, which darkens Bevy's light in it to 0.933 of itself. With
+the cascades on, 14,202 of its 14,400 pixels read below nothing, the lowest at -0.252, on the light
+pass before the mend, and none after, the lowest at 0.
+
+No public API changes, the remarks of `Render.SetGlobalIllumination` and
+`Render.SetAmbientOcclusion` saying the occlusion's part. The bridge was rebuilt with the editor,
+meshlet and Solari, the render profile checked in the build's container and headless on the host,
+and the bridge's own tests passed, 126. Comment lines kept to 100 columns (N 4.12). The whole suite
+after the last change, 2,215 passed, 0 failed and 10 skipped, 2,225 in all against a listing of
+2,214, no run aborted.
+
+NormTests passed, 19.

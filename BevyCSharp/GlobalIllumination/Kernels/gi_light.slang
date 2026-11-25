@@ -13,9 +13,11 @@
 // probes' light is in the picture's units, the camera's exposure applied, and Bevy's ambient term
 // and its diffuse light from an environment map are taken back times the exposure as Bevy applies
 // it. Bevy's reflection of the light from all around is taken back and given again, traced below a
-// roughness of a half and read from the probes about the mirror way above it. Bevy's screen-space
-// ambient occlusion is Bevy's and left as it is, so where a camera has it the light taken back
-// differs from the light Bevy gave by as much.
+// roughness of a half and read from the probes about the mirror way above it. Where the camera has
+// Bevy's screen-space ambient occlusion, the light taken back is taken under it as Bevy's deferred
+// lighting darkened its own (passAmbientOcclusion), so no more is taken back than Bevy gave, and
+// the probes' light added and reflected is darkened by the same. A camera without it reads a single
+// white texel under its name, which leaves the material's occlusion alone.
 //
 // Bevy's light probes are taken back as its lighting gives them, in the order of bevy_pbr 0.20's
 // pbr_functions with the bridge's mend of its fallback (mended.rs). An irradiance volume's light
@@ -37,6 +39,9 @@ import bcs_gi;
 import bcs_glow;
 
 Texture2D<uint4> gbuffer;
+// Bevy's screen-space ambient occlusion, one a pixel of the window, or a single white texel where
+// the camera has none.
+Texture2D<float> ambient_occlusion;
 Texture3D<float4> scene_field;
 SamplerState scene_field_sampler;
 StructuredBuffer<FieldInfo> scene_field_info;
@@ -653,7 +658,16 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 V = normalize(-fromEye);
     float NdotV = max(dot(n, V), 0.0001);
     float3 diffuse = surface.base_color * (1.0 - surface.metallic);
-    float occlusion = surface.diffuse_occlusion;
+
+    // Bevy's screen-space ambient occlusion where the camera has it, read where Bevy's lighting
+    // reads it, at the window's pixel held to the texture's size, so the stand-in's single texel
+    // answers for every pixel of a camera without it, and the occlusion Bevy's lighting gave the
+    // surface's light from all around under it, the diffuse light's and the reflection's.
+    uint occlusionWidth, occlusionHeight;
+    ambient_occlusion.GetDimensions(occlusionWidth, occlusionHeight);
+    float visibility = ambient_occlusion.Load(int3(min(passTexel(pixel), int2(occlusionWidth, occlusionHeight) - 1), 0)).r;
+    float specularOcclusion;
+    float3 occlusion = passAmbientOcclusion(visibility, surface.diffuse_occlusion, surface.base_color, surface.perceptual_roughness, NdotV, specularOcclusion);
 
     // How the surface's point moves from pixel to pixel, and the way it faces as the depth gives it,
     // which weigh the screen probes and the glow lights' texels around the pixel.
@@ -773,13 +787,14 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 specularShare = f0 * F_ab_r.x + F_ab_r.y;
     float3 environment = passHasEnvironment() ? passEnvironmentSpecular(radianceWay(n, r, roughness), roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;
-    float3 bevySpecular = (viewShare * specularShare * environment + ambientShare) * passView.exposure;
+    float3 bevySpecular = (viewShare * specularShare * environment * specularOcclusion + ambientShare) * passView.exposure;
     float4 traced = tracedReflection(info, lights, world, fromEye, n, r, roughness);
     float gloss = traced.a * (1.0 - smoothstep(GlossyRoughness * 0.5, GlossyRoughness, roughness));
     float4 along = held > 0.0 ? reflectedAlong(info, world, n, r, roughness, probes.x, probes.y, probes.z) : float4(0.0);
     float3 lobe = along.rgb + bounced * (1.0 - along.a);
-    float3 fromAround = lerp(bevySpecular, viewShare * occlusion * specularShare * lobe, held);
-    float3 specular = fromAround * (1.0 - gloss) + viewShare * occlusion * traced.rgb * gloss * specularShare;
+    float3 reflected = occlusion * specularOcclusion;
+    float3 fromAround = lerp(bevySpecular, viewShare * reflected * specularShare * lobe, held);
+    float3 specular = fromAround * (1.0 - gloss) + viewShare * reflected * traced.rgb * gloss * specularShare;
 
     return float4(added - given + specular - bevySpecular, 0.0);
 }
