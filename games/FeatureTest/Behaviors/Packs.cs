@@ -92,7 +92,7 @@ public partial struct Packs
     };
 
     /// <summary>
-    /// How near the place of a scene standing alone the eye is in it, so its lens is held.
+    /// How near the place of a scene standing the eye is in it, so its lenses are held.
     /// </summary>
     private const float LensReach = 500f;
 
@@ -157,6 +157,12 @@ public partial struct Packs
     internal static PhysicalLens? NightLens { get; private set; }
 
     /// <summary>
+    /// Whether the eye stands in the place of a scene standing, within <see cref="LensReach"/> of
+    /// it, where the day is a clear day's in its own numbers (<see cref="DayNight.SunnyLens"/>).
+    /// </summary>
+    internal static bool InPlace { get; private set; }
+
+    /// <summary>
     /// Whether the heaviest meshes are to be drawn as meshlets, where meshlets run.
     /// </summary>
     internal static bool AsMeshlets { get; set; } = true;
@@ -176,6 +182,8 @@ public partial struct Packs
         _root = Entity.None;
         _fitted = false;
         _site = default;
+        InPlace = false;
+        NightLens = null;
         _asMeshlets = false;
         _onGpu = false;
         _timings = default;
@@ -400,23 +408,25 @@ public partial struct Packs
     private static string CacheFolder(ScenePack pack) => $"{ScenePacks.MountFolder}/{pack.Name}-meshlets";
 
     /// <summary>
-    /// Gives the camera the lens of the place the eye stands in, the scene standing alone's while
-    /// the eye is within <see cref="LensReach"/> of it, and the night's own once it is carried out
-    /// or the scene is taken away.
+    /// Says whether the eye stands in the place of the scene standing, within
+    /// <see cref="LensReach"/> of it, and gives the camera that place's lenses, a sunny day's by
+    /// day and the scene's own by night where it names one, the day's and the night's own once the
+    /// eye is carried out or the scene is taken away.
     /// </summary>
     [OnUpdate]
     public static void Lens(BehaviorContext ctx)
     {
+        var inside = false;
         PhysicalLens? lens = null;
-        if (_shown is { } pack && FittingOf(pack) is { Alone: not null, NightLens: { } own }
-            && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
+        if (_shown is { } pack && _root != Entity.None && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
         {
             var eye = ctx.Ecs.GetOrDefault<Transform>(camera).Translation;
-            if (new Vec2(eye.X - _site.At.X, eye.Z - _site.At.Z).Length < LensReach) lens = own;
+            inside = new Vec2(eye.X - _site.At.X, eye.Z - _site.At.Z).Length < LensReach;
+            if (inside) lens = FittingOf(pack).NightLens;
         }
 
-        if (lens == NightLens) return;
-        NightLens = lens;
+        if (inside == InPlace && lens == NightLens) return;
+        (InPlace, NightLens) = (inside, lens);
         Applied.Due();
     }
 

@@ -47,6 +47,14 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// lamp's glass from a glTF file or a lamp of the level, takes the lens whole.
 /// </para>
 /// <para>
+/// Where a scene pack stands and the eye is in its place, the day is a clear day's in its own
+/// numbers (<see cref="Packs.InPlace"/>), the sun 120,000 lux above the air and the camera a sunny
+/// day's, f/16 at a two-hundredth of a second and ISO 200, about EV 14.64. The sun, the moon, the
+/// ambient light and the night sky are raised from the day's terms by as much as the sun is, 9.6
+/// times, so they keep their measure to it, and the lens takes the picture down by some 31 times,
+/// so the sunlit stone there reads about a third as light as under the day's own lens.
+/// </para>
+/// <para>
 /// Where the weather runs, the day hands it the sun and the moon, marked as its own, and its clock,
 /// held still and set each frame to this hour and latitude, so the panel's Time page and
 /// <c>day.hour</c> go on setting the hour. The earth's tilt is taken off its clock, so every day of
@@ -163,6 +171,18 @@ public partial struct DayNight
     /// <summary>The camera's exposure by day, Bevy's own, in EV-100.</summary>
     internal const float DayEv100 = 9.7f;
 
+    /// <summary>
+    /// The sun above the air where a scene pack stands, in lux, about a clear day's outside the
+    /// air.
+    /// </summary>
+    internal const float ClearSun = 120_000f;
+
+    /// <summary>
+    /// A sunny day's camera, f/16 at a two-hundredth of a second and ISO 200, about EV 14.64, which
+    /// the camera holds by day where a scene pack stands.
+    /// </summary>
+    internal static readonly PhysicalLens SunnyLens = new(Aperture: 16f, Shutter: 1f / 200f, Sensitivity: 200f);
+
     /// <summary>A moonlit ground's camera, f/1.4 at a fifteenth of a second and ISO 3200.</summary>
     internal static readonly PhysicalLens NightLens = new(Aperture: 1.4f, Shutter: 1f / 15f, Sensitivity: 3200f);
 
@@ -177,10 +197,12 @@ public partial struct DayNight
     internal static bool Night => Sky.Hour is >= 18.75f or <= 5.5f;
 
     /// <summary>
-    /// What the lights the day steers and the night sky's nits are taken by, 1 by day and about
-    /// 1/905 by night, what the moonlit ground's lens takes the picture up by.
+    /// What the lights the day steers and the night sky's nits are taken by, 1 by day, 9.6 by day
+    /// where a scene pack stands, the clear day's sun over the day's own, and about 1/905 by night,
+    /// what the moonlit ground's lens takes the picture up by.
     /// </summary>
-    internal static float LensScale => Night ? MathF.Pow(2f, NightEv100 - DayEv100) : 1f;
+    internal static float LensScale =>
+        Night ? MathF.Pow(2f, NightEv100 - DayEv100) : Packs.InPlace ? ClearSun / RawSun.Light : 1f;
 
     /// <summary>The hour of the day now, from midnight at zero.</summary>
     internal static float Hour => Sky.Hour;

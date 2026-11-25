@@ -229,7 +229,12 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     against 16 of the glass 2 m off, mended with 146's glow light parts. The kernels' later mends,
     the screen probes' filter and turned rays, the merge's reach read and the sky past the cascade
     above, come with 138's move and are not ported here by hand. After 149; before 146's findings 68
-    to 75.
+    to 75. Second part `488c456f`, pushed at 17:55 on 2026-11-25, its run green at 18:5x. A pack's
+    fitting names its field and quality, Sponza at High with 0.125 m cells and a far cascade of 100
+    m, the Bistro at High with 0.25 m and 240, the feature test's own back on unload; the atrium's
+    mean with cascades on 30.4 to 31.0 where 116.8 without, the far arch and door lighter, so the
+    gap stays for the third to fifth parts; the sheet 2026-11-25-item-150-atrium-fitting.webp; 2,213
+    passed. The third part next, the day in physical numbers.
 
 151. **The day's sweep against the norm.** A read of the tree against NORM.md found these, each to
     mend in place with no change of behavior. Comments that liken to another product or carry a cost
@@ -1052,5 +1057,34 @@ passed under Xvfb, 13 of 13. The comments of the files touched lie within 100 co
 Shared: a scene's fitting names its field's cells, its far cascade and its quality, Sponza 0.125 m,
 100 m and High and the Bistro 0.25 m, 240 m and High, as the sibling's do, and here they hold only
 while the scene stands, the player's own coming back as it goes.
+
+NormTests passed, 19.
+
+150. The third part done. Where a scene pack stands and the eye is within 500 m of it,
+`Packs.InPlace` in the feature test, the day is in physical numbers, the sun 120,000 lux above the
+air (`DayNight.ClearSun`) and the camera at ISO 200, 1/200 s and f/16, EV 14.64
+(`DayNight.SunnyLens`), which `Applied.cs` holds by day there in place of Bevy's EV 9.7. The moon,
+the ambient light and the night sky are raised from the day's terms by as much as the sun, 9.6
+times, through the lens scale the night's lenses use, so they keep their measure to it, and the
+night's lenses are as they were. `entity.get Sun` read 12,500 before Sponza stood, 120,000 while it
+stood and the eye was in its place, and 12,500 after `scene.unload`. The sibling's sun is 120,000
+times the sine of its height with 5,000 at least, and the one here is 120,000 at every height as the
+item names it, the atmosphere dimming a low sun, which at the sheet's 84 degrees differs by under
+one percent.
+
+The sheet is 2026-11-25-item-150-physical-day.webp, Sponza's atrium at the sibling's view at 12:17
+with Sponza's field at High, in three rows of cascades on, off and on less off at 96 levels. Under
+the day's own numbers and AgX the means read 31.0 on and 116.7 off. Under the physical day and AgX
+they read 11.6 and 66.2, and under the physical day and the day's look 14.4 and 63.2. In every row
+every pixel past the frame counter is darker with the cascades on, since with them off the fill of
+1,000 lights the shade. Held at the sunny lens the sunlit floor sits well under white, and the shade
+the probes light reads near black, as the sibling's comment says of its own atrium, which starts
+metered for that reason and holds these values on a key. Which stays, the day's look or the plain
+curve, and the lens held or metered, is the review's after the sheet, and the panel's look is
+unchanged until then.
+
+No public API changes, the members being the feature test's own. Comment lines kept to 100 columns
+(N 4.12). The whole suite after the last change, 2,213 passed, 0 failed and 10 skipped, 2,223 in all
+against a listing of 2,212, no run aborted.
 
 NormTests passed, 19.

@@ -30,10 +30,11 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// starts with, lighting the scene from its sky with the stars behind it, or a dusk sky drawn in
 /// code as a cubemap, made the first time it is asked for, and the dusk sky alone where meshlets
 /// run, since Bevy's meshlet pipelines end the app under an atmosphere. <see cref="DayNight"/>
-/// keeps the stars to the hour, and the camera's exposure, Bevy's EV 9.7 by day and a moonlit
-/// ground's lens by night, or the lens of the place the eye stands in where it names one (<see
-/// cref="Packs.NightLens"/>), the stars', the galaxy's, the moon's and the dusk sky's nits taken
-/// down by the moonlit ground's lens as the day's lights are.
+/// keeps the stars to the hour, and the camera's exposure, Bevy's EV 9.7 by day, a sunny day's lens
+/// where a scene pack stands (<see cref="DayNight.SunnyLens"/>), and a moonlit ground's lens by
+/// night, or the lens of the place the eye stands in where it names one (<see
+/// cref="Packs.NightLens"/>), the stars', the galaxy's, the moon's and the dusk sky's nits taken by
+/// the day's lens scale as the day's lights are.
 /// </para>
 /// <para>
 /// The engine's weather runs over the atmosphere's sky at the quality the weather page sets, or not
@@ -165,6 +166,7 @@ public partial struct Applied
         });
         Render.SetEffects(camera, Lens(settings));
         if (DayNight.Night) Render.SetLens(camera, Packs.NightLens ?? DayNight.NightLens);
+        else if (Packs.InPlace) Render.SetLens(camera, DayNight.SunnyLens);
         else Render.SetExposure(camera, DayNight.DayEv100);
 
         if (!RayTracedOcclusion.Tracing)
