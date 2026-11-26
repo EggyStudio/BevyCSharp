@@ -1,3 +1,4 @@
+using System.Numerics;
 using Bevy;
 using Xunit;
 
@@ -116,7 +117,7 @@ public sealed partial class GlobalIlluminationTests
         {
             var t = half / height / MathF.Sqrt(1f + (half / height * half / height));
             var wanted = white / MathF.PI * 4f * nits * t * MathF.Atan(t) * exposure;
-            var shown = UnderPanel(assets.Root, height, white);
+            var shown = UnderPanel(assets.Root, height, white, "panel.gltf", 0.0005f);
             output.WriteLine($"the floor {height} under the glTF panel reads {shown:0.0000} against its closed form's {wanted:0.0000}, {shown / wanted - 1:+0.000;-0.000}");
             if (Math.Abs(shown / wanted - 1) >= 0.2) faults.Add($"{height} under the panel the floor reads {shown / wanted:0.000} of its closed form");
         }
@@ -125,12 +126,99 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// The mean light of the middle of the picture, five pixels a side, before tonemapping, of a
-    /// floor of <paramref name="white"/> under the panel of the file at <paramref name="root"/>, its
-    /// lower face <paramref name="height"/> over the floor, looked at from the side along a line that
-    /// passes under the panel, at Bevy's exposure of EV 9.7, with no other light.
+    /// A lantern's glass, four upright panels emitting from their outer sides and open above and
+    /// below, lights a floor of the level's white beside it within a fifth of its near panel's
+    /// closed form at two distances, and the floor under it, which no panel faces, by less than a
+    /// tenth of the nearer.
     /// </summary>
-    private static double UnderPanel(string root, float height, float white)
+    /// <remarks>
+    /// The glass is 0.3 square and 0.4 high, its lower edge 0.5 over the floor, each panel emitting
+    /// 4,000 nits from its front alone, so global illumination carries it as a glow light of the
+    /// four upright faces of its box, which the bridge reads from the triangles facing out of it.
+    /// Carried as its box whole, by the share of the box its glass makes, its lower face would
+    /// light the floor under it near three times as much as the near panel lights the floor beside
+    /// it, and add to the floor beside it as well. A point facing n takes from a polygon of
+    /// luminance L the light E = L Σ γ dot(n, u) / 2 over its edges, by Lambert's form, γ the angle
+    /// an edge spans seen from the point and u the unit normal of the plane through the point and
+    /// the edge.
+    /// </remarks>
+    [SkippableFact]
+    public void ALanternsGlassLightsTheFloorBesideItAndNotUnderIt()
+    {
+        Needs.Shaders();
+        const float half = 0.15f, tall = 0.4f, lowest = 0.5f, nits = 4_000f, white = 0.787f;
+        var exposure = 1f / (1.2f * MathF.Pow(2f, 9.7f));
+        using var assets = PictureRun.Temporary();
+        assets.Write("lantern.gltf", Panel(half, tall, nits, open: true));
+        Vector3[] near = [new(half, lowest, -half), new(half, lowest, half), new(half, lowest + tall, half), new(half, lowest + tall, -half)];
+
+        var faults = new List<string>();
+        var nearest = 0.0;
+        foreach (var along in new[] { 0.45f, 0.6f })
+        {
+            var wanted = white / MathF.PI * nits * Lambert(new Vector3(along, 0f, 0f), Vector3.UnitY, near) * exposure;
+            var shown = UnderPanel(assets.Root, lowest, white, "lantern.gltf", tall / 2, along);
+            nearest = nearest > 0 ? nearest : wanted;
+            output.WriteLine($"the floor {along} beside the lantern's middle reads {shown:0.0000} against its closed form's {wanted:0.0000}, {shown / wanted - 1:+0.000;-0.000}");
+            if (Math.Abs(shown / wanted - 1) >= 0.2) faults.Add($"{along} beside the lantern the floor reads {shown / wanted:0.000} of its closed form");
+        }
+        var under = UnderPanel(assets.Root, lowest, white, "lantern.gltf", tall / 2);
+        output.WriteLine($"the floor under the lantern reads {under:0.0000}, {under / nearest:0.000} of the nearer closed form beside it");
+        if (under >= 0.1 * nearest) faults.Add($"under the lantern the floor reads {under / nearest:0.000} of the nearer closed form beside it");
+
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// A glow light sends from the faces of its box its mesh's triangles facing out name, by the
+    /// share of those faces they make. A lantern's four upright panels send from its four sides by
+    /// their whole light, its box square to the axes or turned, a face a negative scale turns over
+    /// is the other face, and two panels side by side sending from their upper faces are one light
+    /// sending from its upper face by their whole light, their pressed sides sending nothing.
+    /// </summary>
+    [Fact]
+    public void AGlowLightSendsFromTheFacesItsMeshNames()
+    {
+        const int sides = 0b11_00_11, up = 0b00_10_00, down = 0b00_01_00;
+        var lantern = new SceneFieldPlan.Box(new Vector3(-0.25f, -0.5f, -0.25f), new Vector3(0.25f, 0.5f, 0.25f));
+        var block = new SceneFieldPlan.Box(new Vector3(-0.5f), new Vector3(0.5f));
+        (SceneFieldPlan.Instance, bool) Emitter(SceneFieldPlan.Box box, Matrix4x4 world, float surface, int faces) =>
+            (new(0, 0, world, false, box, Vector3.One, new Vector3(4f, 3f, 2f), Surface: surface, Faces: faces), false);
+
+        foreach (var world in new[] { Matrix4x4.CreateTranslation(3f, 1f, 0f), Matrix4x4.CreateRotationY(0.5f) * Matrix4x4.CreateTranslation(3f, 1f, 0f) })
+        {
+            var light = Assert.Single(GlowLights.Gather([Emitter(lantern, world, 4 * 0.5f * 1f, sides)], firstCell: 0.25f));
+            Assert.Equal(sides, light.Faces);
+            Assert.Equal(1f, light.Share, 4);
+        }
+        Assert.Equal(down, Assert.Single(GlowLights.Gather([Emitter(block, Matrix4x4.CreateScale(1f, -1f, 1f), 1f, up)], firstCell: 0.25f)).Faces);
+        var row = Assert.Single(GlowLights.Gather([Emitter(block, Matrix4x4.Identity, 1f, up), Emitter(block, Matrix4x4.CreateTranslation(1f, 0f, 0f), 1f, up)], firstCell: 0.25f));
+        Assert.Equal(up, row.Faces);
+        Assert.Equal(1f, row.Share, 4);
+    }
+
+    // The light a point at p facing n takes from a polygon of these corners, wholly above its
+    // surface, over the polygon's luminance, by Lambert's form.
+    private static double Lambert(Vector3 p, Vector3 n, Vector3[] corners)
+    {
+        double sum = 0;
+        for (var i = 0; i < corners.Length; i++)
+        {
+            var (a, b) = (Vector3.Normalize(corners[i] - p), Vector3.Normalize(corners[(i + 1) % corners.Length] - p));
+            sum += Math.Acos(Math.Clamp(Vector3.Dot(a, b), -1f, 1f)) * Vector3.Dot(Vector3.Normalize(Vector3.Cross(a, b)), n);
+        }
+        return Math.Abs(sum) / 2;
+    }
+
+    /// <summary>
+    /// The mean light of the middle of the picture, five pixels a side, before tonemapping, of a
+    /// floor of <paramref name="white"/> at <paramref name="along"/> on the axis under the middle
+    /// of the emitter of the file <paramref name="file"/> at <paramref name="root"/>, its lower
+    /// face <paramref name="height"/> over the floor and its middle <paramref name="halfHeight"/>
+    /// above that, looked at from the side along a line that passes under it, at Bevy's exposure of
+    /// EV 9.7, with no other light.
+    /// </summary>
+    private static double UnderPanel(string root, float height, float white, string file, float halfHeight, float along = 0f)
     {
         var (read, ready) = (false, 0);
         new PictureRun
@@ -142,7 +230,7 @@ public sealed partial class GlobalIlluminationTests
             Scene = ecs =>
             {
                 var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f), FieldOfView = 20f });
-                ecs.Add(camera, Transform.LookingAt(new Vec3(2.4f, 1.2f, 0f), Vec3.Zero, Vec3.UnitY));
+                ecs.Add(camera, Transform.LookingAt(new Vec3(along + 2.4f, 1.2f, 0f), new Vec3(along, 0f, 0f), Vec3.UnitY));
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
                 Render.SetExposure(camera, 9.7f);
                 Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);
@@ -150,8 +238,8 @@ public sealed partial class GlobalIlluminationTests
                 Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 12f, 0.4f, 12f));
                 Render.SetMaterial(ecs, floor, Render.CreateMaterial(white, white, white, roughness: 0.9f));
                 ecs.Add(floor, Transform.At(0f, -0.2f, 0f));
-                var panel = ecs.SpawnScene(AssetServer.LoadGltfScene("panel.gltf"));
-                ecs.Add(panel, Transform.At(0f, height + 0.0005f, 0f));
+                var panel = ecs.SpawnScene(AssetServer.LoadGltfScene(file));
+                ecs.Add(panel, Transform.At(0f, height + halfHeight, 0f));
                 Render.SetGlobalIllumination(GlobalIllumination.Medium);
             },
         }
@@ -183,9 +271,11 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// A glTF file of one panel <paramref name="half"/> either way of its middle across and
-    /// <paramref name="thick"/> through, black, every face emitting <paramref name="nits"/> in white.
+    /// <paramref name="thick"/> through, black, every face emitting <paramref name="nits"/> in
+    /// white from its front, or its upright faces alone where it is <paramref name="open"/> above
+    /// and below.
     /// </summary>
-    private static string Panel(float half, float thick, float nits)
+    private static string Panel(float half, float thick, float nits, bool open = false)
     {
         // Each face its four corners and its normal, wound counterclockwise seen from outside.
         var (x, y, z) = (half, thick / 2f, half);
@@ -201,6 +291,7 @@ public sealed partial class GlobalIlluminationTests
         var (positions, normals, indices) = (new List<float>(), new List<float>(), new List<ushort>());
         foreach (var (normal, corners) in faces)
         {
+            if (open && normal.Y != 0) continue;
             var first = (ushort)(positions.Count / 3);
             foreach (var corner in corners)
             {

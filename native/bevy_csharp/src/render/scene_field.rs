@@ -31,7 +31,9 @@ pub struct BcsFieldDraw {
     /// How many times Bevy said the mesh's data changed since it was numbered.
     pub generation: u32,
     /// Bit 0 where the material has no back faces to cull, so the mesh has no inside, bit 1 where
-    /// the mesh is skinned, so its shape moves whatever its matrix does.
+    /// the mesh is skinned, so its shape moves whatever its matrix does, and bits 2 to 7 the faces
+    /// of its box an emitter sends its light from, a bit a face, two an axis, the side toward the
+    /// axis's way the higher, none where it does not emit or every face does.
     pub flags: u32,
     /// How many triangles the pool takes from the mesh's data, counted once a generation without
     /// reading them, so the field's triangle budget weighs a mesh before it is pooled.
@@ -45,7 +47,8 @@ pub struct BcsFieldDraw {
     /// The material's emission in linear light, in the units of the camera's picture as Bevy shows
     /// it, times the camera's exposure by the share of it the material's `emissive_exposure_weight`
     /// sets, and in its fourth channel the surface the mesh emits from, the area of its triangles
-    /// in its own space, where it emits, and none where it does not.
+    /// facing out of its box in its own space, or of all of them where none does, where it emits,
+    /// and none where it does not.
     pub emission: [f32; 4],
     /// The mesh's bounds in its own space, the least corner, then the greatest.
     pub low: [f32; 4],
@@ -279,7 +282,7 @@ mod built {
     use super::{BcsFieldDraw, BcsFieldEye};
     use crate::interop::status;
     use crate::render::field_means::TextureMeans;
-    use crate::render::field_triangles::{bounds_of, corners_of, surface_of, triangles_of};
+    use crate::render::field_triangles::{bounds_of, corners_of, emitting_of, triangles_of, Emitting};
 
     /// Bytes of one corner in the pool.
     pub const CORNER_BYTES: usize = 16;
@@ -297,7 +300,7 @@ mod built {
         generations: Vec<u32>,
         bounds: Vec<Option<[f32; 6]>>,
         triangles: Vec<Option<u32>>,
-        surfaces: Vec<Option<f32>>,
+        surfaces: Vec<Option<Emitting>>,
     }
 
     impl FieldMeshes {
@@ -512,23 +515,25 @@ mod built {
                     [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, transmission]
                 });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
-                // The surface an emitter emits from, read once a generation and for an emitter
-                // alone, which global illumination carries as a light from its box by this share of
-                // the box's faces, so a ball emits as a ball does rather than as its box.
-                let surface = if emission[..3].iter().any(|&channel| channel > 0.0) {
-                    *meshes.surfaces[number as usize].get_or_insert_with(|| data.and_then(|data| data.get(&mesh.0)).map_or(0.0, surface_of))
+                // The surface an emitter emits from and the faces of its box it sends from, read
+                // once a generation and for an emitter alone, which global illumination carries as
+                // a light from those faces by this share of them, so a ball emits as a ball does
+                // rather than as its box and a lantern's upright glass from its sides alone.
+                let emitting = if emission[..3].iter().any(|&channel| channel > 0.0) {
+                    *meshes.surfaces[number as usize]
+                        .get_or_insert_with(|| data.and_then(|data| data.get(&mesh.0)).map_or_else(Emitting::default, emitting_of))
                 } else {
-                    0.0
+                    Emitting::default()
                 };
 
                 *draw = BcsFieldDraw {
                     mesh: number,
                     generation: meshes.generations[number as usize],
-                    flags: u32::from(open) | (u32::from(skinned) << 1),
+                    flags: u32::from(open) | (u32::from(skinned) << 1) | ((emitting.faces & 63) << 2),
                     triangles,
                     rows: [x.x, y.x, z.x, t.x, x.y, y.y, z.y, t.y, x.z, y.z, z.z, t.z],
                     color: [color[0], color[1], color[2], look.through.clamp(0.0, 1.0)],
-                    emission: [emission[0], emission[1], emission[2], surface],
+                    emission: [emission[0], emission[1], emission[2], emitting.surface],
                     low: [low[0], low[1], low[2], 0.0],
                     high: [high[0], high[1], high[2], 0.0],
                     gloss,

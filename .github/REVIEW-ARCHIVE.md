@@ -6162,6 +6162,89 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
    engine's name linked to its repository, BevyCSharp's with 3DEngine and 3DEngine's with
    BevyCSharp, as the game's row ends with 3DEngine. Item 108.
 
+80. **No millisecond budget.** Decided on 2026-11-08 at 08:50. There is no millisecond budget. A
+   feature is first made to work and to perform well, and its numbers are worked on after or along
+   the way as much as possible. So a mend that brings a view to its reference lands by its figures,
+   its cost measured and recorded beside them and cut after or along the way where a cut holds the
+   readings; item 114 and the rest land or stay by their figures, the cost a figure and not a gate,
+   and the forest's and the meadow's milliseconds stay in each record.
+
+81. **A stop rule and one target.** On 2026-11-08 at 08:5x, on the question why the light leaking
+   had moved little in days, the direction was that the review does what it thinks right and reports
+   it for approval. Approved at 08:49 on 2026-11-08, so a view inside its band lands and a figure
+   that remains is recorded and not chased unless it lies in a scene that is looked at, the meadow
+   here and Sponza's named views in the engine; one bounded read places a cause and a second is the
+   last before a mend is tried or the figure recorded. The meadow at eight in the morning is the
+   bridge's one target scene, its crowns and its grass against the one reference, the rooms the
+   guard.
+
+82. **The difference beside a pair.** Reported to the BevyCSharp session at about 13:50 on
+    2026-11-08, on item 116's meadow pair, no changes were visible in the comparison, the crossing
+    among them, as in the times before, and the ask was that where there is a difference a third
+    image to the right show it. From here a reading's pair carries a third panel, the after's
+    luminance less the before's at a gain the caption names, brighter in orange and darker in blue
+    on black, in both engines (N 4.9); the earlier readings stand as they are. The change 116 makes
+    is small, about one point in the leaves and a little more of the crown's scattered light on the
+    wall and the ground behind it, which the panel shows at a gain of 40, and it is reported so.
+
+83. **Version tags.** Decided at about 14:00 on 2026-11-08, after every commit of the Unity
+    Essentials repositories was tagged as `v2.0.30` and the like, the three projects take tags too,
+    with the review's questions answered at 14:1x. The form is `v6.0.91`, the letter v before
+    `build/version.sh`'s number. Tags go on each major or minor change and on the commits packages
+    were built from, since a tag on every commit clutters the list and is unnecessary, the tags
+    marking releases some time apart with meaningful changes and not commits apart. The major and
+    the minor are the sessions' to raise, each session working on the project deciding when the time
+    is right to raise the minor or the major, every commit counting as a patch, with full liberty
+    once a step is done and meaningful changes were made. N 6.3 holds the rule and the reviewer sets
+    the tags as it pushes. `v0.6.0` marks the commit that set 0.6 and `v0.6.18` the commit
+    `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set at 14:12.
+
+84. **No middle dot.** Decided at 17:57 and 18:00 on 2026-11-08, the middle dot is not used, the
+    README's top links separated by a space alone and the dot nowhere else; the reviewer changed the
+    README's first line in the tree on that decision, for the next commit to carry, and every other
+    middle dot in the repository is item 118's. The rule goes into STYLE.md's Punctuation as the
+    shared text has it everywhere.
+
+85. **One repository, many projects.** The engines' future was thought through with the review at
+    about 18:20 on 2026-11-08, after Unity Essentials, where every feature is a repository of its
+    own. The points made were that the engines are somewhat cluttered and should be modular,
+    extendable, stable and easy to use, that splitting everything into repositories adds clutter and
+    makes commits awkward, that the shared modules' repositories are right, that the engine's own
+    content could be made modular the same way inside its repository, and that one running process,
+    edited and seen as it changes, is worth thinking about; the review's recommendation was approved
+    at 18:30. The direction is that each engine stays one repository and becomes one solution of
+    many projects, each an area with its own public surface and its own plugin, packed as its own
+    package at one version for all, as Bevy's crates are in Bevy's one repository; the dependency
+    direction is held by project references and a norm test over them; the flat API stays unchanged
+    on top and a game names the packages it needs; the names are dotted .NET names and not com.;
+    there is no editor, and the live path is a watcher that recompiles a changed shader, reloads a
+    changed asset or scene and recompiles a changed behavior into the running process, the engine's
+    own code by restart. It is scheduled after the current items and done as one mechanical batch
+    per engine with the public API held identical before and after and the documents' tables
+    redrawn. Items 119 and 120, 3DEngine Decision 102.
+
+86. **Comments on the code's own terms.** A comment of scenes_sponza was read at about 19:00 on
+    2026-11-08, "The frame graded as that scene's HDRP profile grades it, by the look of its AgX -
+    Powerful.exr, a lookup build/unity-lut.py writes from that strip, a gamma of w 0.225, and a
+    bloom of intensity 0.25, threshold 0.333 and scatter 0.7, worked out as HDRP works them out",
+    and found to read badly, to read as an em dash does, and to lean too far on outside knowledge
+    and on the sessions' knowledge of work in progress, in scenes_sponza explicitly and probably
+    everywhere else. The rule from it, in STYLE.md's Register and as N 4.11, is that a comment
+    stands on the code's own terms. It says what the code does and why in the engine's words; a
+    number taken from elsewhere stands with the reason it is right here, what it makes the frame or
+    the program do, and the source is named once in the documents' references and not in the
+    comment; the file names of outside assets, another product's profile or process as the
+    explanation, "as X works it out", and the facts of the sessions' work are not written in a
+    comment. Item 121, 3DEngine Decision 103.
+
+87. **No readings or costs in comments.** Decided at about 05:20 on 2026-11-09, on scenes_sponza's
+    comment on the far cascade of 100 that carried the lion's end wall's reading from 34.6 to 15.1
+    times its reference and the mend's 0.6 ms, a comment need not name the progress or the
+    millisecond count, a comment being no protocol. N 4.11 widens so that a comment carries no
+    reading of before and after, no cost figure and no account of the trials, which are the review's
+    records and RENDERING.md's; a number stands in a comment only where the code's choice depends on
+    it, with its reason. Item 123.
+
 ## Replies archived
 
 Shared: the edit mesh with its primitives, its selection and what moves it, in the commit carrying

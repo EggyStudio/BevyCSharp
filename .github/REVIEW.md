@@ -253,7 +253,15 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     before the fifth part, a commit each, the bridge keeping materials deferred while any engine
     prepass asks for the G-buffer with SetDeferredRendering(false) taking effect once none asks, and
     the light pass binding Bevy's occlusion texture, taking back what Bevy gave under it and
-    darkening the probes' light by it, each read on the atrium before and after.
+    darkening the probes' light by it, each read on the atrium before and after. The two mends
+    `8fb721eb` and `e5e997f4`, pushed at 04:14 on 2026-11-26, their run awaited. Materials stay
+    deferred while any 3D camera reads the G-buffer, the atrium after the reflections' toggle
+    reading 11.6 with 31% black as at the start, DeferredHoldTests; the light pass reads Bevy's
+    occlusion where Bevy does and weighs it as its deferred lighting does, the atrium with occlusion
+    from 7.5 and 78% black to 10.6 and 38%, a closed room reading no light below nothing; found on
+    the way, the stand-in occlusion texel read 0 off its one pixel and made the pass neutral, the
+    load held to the texture's size. 2,215 passed. The fifth part next, the lantern box's lower
+    face.
 
 151. **The day's sweep against the norm.** A read of the tree against NORM.md found these, each to
     mend in place with no change of behavior. Comments that liken to another product or carry a cost
@@ -563,147 +571,7 @@ test mended. A drive script's change is followed by `ScriptedRunTests` before it
 
 ## Decisions
 
-Decisions 1 Commits stay local; 2 AGENTS.md's bullet on SHARED.md changes by the project's direction
-alone; 3 A picture opens the example's own source, and not Bevy's live demo of it; 4 AGENTS.md's
-bullet on NORM.md changes by the project's direction alone, with the exception N 7.4 makes; 5 The
-examples written are brought to B 4 a group at a time; 6 A run that fails says what failed in a
-page, and the reviewing session is given no log; 7 The page's repeated lines are warnings and
-errors; 8 The next package is 0.4; 9 A document a game's author reads names no one who decided; 10
-The tests run on macOS as well; 11 Feathers' crate may be enabled, after the other gaps; 12 The free
-and pan camera controllers may be enabled, after the other gaps; 13 System font discovery stays off;
-14 The sample becomes a feature test; 15 Graphics test scenes come as packs fetched on demand, never
-checked in; 16 Every tonemapper here comes to 3DEngine; 17 The embedding is the bridge's own; 18 The
-weather is vendored and ported; 19 Bevy 0.20 comes after the deferred batch in flight and before the
-other gaps; 20 The crates' word for the upgrade; 21 No document or comment a reader sees names a
-person or a session; 22 Content streamed on the go stays in the ledger, and the browser stays out;
-23 A run that shows no window makes no sound; 24 A game's session writes what the engine lacks in
-`.github/ASKS.md`, here as in 3DEngine; 25 A feature of a crate already in the tree that pulls no
-crate in is the working session's to turn on; a feature that pulls a crate in waits on the owner's
-word as Decision 11 has it; 26 An insert from nothing over a resource a plugin made, of a type that
-reflects no default, is refused and names `Resource<T>`; 27 The README's gallery is one scrolling
-row of pictures a group, in Bevy's order of its groups; 28 The bcs skill leaves `.claude` for
-`.github/BCS.md`, and the gallery's pictures are one size; 29 The development machine's GPU is named
-nowhere a user reads; 30 The examples' counts stand under the Examples heading and on each group's
-heading; 31 A vertex stream of the game's own, in both engines; 32 A position is every mesh's, and
-the packed data a stream beside it; 33 No development on either engine until every job is green on
-every push and pack; 34 Two workflows an engine, build and pack, the same shape in both; the tester
-zips and the scene packs are runs on the development machine; 35 Decision 33's gate is the new
-workflows; 36 The docs job goes; the repository's links are the suite's to check; 37 Prose is
-technical and generic; 38 Development resumes, the bridge completed first and the mends of the
-moment made lasting after; 39 The direction of 2026-10-19 on the crates, the order and the mends of
-the moment; 40 The README's centered parts are markdown inside a centering block, since nuget.org
-draws a README without its HTML; 41 A package's release notes are the commits since the package last
-published on nuget.org; 42 The pack workflow publishes through nuget.org's trusted publishing; 43
-The reviewer starts the pack runs when a package is due; 44 The review's files are committed by the
-batch that comes next, and by the reviewer at most once a day; 45 The feature test lives in the
-games folder, as 3DEngine's does; 46 Modeling in both engines, from the kernel to the modifiers,
-grid prototyping first; 47 The Actions bill is not weighed; 48 Animated captures as tooling for
-documentation and devlogs; 49 A screenshot on F2 in every program; 50 F1 hides the interface and F3
-shows the debug overlay, in both engines; 51 3DEngine's radiance cascades come to this engine; 52 A
-denoiser for the ray-traced tier of global illumination, beside the cascades, in both engines; 53
-The cloud sessions take GPU-free items on branches of their own; 54 Branches are named for their
-work, never claude/ or a random string, and work stays on main where one session writes; 55 Every
-commit carries the repository's author identity, and the cloud session's branch was deleted for not
-carrying it; 56 Slang reads the same in both engines, plain names and no module prefix; 57 Until a
-full release, both engines are used by nobody; 58 The two cheatsheets have one form; 59 A devlog
-under `.github/devlog`, with AGENTS.md's row for it; 60 A session saves the pictures of its work in
-the repository, N 4.8; 61 The feature test's level is redone, the look, the sky, the file, the
-entities' connections and an editor; 62 The fog, the clouds and the rest of the weather are written
-in the engine, and the weather crate goes; 63 Trees and foliage are grown, not loaded; 64 The devlog
-written as the work goes; 65 The devlog carries notes beside the pictures; 66 Free textures ship as
-a bounded collection, the models stay reference; 67 The level file is Valve 220 map text; 68 The
-feature test's open map is legacy and its features move into one generated level; 69 A reading's
-picture explains itself, and a plain capture or pair stays where it shows the thing; 70 Every
-picture a session makes goes to the repository's dump folder; 71 Six ideas for later, thought about
-and not scheduled; 72 The version's major and minor move by the reviewer's judgment; 73 What a
-scriptable render pipeline has, written down for later; 74 Global illumination is fixed first and
-used in the feature test after the radiance cascades' fix; 75 The sky's model is a module, the
-drawing stays in each engine; 76 No one is named in a picture; 77 Anisotropic filtering at 16
-everywhere; 78 Crowns read thick and filled; 79 Each README cross-references the other engine, each
-in full under Decisions in REVIEW-ARCHIVE.md.
-
-80. **No millisecond budget.** Decided on 2026-11-08 at 08:50. There is no millisecond budget. A
-   feature is first made to work and to perform well, and its numbers are worked on after or along
-   the way as much as possible. So a mend that brings a view to its reference lands by its figures,
-   its cost measured and recorded beside them and cut after or along the way where a cut holds the
-   readings; item 114 and the rest land or stay by their figures, the cost a figure and not a gate,
-   and the forest's and the meadow's milliseconds stay in each record.
-
-81. **A stop rule and one target.** On 2026-11-08 at 08:5x, on the question why the light leaking
-   had moved little in days, the direction was that the review does what it thinks right and reports
-   it for approval. Approved at 08:49 on 2026-11-08, so a view inside its band lands and a figure
-   that remains is recorded and not chased unless it lies in a scene that is looked at, the meadow
-   here and Sponza's named views in the engine; one bounded read places a cause and a second is the
-   last before a mend is tried or the figure recorded. The meadow at eight in the morning is the
-   bridge's one target scene, its crowns and its grass against the one reference, the rooms the
-   guard.
-
-82. **The difference beside a pair.** Reported to the BevyCSharp session at about 13:50 on
-    2026-11-08, on item 116's meadow pair, no changes were visible in the comparison, the crossing
-    among them, as in the times before, and the ask was that where there is a difference a third
-    image to the right show it. From here a reading's pair carries a third panel, the after's
-    luminance less the before's at a gain the caption names, brighter in orange and darker in blue
-    on black, in both engines (N 4.9); the earlier readings stand as they are. The change 116 makes
-    is small, about one point in the leaves and a little more of the crown's scattered light on the
-    wall and the ground behind it, which the panel shows at a gain of 40, and it is reported so.
-
-83. **Version tags.** Decided at about 14:00 on 2026-11-08, after every commit of the Unity
-    Essentials repositories was tagged as `v2.0.30` and the like, the three projects take tags too,
-    with the review's questions answered at 14:1x. The form is `v6.0.91`, the letter v before
-    `build/version.sh`'s number. Tags go on each major or minor change and on the commits packages
-    were built from, since a tag on every commit clutters the list and is unnecessary, the tags
-    marking releases some time apart with meaningful changes and not commits apart. The major and
-    the minor are the sessions' to raise, each session working on the project deciding when the time
-    is right to raise the minor or the major, every commit counting as a patch, with full liberty
-    once a step is done and meaningful changes were made. N 6.3 holds the rule and the reviewer sets
-    the tags as it pushes. `v0.6.0` marks the commit that set 0.6 and `v0.6.18` the commit
-    `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set at 14:12.
-
-84. **No middle dot.** Decided at 17:57 and 18:00 on 2026-11-08, the middle dot is not used, the
-    README's top links separated by a space alone and the dot nowhere else; the reviewer changed the
-    README's first line in the tree on that decision, for the next commit to carry, and every other
-    middle dot in the repository is item 118's. The rule goes into STYLE.md's Punctuation as the
-    shared text has it everywhere.
-
-85. **One repository, many projects.** The engines' future was thought through with the review at
-    about 18:20 on 2026-11-08, after Unity Essentials, where every feature is a repository of its
-    own. The points made were that the engines are somewhat cluttered and should be modular,
-    extendable, stable and easy to use, that splitting everything into repositories adds clutter and
-    makes commits awkward, that the shared modules' repositories are right, that the engine's own
-    content could be made modular the same way inside its repository, and that one running process,
-    edited and seen as it changes, is worth thinking about; the review's recommendation was approved
-    at 18:30. The direction is that each engine stays one repository and becomes one solution of
-    many projects, each an area with its own public surface and its own plugin, packed as its own
-    package at one version for all, as Bevy's crates are in Bevy's one repository; the dependency
-    direction is held by project references and a norm test over them; the flat API stays unchanged
-    on top and a game names the packages it needs; the names are dotted .NET names and not com.;
-    there is no editor, and the live path is a watcher that recompiles a changed shader, reloads a
-    changed asset or scene and recompiles a changed behavior into the running process, the engine's
-    own code by restart. It is scheduled after the current items and done as one mechanical batch
-    per engine with the public API held identical before and after and the documents' tables
-    redrawn. Items 119 and 120, 3DEngine Decision 102.
-
-86. **Comments on the code's own terms.** A comment of scenes_sponza was read at about 19:00 on
-    2026-11-08, "The frame graded as that scene's HDRP profile grades it, by the look of its AgX -
-    Powerful.exr, a lookup build/unity-lut.py writes from that strip, a gamma of w 0.225, and a
-    bloom of intensity 0.25, threshold 0.333 and scatter 0.7, worked out as HDRP works them out",
-    and found to read badly, to read as an em dash does, and to lean too far on outside knowledge
-    and on the sessions' knowledge of work in progress, in scenes_sponza explicitly and probably
-    everywhere else. The rule from it, in STYLE.md's Register and as N 4.11, is that a comment
-    stands on the code's own terms. It says what the code does and why in the engine's words; a
-    number taken from elsewhere stands with the reason it is right here, what it makes the frame or
-    the program do, and the source is named once in the documents' references and not in the
-    comment; the file names of outside assets, another product's profile or process as the
-    explanation, "as X works it out", and the facts of the sessions' work are not written in a
-    comment. Item 121, 3DEngine Decision 103.
-
-87. **No readings or costs in comments.** Decided at about 05:20 on 2026-11-09, on scenes_sponza's
-    comment on the far cascade of 100 that carried the lion's end wall's reading from 34.6 to 15.1
-    times its reference and the mend's 0.6 ms, a comment need not name the progress or the
-    millisecond count, a comment being no protocol. N 4.11 widens so that a comment carries no
-    reading of before and after, no cost figure and no account of the trials, which are the review's
-    records and RENDERING.md's; a number stands in a comment only where the code's choice depends on
-    it, with its reason. Item 123.
+Decisions 1 to 87 stand in REVIEW-ARCHIVE.md under Decisions; the last ten follow.
 
 88. **One package on nuget.org.** Chosen on 2026-11-11 at about 16:20, on the review's question with
     the twenty ids of item 119's split laid out, BevyCSharp keeps one package, since so many
@@ -1212,5 +1080,67 @@ meshlet and Solari, the render profile checked in the build's container and head
 and the bridge's own tests passed, 126. Comment lines kept to 100 columns (N 4.12). The whole suite
 after the last change, 2,215 passed, 0 failed and 10 skipped, 2,225 in all against a listing of
 2,214, no run aborted.
+
+NormTests passed, 19.
+
+150. The fifth part, a lantern's light sent from the faces of its box its glass faces. The bridge
+reads an emitting mesh's triangles that face out of its box, those whose normal points away from the
+box's middle, and names for each the face of the box its normal leans toward most. Their area is the
+surface the light sends from, and the faces they name ride in bits 2 to 7 of the field draw's flags
+beside the open and skinned bits, so the draw keeps its layout and the bridge its ABI of 332. A mesh
+with no triangle facing out sends from every face by its whole area, as every mesh did before.
+`GlowLights` writes the faces beside the share in the light's last value and takes the share over
+those faces' surface alone. A square box a negative scale turns over sends from the other face of
+the pair, a turned box keeps its mesh's faces, and touching boxes joined into one light send from
+their members' faces lying on its sides, two pressed faces covering each other only where their box
+emits from them. The kernels' closed forms honor the faces, and `glowLightShown`, how much of a glow
+light a surface sees through the field, marches to the faces that emit alone, in `bcs_glow.slang`,
+so `gi_light.slang` keeps its 800 lines. Of the sibling's PartsOf the faces are taken, and its
+mirroring of double-sided triangles and its cutting of a mesh into parts are not, the Bistro's
+emissive materials being single-sided.
+
+The Bistro's street lantern has two layers of glass, 0.611 m² in all, of which the outer, 0.325 m²,
+faces out of its box. Its box sent from all six faces by a share of 0.92, the light of both layers,
+and sends from its four upright faces by 0.70, the outer layer's. In closed form, 2 m beside it at
+its height, the box gave 130 lux and gives 100, where the outer glass gives 114. On the paving 2 m
+from the post's foot, 3.9 m below the lantern, it gave 24.3 lux, 16.0 of them from its lower face as
+149 read, and gives 6.3, where the glass gives 10.4. The glass leans downward by a tenth, which
+upright faces do not carry, so the paving under the lantern takes none of its light where the glass
+gives 5.4 lux and the box gave 25.5. A share for each face, from the area of the triangles facing
+out cast onto it, would carry that lean, at the cost of a wider light.
+
+Read against their triangles in closed form below and on four sides 2 m off, the Bistro's 28 street
+lanterns of two layers send from their four upright faces, two shop signs from front and back, six
+spotlights' lenses from their lower face and one from its upper, and the string lights, the other
+lanterns and the other spotlights keep every face. The shop signs' triangles lean between their
+box's faces, so they send 1.29 of their triangles' light ahead where they sent 0.58 of it, and none
+to their sides, where their triangles send some.
+
+The sheets are `2026-11-26-item-150-atrium-faces.webp` and
+`2026-11-26-item-150-bistro-lantern-faces.webp`. The atrium reads 11.6 with the cascades on and 66.2
+off, 10.6 and 59.4 with Bevy's occlusion, and no pixel moves by more than one level from the second
+mend's picture. The Bistro at 23:00 under the pack's night lens reads 39.8 along the street where it
+read 55.4, and 52.6 across the square where it read 79.3, each lantern sending its outer glass's
+light where it sent both layers'. The before pictures came from a bridge built for them that sent
+every face by the whole area.
+
+`ALanternsGlassLightsTheFloorBesideItAndNotUnderIt` lights a floor of the level's white from four
+upright panels 0.3 m square and 0.4 m high, 4,000 nits outward and open above and below, their lower
+edge 0.5 m up. The floor 0.45 and 0.6 m from their middle reads 0.9% over and 1.6% under the near
+panel's closed form and the floor under them 0.002 of the nearer, where without the faces it read
+68% and 24% over and 2.89 times, and failed. `AGlowLightSendsFromTheFacesItsMeshNames` holds the
+faces through the gather, square, turned, turned over and in a row, and the bridge's
+`a_lanterns_glass_emits_from_its_outer_panels_and_upright_faces` holds a two-layer glass's outer
+area and faces.
+
+Shared: a glow light's box sends from the faces its mesh's triangles facing out lean toward, by
+their share of those faces, carried from the bridge in the field draw's flags, the faces of the
+sibling's PartsOf for a mesh of one part.
+
+No public API changes. The bridge was rebuilt with the editor, meshlet and Solari, the render
+profile checked in the build's container, where its four triangle tests passed, and headless on the
+host, and the bridge's own tests passed, 126. Comment lines kept to 100 columns (N 4.12). The whole
+suite after the last change, 2,217 passed, 0 failed and 10 skipped, 2,227 in all against a listing
+of 2,216, no run aborted.
 
 NormTests passed, 19.

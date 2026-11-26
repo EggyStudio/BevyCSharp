@@ -20,7 +20,11 @@ internal unsafe struct NativeFieldDraw
     /// <summary>How many times Bevy said the mesh's data changed since it was numbered.</summary>
     [FieldOffset(4)] public uint Generation;
 
-    /// <summary>Bit 0 where the mesh has no inside, its back faces drawn, bit 1 where it is skinned.</summary>
+    /// <summary>
+    /// Bit 0 where the mesh has no inside, its back faces drawn, bit 1 where it is skinned, and
+    /// bits 2 to 7 the faces of its box an emitter sends its light from, a bit a face, two an axis,
+    /// the side toward the axis's way the higher, none where it does not emit or every face does.
+    /// </summary>
     [FieldOffset(8)] public uint Flags;
 
     /// <summary>How many triangles the pool takes from the mesh, which the field's triangle budget weighs it by.</summary>
@@ -37,7 +41,8 @@ internal unsafe struct NativeFieldDraw
 
     /// <summary>
     /// The material's emission in linear light, red, green and blue, and the surface the mesh emits
-    /// from, the area of its triangles in its own space, where it emits.
+    /// from, the area of its triangles facing out of its box in its own space, or of all of them
+    /// where none does, where it emits.
     /// </summary>
     [FieldOffset(80)] public fixed float Emission[4];
 

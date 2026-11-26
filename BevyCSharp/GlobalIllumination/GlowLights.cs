@@ -25,11 +25,12 @@ namespace Bevy;
 /// (<see cref="Faint"/>).
 /// </para>
 /// <para>
-/// Each emitter is its box, every face emitting, by the share of the box's faces its mesh's own
-/// surface makes, the area of its triangles the field's gather hands over, since taken as its box
-/// whole, a ball, whose surface is about half its box's, would be carried twice as bright as it is.
-/// The gather does not cut a mesh of many emitters into its parts, so such a mesh is one light of
-/// its box.
+/// Each emitter is its box, the faces its mesh's triangles facing out of it lean toward emitting,
+/// by the share of those faces the triangles make, as the field's gather hands both over. Taken as
+/// its box whole, a ball, whose surface is about half its box's, would be carried twice as bright
+/// as it is, and a lantern's upright panels would send from the box's lower face the light they
+/// send aside, onto the ground under it. The gather does not cut a mesh of many emitters into its
+/// parts, so such a mesh is one light of its box.
 /// </para>
 /// </remarks>
 internal static class GlowLights
@@ -49,8 +50,16 @@ internal static class GlowLights
     // exposed for the room it lights sees it.
     private const float Faint = 0.001f;
 
-    /// <summary>A light as it is written, the middle of its box, half its side along each of the box's axes, its light and its surface over its box's.</summary>
-    internal readonly record struct Light(Vector3 Middle, Vector3 X, Vector3 Y, Vector3 Z, Vector3 Glow, float Share);
+    /// <summary>
+    /// A light as it is written, the middle of its box, half its side along each of the box's axes,
+    /// its light, its surface over that of its box's faces that emit, and which of them emit, a bit
+    /// a face, two an axis of <see cref="X"/>, <see cref="Y"/> and <see cref="Z"/>, the side the
+    /// axis points to the higher, none for every face.
+    /// </summary>
+    internal readonly record struct Light(Vector3 Middle, Vector3 X, Vector3 Y, Vector3 Z, Vector3 Glow, float Share, int Faces = 0);
+
+    // Every face of a box, a bit a face, as the faces are written.
+    private const int All = 63;
 
     /// <summary>
     /// Writes the lights the carried emitters among <paramref name="drawn"/> make, those nearest
@@ -79,17 +88,17 @@ internal static class GlowLights
         for (var n = 0; n < count; n++)
         {
             if (places is null) placeOf[n] = n;
-            var (middle, x, y, z, glow, share) = lights[n];
-            var surface = 4 * FacesSurface(new Vector3(x.Length(), y.Length(), z.Length())) * share;
+            var (middle, x, y, z, glow, share, faces) = lights[n];
+            var surface = 4 * FacesSurface(new Vector3(x.Length(), y.Length(), z.Length()), faces == 0 ? All : faces) * share;
             var reach = MathF.Sqrt(surface / (4 * Faint));
             var light = floats.Slice(placeOf[n] * Bytes / 4, Bytes / 4);
             (light[0], light[1], light[2], light[3]) = (middle.X, middle.Y, middle.Z, reach);
             (light[4], light[5], light[6], light[7]) = (x.X, x.Y, x.Z, x.Length());
             (light[8], light[9], light[10], light[11]) = (y.X, y.Y, y.Z, y.Length());
             (light[12], light[13], light[14], light[15]) = (z.X, z.Y, z.Z, z.Length());
-            // The share below 2 and twice the faces above it, every face here, as glowShare and
-            // glowFaces in bcs_glow read them.
-            (light[16], light[17], light[18], light[19]) = (glow.X, glow.Y, glow.Z, share);
+            // The share below 2 and twice the faces above it, as glowShare and glowFaces in
+            // bcs_glow read them.
+            (light[16], light[17], light[18], light[19]) = (glow.X, glow.Y, glow.Z, share + 2 * faces);
         }
         return used;
     }
@@ -109,7 +118,7 @@ internal static class GlowLights
     internal static List<Light> Gather(IReadOnlyList<(SceneFieldPlan.Instance Instance, bool Skinned)> drawn, float firstCell)
     {
         var lights = new List<Light>();
-        var square = new List<(SceneFieldPlan.Box Box, Vector3 Glow, float Surface)>();
+        var square = new List<(SceneFieldPlan.Box Box, Vector3 Glow, float Surface, int Faces)>();
         foreach (var (instance, _) in drawn)
         {
             if (!SceneField.Carried(instance, firstCell)) continue;
@@ -126,18 +135,25 @@ internal static class GlowLights
                 var grow = Vector3.Max(Vector3.Zero, new Vector3(least) - size) / 2;
                 box = new SceneFieldPlan.Box(box.Min - grow, box.Max + grow);
             }
-            // The share of its box's faces the mesh's own surface makes, where the bridge worked it
-            // out, so a ball, whose surface is about half its box's, emits as a ball does.
-            var own = !flat && instance.Surface > 0 ? Math.Clamp(instance.Surface / Math.Max(FacesSurface(size), 1e-8f), 0.05f, 1f) : 1f;
+            // The faces of its box the mesh sends its light from and the share of them its own
+            // surface makes, where the bridge worked them out, so a ball, whose surface is about
+            // half its box's, emits as a ball does, and a lantern's upright glass from its sides.
+            // A flat one emits from every face of the box it is grown to, by its whole surface.
+            var faces = flat || instance.Faces is 0 or All ? All : instance.Faces;
+            var own = !flat && instance.Surface > 0 ? Math.Clamp(instance.Surface / Math.Max(FacesSurface(size, faces), 1e-8f), 0.05f, 1f) : 1f;
             if (Square(w))
             {
                 var world = box.Transformed(w);
-                square.Add((world, glow, FacesSurface(world.Max - world.Min) * own));
+                // A side of the box a negative scale turns the other way is the other face.
+                for (var k = 0; k < 3; k++)
+                    if ((k == 0 ? w.M11 : k == 1 ? w.M22 : w.M33) < 0)
+                        faces = (faces & ~(3 << (2 * k))) | (((faces >> (2 * k)) & 1) << (2 * k + 1)) | (((faces >> (2 * k + 1)) & 1) << (2 * k));
+                square.Add((world, glow, FacesSurface(world.Max - world.Min, faces) * own, faces));
                 continue;
             }
             var half = (box.Max - box.Min) / 2;
             lights.Add(new Light(Vector3.Transform((box.Min + box.Max) / 2, w), new Vector3(w.M11, w.M12, w.M13) * half.X,
-                new Vector3(w.M21, w.M22, w.M23) * half.Y, new Vector3(w.M31, w.M32, w.M33) * half.Z, glow, own));
+                new Vector3(w.M21, w.M22, w.M23) * half.Y, new Vector3(w.M31, w.M32, w.M33) * half.Z, glow, own, faces == All ? 0 : faces));
         }
 
         // The boxes that touch, found through a grid of the largest box's size, and joined.
@@ -176,7 +192,7 @@ internal static class GlowLights
         }
         var covered = new Dictionary<int, float>();
         foreach (var (a, b) in touching)
-            covered[Root(a)] = covered.GetValueOrDefault(Root(a)) + 2 * Contact(square[a].Box, square[b].Box);
+            covered[Root(a)] = covered.GetValueOrDefault(Root(a)) + Covered(square[a].Box, square[a].Faces, square[b].Box, square[b].Faces);
         foreach (var group in Enumerable.Range(0, square.Count).GroupBy(Root))
         {
             var (min, max) = (new Vector3(float.MaxValue), new Vector3(float.MinValue));
@@ -186,15 +202,37 @@ internal static class GlowLights
                 (min, max) = (Vector3.Min(min, square[i].Box.Min), Vector3.Max(max, square[i].Box.Max));
                 surface += square[i].Surface;
             }
-            var share = Math.Clamp((surface - covered.GetValueOrDefault(group.Key)) / Math.Max(FacesSurface(max - min), 1e-8f), 0.05f, 1);
+            // The group's faces that emit, each a member's that lies on the group's side there, so
+            // a row of panels that send from their upper faces alone sends from the row's upper
+            // face and not from the five others of the box around it.
+            var near = 1e-4f * MathF.Max((max - min).Length(), 1e-6f);
+            var faces = 0;
+            foreach (var i in group)
+            {
+                var (box, own) = (square[i].Box, square[i].Faces);
+                for (var k = 0; k < 3; k++)
+                {
+                    if (((own >> (2 * k)) & 1) != 0 && MathF.Abs(box.Min[k] - min[k]) <= near) faces |= 1 << (2 * k);
+                    if (((own >> (2 * k + 1)) & 1) != 0 && MathF.Abs(box.Max[k] - max[k]) <= near) faces |= 1 << (2 * k + 1);
+                }
+            }
+            faces = faces == 0 ? All : faces;
+            var share = Math.Clamp((surface - covered.GetValueOrDefault(group.Key)) / Math.Max(FacesSurface(max - min, faces), 1e-8f), 0.05f, 1);
             var half = (max - min) / 2;
-            lights.Add(new Light((min + max) / 2, new Vector3(half.X, 0, 0), new Vector3(0, half.Y, 0), new Vector3(0, 0, half.Z), square[group.Key].Glow, share));
+            lights.Add(new Light((min + max) / 2, new Vector3(half.X, 0, 0), new Vector3(0, half.Y, 0), new Vector3(0, 0, half.Z), square[group.Key].Glow, share,
+                faces == All ? 0 : faces));
         }
         return lights;
     }
 
-    // The surface of the six faces of a box of this size.
-    private static float FacesSurface(Vector3 size) => 2 * (size.X * size.Y + size.Y * size.Z + size.Z * size.X);
+    // The surface of the faces of a box of this size the bits name, two an axis.
+    private static float FacesSurface(Vector3 size, int faces = All)
+    {
+        float surface = 0;
+        for (var k = 0; k < 3; k++)
+            surface += (((faces >> (2 * k)) & 1) + ((faces >> (2 * k + 1)) & 1)) * size[(k + 1) % 3] * size[(k + 2) % 3];
+        return surface;
+    }
 
     // Whether a world matrix turns nothing, so a box it moves stays square to the axes.
     private static bool Square(Matrix4x4 w)
@@ -212,16 +250,22 @@ internal static class GlowLights
             && a.Min.Z <= b.Max.Z + slack && b.Min.Z <= a.Max.Z + slack;
     }
 
-    // The area of the faces two touching boxes press together, where one's side lies on the other's
-    // along an axis, or none where they overlap or meet at an edge.
-    private static float Contact(SceneFieldPlan.Box a, SceneFieldPlan.Box b)
+    // The surface two touching boxes emitting from the faces the bits name press together, where
+    // one's side lies on the other's along an axis, the side of each that emits from it, so two
+    // panels side by side that send from their upper faces alone lose none of their light, or none
+    // where they overlap or meet at an edge.
+    private static float Covered(SceneFieldPlan.Box a, int facesA, SceneFieldPlan.Box b, int facesB)
     {
         var slack = 1e-3f * MathF.Min((a.Max - a.Min).Length(), (b.Max - b.Min).Length());
         var overlap = Vector3.Max(Vector3.Zero, Vector3.Min(a.Max, b.Max) - Vector3.Max(a.Min, b.Min));
         for (var axis = 0; axis < 3; axis++)
         {
-            var meet = MathF.Abs(a.Max[axis] - b.Min[axis]) <= slack || MathF.Abs(b.Max[axis] - a.Min[axis]) <= slack;
-            if (meet && overlap[axis] <= slack) return overlap[(axis + 1) % 3] * overlap[(axis + 2) % 3];
+            var below = MathF.Abs(a.Max[axis] - b.Min[axis]) <= slack;
+            if (!below && MathF.Abs(b.Max[axis] - a.Min[axis]) > slack || overlap[axis] > slack) continue;
+            // a's face toward b and b's toward a, the higher side of the axis on the box below.
+            var (up, down) = (2 * axis + 1, 2 * axis);
+            var sides = below ? ((facesA >> up) & 1) + ((facesB >> down) & 1) : ((facesA >> down) & 1) + ((facesB >> up) & 1);
+            return sides * overlap[(axis + 1) % 3] * overlap[(axis + 2) % 3];
         }
         return 0;
     }

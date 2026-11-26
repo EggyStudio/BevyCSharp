@@ -6,6 +6,45 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-25
+
+![](.github/assets/readings/2026-11-25-item-150-atrium-fitting.webp)
+Intel Sponza's atrium on the feature test, offscreen at 1280 by 720, from the sibling's view at
+12:17 at latitude -4.25 under the feature test's lens and AgX, global illumination on and off with
+the feature test's own field, Medium with four cascades of 0.25 m cells and none far, and with the
+pack's fitting, High with four cascades of 0.125 m cells and a far one of 100 m, and the difference
+of the two lit pictures, red lighter and blue darker, the arch and door at the far end lighter and
+the mean 30.4 against 31.0 of 255.
+
+![](.github/assets/readings/2026-11-25-item-150-physical-day.webp)
+Intel Sponza's atrium on the feature test, offscreen at 1280 by 720, from the sibling's view at
+12:17 at latitude -4.25 with global illumination High in Sponza's field, under the day's own numbers
+of a sun of 12,500 lux above the air at EV 9.7 with AgX, the physical day of 120,000 lux above the
+air at ISO 200, 1/200 s and f/16 with AgX, and the physical day with the day's look, each with the
+cascades on, off and on less off, red lighter and blue darker at 96 levels.
+
+![](.github/assets/readings/2026-11-25-item-150-forward-and-occlusion.webp)
+Intel Sponza's atrium on the feature test, offscreen at 1280 by 720, from the sibling's view at
+12:17 at latitude -4.25 under the physical day and AgX with global illumination High in Sponza's
+field, with the cascades on and off as the scene starts, on and off again after the reflections are
+turned on and off and Bevy's materials go forward, and on without and with Bevy's ambient occlusion,
+each pair with its difference, red lighter and blue darker at 96 levels.
+
+![](.github/assets/readings/2026-11-25-item-150-deferred-held.webp)
+Intel Sponza's atrium on the feature test, offscreen at 1280 by 720, from the sibling's view at
+12:17 at latitude -4.25 under the physical day and AgX with global illumination High in Sponza's
+field, with the cascades on and off after the reflections are turned on and off before and with
+Bevy's materials held deferred while the camera asks for the G-buffer, and the picture after the
+toggle against the one as the scene starts, each pair with its difference, red lighter and blue
+darker at 96 levels.
+
+![](.github/assets/readings/2026-11-25-item-150-occlusion-taken.webp)
+Intel Sponza's atrium on the feature test, offscreen at 1280 by 720, from the sibling's view at
+12:17 at latitude -4.25 under the physical day and AgX with global illumination High in Sponza's
+field, with the cascades on and Bevy's ambient occlusion on against off before and after the light
+pass reads the occlusion, and the occluded picture after against before, each pair with its
+difference, red lighter and blue darker at 96 levels.
+
 ## 2026-11-23
 
 ![](.github/assets/readings/2026-11-23-item-160-window-page.webp)

@@ -474,11 +474,12 @@ public float glowLightSeen(Texture3D<float4> field, SamplerState linear, FieldIn
 }
 
 /// How much of a glow light's light a surface at p facing n, in cells of `cell`, sees, from 0 to 1,
-/// by each face of its box p lies before, two or three, halved across the face's axis that rises
-/// most from p's surface, and a march from a tenth of a cell off the surface to the middle of each
-/// half, the cone the half's own rise, each half's share by its own light at p. Past a wall half as
-/// high as a lamp beside it, one march to the box's middle would find the lamp hidden from the whole
-/// floor past the wall, which sees the lamp's upper half. Where the field does not hold p, all of it.
+/// by each face of its box p lies before that emits, up to three, halved across the face's axis
+/// that rises most from p's surface, and a march from a tenth of a cell off the surface to the
+/// middle of each half, the cone the half's own rise, each half's share by its own light at p. Past
+/// a wall half as high as a lamp beside it, one march to the box's middle would find the lamp
+/// hidden from the whole floor past the wall, which sees the lamp's upper half. Where the field
+/// does not hold p, all of it.
 public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
 {
     if (cell <= 0.0)
@@ -486,6 +487,7 @@ public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldI
     float3 middle = light.middleAndReach.xyz;
     float4 halves[3] = { light.halfX, light.halfY, light.halfZ };
     float3 offset = p - middle;
+    uint faces = glowFaces(light);
     float lit = 0.0, seen = 0.0;
     [unroll]
     for (int k = 0; k < 3; k++)
@@ -493,7 +495,7 @@ public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldI
         float3 h = halves[k].xyz;
         float side = dot(offset, h);
         float squared = halves[k].w * halves[k].w;
-        if (squared < 1e-12 || abs(side) <= squared)
+        if (squared < 1e-12 || abs(side) <= squared || (faces & (1u << uint(2 * k + (side > 0.0 ? 1 : 0)))) == 0u)
             continue;
         float3 face = middle + (side > 0.0 ? h : -h);
         float4 u = halves[(k + 1) % 3], v = halves[(k + 2) % 3];

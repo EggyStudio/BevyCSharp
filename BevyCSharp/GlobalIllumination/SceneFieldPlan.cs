@@ -89,12 +89,15 @@ internal sealed partial class SceneFieldPlan
     /// A mesh drawn this frame, its number and generation, where it is drawn, whether it has an
     /// inside, the box around it in its own space, its surface's color and emission, linear, the
     /// share of global illumination's light that passes a unit of its depth, where it emits, the
-    /// area of its triangles in its own space, none where the bridge did not work it out, its
-    /// surface's gloss, its perceptual roughness, metallic share and reflectance, and the share of
-    /// its diffuse light it sends through to its far side, its diffuse transmission.
+    /// area of its triangles facing out of its box in its own space, none where the bridge did not
+    /// work it out, its surface's gloss, its perceptual roughness, metallic share and reflectance,
+    /// the share of its diffuse light it sends through to its far side, its diffuse transmission,
+    /// and the faces of its box it sends its light from, a bit a face, two an axis, the side toward
+    /// the axis's way the higher, none for every face.
     /// </summary>
     internal readonly record struct Instance(uint Mesh, uint Generation, Matrix4x4 World, bool DoubleSided, Box Bounds,
-        Vector3 Color = default, Vector3 Emission = default, float Through = 0f, float Surface = 0f, Vector3 Gloss = default, float Transmission = 0f)
+        Vector3 Color = default, Vector3 Emission = default, float Through = 0f, float Surface = 0f, Vector3 Gloss = default, float Transmission = 0f,
+        int Faces = 0)
     {
         /// <summary>Whether two instances draw the same mesh as it stands.</summary>
         public bool SameMesh(in Instance other) => Mesh == other.Mesh && Generation == other.Generation;
